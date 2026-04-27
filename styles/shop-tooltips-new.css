@@ -1,0 +1,330 @@
+/**
+ * Treasure Hoard Manager - Shop Tooltips (NEW CLEAN VERSION)
+ * Полностью переработанные подсказки без конфликтов
+ * Базируется на рабочей системе из контейнера
+ */
+
+/* ==========================================
+   НОВЫЕ ЧИСТЫЕ ПОДСКАЗКИ ДЛЯ МАГАЗИНА
+   ========================================= */
+
+/* Базовый контейнер подсказки - для всех типов окон */
+body.thm-barter-window-active .thm-shop-tooltip, 
+body.thm-trade-window-active .thm-shop-tooltip,
+body.thm-loot-window-active .thm-shop-tooltip,
+body.thm-blackmarket-window-active .thm-shop-tooltip {
+  position: fixed;
+  z-index: 100000 !important;
+  max-width: 400px;
+  min-width: 200px;
+  
+  background: linear-gradient(135deg, #1a1814 0%, #2a251f 100%);
+  border: 1px solid rgba(159, 130, 78, 0.4);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+  padding: 10px;
+  
+  font-family: "Signika", sans-serif;
+  font-size: 12px;
+  line-height: 1.3;
+  color: #e8dcc0;
+  max-height: 85vh;
+  overflow-y: auto;
+  opacity: 0;
+  transition: opacity 0.1s ease-out;
+  pointer-events: none;
+}
+
+/* Активное состояние подсказки */
+body.thm-barter-window-active .thm-shop-tooltip.active, 
+body.thm-trade-window-active .thm-shop-tooltip.active,
+body.thm-loot-window-active .thm-shop-tooltip.active,
+body.thm-blackmarket-window-active .thm-shop-tooltip.active {
+  opacity: 1;
+}
+
+/* Заголовок подсказки */
+.thm-shop-tooltip .tooltip-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(159, 130, 78, 0.2);
+}
+
+/* Изображение предмета */
+.thm-shop-tooltip .tooltip-image {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border: 1px solid rgba(159, 130, 78, 0.3);
+  border-radius: 3px;
+  flex-shrink: 0;
+  background: #000;
+}
+
+/* Информация о предмете */
+.thm-shop-tooltip .tooltip-info {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Название предмета */
+.thm-shop-tooltip .item-name {
+  font-weight: bold;
+  font-size: 13px;
+  color: #e8dcc0;
+  margin: 0 0 2px 0;
+  line-height: 1.2;
+  word-wrap: break-word;
+}
+
+/* Тип и редкость */
+.thm-shop-tooltip .item-type {
+  font-size: 10px;
+  color: #b8a88a;
+  font-style: italic;
+  margin: 0 0 4px 0;
+}
+
+/* Описание предмета */
+.thm-shop-tooltip .item-description {
+  color: #d4c8a8;
+  font-size: 11px;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  padding-right: 4px;
+}
+
+/* Детали предмета */
+.thm-shop-tooltip .item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 10px;
+}
+
+/* Цена */
+.thm-shop-tooltip .item-price {
+  color: #ffd700;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Вес */
+.thm-shop-tooltip .item-weight {
+  color: #b8a88a;
+  font-size: 10px;
+}
+
+/* ==========================================
+   ЦВЕТА РЕДКОСТИ ИЗ МОДУЛЯ КРАФТА (BG3 Style)
+   ========================================= */
+
+/* Common (Обычный - Серый) */
+.thm-shop-tooltip.rarity-common, 
+.thm-shop-tooltip.common {
+  border-color: #a0a0a0 !important;
+  box-shadow: inset 0 0 15px rgba(160, 160, 160, 0.1), 0 0 10px rgba(160, 160, 160, 0.2) !important;
+}
+
+/* Uncommon (Необычный - Зеленый) */
+.thm-shop-tooltip.rarity-uncommon, 
+.thm-shop-tooltip.uncommon {
+  border-color: #45e64a !important;
+  box-shadow: inset 0 0 15px rgba(69, 230, 74, 0.1), 0 0 10px rgba(69, 230, 74, 0.2) !important;
+}
+
+/* Rare (Редкий - Голубой) */
+.thm-shop-tooltip.rarity-rare, 
+.thm-shop-tooltip.rare {
+  border-color: #00b0f0 !important;
+  box-shadow: inset 0 0 15px rgba(0, 176, 240, 0.1), 0 0 10px rgba(0, 176, 240, 0.2) !important;
+}
+
+/* Very Rare (Очень редкий - Розовый/Фиолетовый) - ловим все варианты написания! */
+.thm-shop-tooltip.rarity-very-rare, 
+.thm-shop-tooltip.rarity-veryrare,
+.thm-shop-tooltip.rarity-veryRare,
+.thm-shop-tooltip.very-rare, 
+.thm-shop-tooltip.veryrare {
+  border-color: #d02090 !important;
+  box-shadow: inset 0 0 15px rgba(208, 32, 144, 0.1), 0 0 12px rgba(208, 32, 144, 0.3) !important;
+}
+
+/* Legendary (Легендарный - Золотой) */
+.thm-shop-tooltip.rarity-legendary, 
+.thm-shop-tooltip.legendary {
+  border-color: #ffbf00 !important;
+  box-shadow: inset 0 0 15px rgba(255, 191, 0, 0.1), 0 0 15px rgba(255, 191, 0, 0.3) !important;
+}
+
+/* Artifact (Артефакт - Оранжевый) */
+.thm-shop-tooltip.rarity-artifact, 
+.thm-shop-tooltip.artifact {
+  border-color: #ff4500 !important;
+  box-shadow: inset 0 0 15px rgba(255, 69, 0, 0.1), 0 0 15px rgba(255, 69, 0, 0.3) !important;
+}
+
+/* Раскрашиваем линию под шапкой в цвет редкости */
+.thm-shop-tooltip[class*="common"] .tooltip-header { border-bottom-color: rgba(160, 160, 160, 0.4) !important; }
+.thm-shop-tooltip[class*="uncommon"] .tooltip-header { border-bottom-color: rgba(69, 230, 74, 0.4) !important; }
+.thm-shop-tooltip[class*="rare"] .tooltip-header { border-bottom-color: rgba(0, 176, 240, 0.4) !important; }
+.thm-shop-tooltip[class*="very"] .tooltip-header { border-bottom-color: rgba(208, 32, 144, 0.4) !important; }
+.thm-shop-tooltip[class*="legendary"] .tooltip-header { border-bottom-color: rgba(255, 191, 0, 0.4) !important; }
+.thm-shop-tooltip[class*="artifact"] .tooltip-header { border-bottom-color: rgba(255, 69, 0, 0.4) !important; }
+
+/* ==========================================
+   ВАЛЮТА И СКРОЛЛБАР - ЧИСТЫЕ СТИЛИ
+   ========================================= */
+.thm-shop-tooltip .currency-cp { color: #cd7f32; }
+.thm-shop-tooltip .currency-sp { color: #c0c0c0; }
+.thm-shop-tooltip .currency-ep { color: #50c878; }
+.thm-shop-tooltip .currency-gp { color: #ffd700; }
+.thm-shop-tooltip .currency-pp { color: #e5e4e2; }
+
+/* Стили для иконок валют в подсказках */
+.thm-shop-tooltip .thm-currency-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  margin-right: 5px !important;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.thm-shop-tooltip .thm-currency-item img {
+  width: 14px !important;
+  height: 14px !important;
+  margin: 0 !important;
+  border: none !important;
+  background: none !important;
+  vertical-align: middle;
+}
+
+.thm-shop-tooltip::-webkit-scrollbar { width: 4px; }
+.thm-shop-tooltip::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 2px; }
+.thm-shop-tooltip::-webkit-scrollbar-thumb { background: rgba(159, 130, 78, 0.4); border-radius: 2px; }
+.thm-shop-tooltip::-webkit-scrollbar-thumb:hover { background: rgba(159, 130, 78, 0.6); }
+
+.thm-shop-tooltip .tooltip-image:hover { transform: scale(1.05); transition: transform 0.2s ease; }
+
+.thm-shop-tooltip .foundry-enriched p { margin: 0 0 6px 0; color: #e8dcc0; }
+.thm-shop-tooltip .foundry-enriched a.content-link, .thm-shop-tooltip .foundry-enriched a.inline-roll { background: rgba(42, 37, 31, 0.8); border: 1px solid rgba(159, 130, 78, 0.5); border-radius: 4px; padding: 1px 4px; color: #ffd700; text-decoration: none; white-space: nowrap; word-break: break-all; display: inline-flex; align-items: center; gap: 4px; }
+.thm-shop-tooltip .foundry-enriched a.content-link i, .thm-shop-tooltip .foundry-enriched a.inline-roll i { color: #b8a88a; }
+.thm-shop-tooltip .foundry-enriched a:hover { background: rgba(159, 130, 78, 0.2); text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+.thm-shop-tooltip .foundry-enriched ul { margin: 0 0 6px 0; padding-left: 15px; }
+.thm-shop-tooltip .foundry-enriched strong { color: #ffd700; font-weight: 600; }
+
+/* ==========================================
+   СКРОЛЛБАР - ЧИСТЫЙ СТИЛЬ
+   ========================================= */
+
+.thm-shop-tooltip::-webkit-scrollbar {
+  width: 4px;
+}
+
+.thm-shop-tooltip::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.thm-shop-tooltip::-webkit-scrollbar-thumb {
+  background: rgba(159, 130, 78, 0.4);
+  border-radius: 2px;
+}
+
+.thm-shop-tooltip::-webkit-scrollbar-thumb:hover {
+  background: rgba(159, 130, 78, 0.6);
+}
+
+/* ==========================================
+   СПЕЦИАЛЬНЫЕ ЭФФЕКТЫ
+   ========================================= */
+
+/* Hover эффект для изображения */
+.thm-shop-tooltip .tooltip-image:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+/* Анимация появления для контента */
+.thm-shop-tooltip .tooltip-content > * {
+  opacity: 0;
+  animation: fadeInUp 0.2s ease forwards;
+}
+
+.thm-shop-tooltip .tooltip-content > *:nth-child(1) { animation-delay: 0.05s; }
+.thm-shop-tooltip .tooltip-content > *:nth-child(2) { animation-delay: 0.1s; }
+.thm-shop-tooltip .tooltip-content > *:nth-child(3) { animation-delay: 0.15s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================
+   СТИЛИ ДЛЯ ОБОГАЩЕННОГО HTML FOUNDRY VTT
+   ========================================= */
+
+.thm-shop-tooltip .foundry-enriched p {
+  margin: 0 0 6px 0;
+  color: #e8dcc0;
+}
+
+.thm-shop-tooltip .foundry-enriched a.content-link,
+.thm-shop-tooltip .foundry-enriched a.inline-roll {
+  background: rgba(42, 37, 31, 0.8);
+  border: 1px solid rgba(159, 130, 78, 0.5);
+  border-radius: 4px;
+  padding: 1px 4px;
+  color: #ffd700;
+  text-decoration: none;
+  white-space: nowrap;
+  word-break: break-all;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.thm-shop-tooltip .foundry-enriched a.content-link i,
+.thm-shop-tooltip .foundry-enriched a.inline-roll i {
+  color: #b8a88a;
+}
+
+.thm-shop-tooltip .foundry-enriched a:hover {
+  background: rgba(159, 130, 78, 0.2);
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+.thm-shop-tooltip .foundry-enriched ul {
+  margin: 0 0 6px 0;
+  padding-left: 15px;
+}
+
+.thm-shop-tooltip .foundry-enriched strong {
+  color: #ffd700;
+  font-weight: 600;
+}
+
+/* ==========================================
+   СТИЛИ ДЛЯ СТРОКИ ДЕТАЛЕЙ ПРЕДМЕТА
+   ========================================= */
+
+.thm-shop-tooltip .item-details-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(159, 130, 78, 0.3);
+  padding-top: 6px;
+  margin-top: 6px;
+}

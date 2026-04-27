@@ -1,0 +1,211 @@
+<form class="{{cssClasses}} thm-premium-window thm-trade-window" autocomplete="off">
+
+  <!-- ВЕРХНЯЯ ЧАСТЬ: СТОЛ ОБМЕНА -->
+  <div class="trade-table-section">
+
+    <!-- ЛЕВАЯ СТОРОНА: Игрок 1 -->
+    <div class="trade-side player-from">
+      <div class="participant-header left-aligned">
+        <div class="thm-portrait-frame">
+          <img class="thm-portrait-img" src="{{fromPlayerData.img}}" alt="{{fromPlayerData.name}}" />
+        </div>
+        <div class="participant-info">
+          <h3 class="participant-name">{{fromPlayerData.name}}</h3>
+          <div class="participant-status {{#if fromPlayerData.confirmed}}confirmed{{/if}}">
+            {{#if fromPlayerData.confirmed}}
+            <i class="fas fa-check-circle"></i> Готов к сделке
+            {{else}}
+            <i class="fas fa-cog fa-spin"></i> Выбирает предметы...
+            {{/if}}
+          </div>
+          <div class="participant-funds thm-currency-block">
+            {{{currencyHtmlFrom}}}
+          </div>
+        </div>
+      </div>
+
+      <div class="trade-zone-title">Предлагает к обмену:</div>
+      <div class="trade-grid from-items" id="fromTradeItems">
+        {{#each fromTradeItems}}
+        <div class="thm-item-slot rarity-{{this.rarityId}} trade-item-slot inventory-item" data-item-id="{{this.id}}"
+          data-actor-id="{{../fromPlayerData.id}}" data-player="from">
+          <div class="thm-rarity-bg"></div>
+          <img class="thm-item-icon" src="{{this.img}}" alt="{{this.name}}" />
+          {{#if (gt this.quantity 1)}}
+          <span class="thm-item-qty">{{this.quantity}}</span>
+          {{/if}}
+          {{#if (eq ../userSide "from")}}
+          <button type="button" class="remove-from-trade" data-item-id="{{this.id}}" data-player="from">
+            <i class="fas fa-times"></i>
+          </button>
+          {{/if}}
+        </div>
+        {{/each}}
+      </div>
+    </div>
+
+    <!-- ЦЕНТРАЛЬНЫЙ РАЗДЕЛИТЕЛЬ -->
+    <div class="trade-separator">
+      <div class="separator-line"></div>
+      <div class="exchange-icon-wrapper">
+        <i class="fas fa-handshake exchange-icon"></i>
+      </div>
+      <div class="separator-line"></div>
+    </div>
+
+    <!-- ПРАВАЯ СТОРОНА: Игрок 2 -->
+    <div class="trade-side player-to">
+      <div class="participant-header right-aligned">
+        <div class="participant-info">
+          <h3 class="participant-name">{{toPlayerData.name}}</h3>
+          <div class="participant-status {{#if toPlayerData.confirmed}}confirmed{{/if}}">
+            {{#if toPlayerData.confirmed}}
+            <i class="fas fa-check-circle"></i> Готов к сделке
+            {{else}}
+            <i class="fas fa-cog fa-spin"></i> Выбирает предметы...
+            {{/if}}
+          </div>
+          <div class="participant-funds thm-currency-block">
+            {{{currencyHtmlTo}}}
+          </div>
+        </div>
+        <div class="thm-portrait-frame">
+          <img class="thm-portrait-img" src="{{toPlayerData.img}}" alt="{{toPlayerData.name}}" />
+        </div>
+      </div>
+
+      <div class="trade-zone-title">Предлагает к обмену:</div>
+      <div class="trade-grid to-items" id="toTradeItems">
+        {{#each toTradeItems}}
+        <div class="thm-item-slot rarity-{{this.rarityId}} trade-item-slot inventory-item" data-item-id="{{this.id}}"
+          data-actor-id="{{../toPlayerData.id}}" data-player="to">
+          <div class="thm-rarity-bg"></div>
+          <img class="thm-item-icon" src="{{this.img}}" alt="{{this.name}}" />
+          {{#if (gt this.quantity 1)}}
+          <span class="thm-item-qty">{{this.quantity}}</span>
+          {{/if}}
+          {{#if (eq ../userSide "to")}}
+          <button type="button" class="remove-from-trade" data-item-id="{{this.id}}" data-player="to">
+            <i class="fas fa-times"></i>
+          </button>
+          {{/if}}
+        </div>
+        {{/each}}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ЦЕНТРАЛЬНАЯ ПАНЕЛЬ: УПРАВЛЕНИЕ СДЕЛКОЙ -->
+  <div class="trade-controls-section">
+    <div class="status-banner {{#if bothConfirmed}}ready-glow{{/if}}">
+      {{#if bothConfirmed}}
+      <i class="fas fa-check-double"></i> ОБА ИГРОКА ГОТОВЫ! ЗАВЕРШЕНИЕ СДЕЛКИ...
+      {{else}}
+      <i class="fas fa-balance-scale"></i> ОЖИДАНИЕ ПОДТВЕРЖДЕНИЯ СТОРОН...
+      {{/if}}
+    </div>
+
+    <div class="action-buttons">
+      {{#if (eq userSide "from")}}
+      <button type="button" class="thm-btn reset-btn" id="resetFromTrade" data-player="from">
+        <i class="fas fa-undo"></i> Очистить мой стол
+      </button>
+      <button type="button" class="thm-btn confirm-btn {{#if fromPlayerData.confirmed}}active{{/if}}"
+        id="confirmFromTrade" data-player="from">
+        <i class="fas fa-signature"></i> Подтвердить сделку
+      </button>
+      {{else}}
+      <button type="button" class="thm-btn reset-btn" id="resetToTrade" data-player="to">
+        <i class="fas fa-undo"></i> Очистить мой стол
+      </button>
+      <button type="button" class="thm-btn confirm-btn {{#if toPlayerData.confirmed}}active{{/if}}" id="confirmToTrade"
+        data-player="to">
+        <i class="fas fa-signature"></i> Подтвердить сделку
+      </button>
+      {{/if}}
+    </div>
+  </div>
+
+  <!-- НИЖНЯЯ ЧАСТЬ: ИНВЕНТАРЬ ТЕКУЩЕГО ИГРОКА -->
+  <div class="inventory-section">
+    <div class="inventory-header">
+      <h2 class="inventory-title"><i class="fas fa-backpack"></i> Ваш рюкзак</h2>
+      <div class="inventory-filters">
+        <label for="rarityFilter"><i class="fas fa-filter"></i> Фильтр:</label>
+        <select class="thm-select rarity-filter" id="rarityFilter" data-player="{{userSide}}">
+          <option value="">Все предметы</option>
+          <option value="common">Обычные</option>
+          <option value="uncommon">Необычные</option>
+          <option value="rare">Редкие</option>
+          <option value="veryRare">Очень редкие</option>
+          <option value="legendary">Легендарные</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="inventory-grid-wrapper">
+      <div class="inventory-grid">
+        {{#if (eq userSide "from")}}
+        {{#each fromPlayerData.items}}
+        <div class="thm-item-slot rarity-{{this.rarityId}} inventory-item-slot item-row inventory-item"
+          data-item-id="{{this.id}}" data-actor-id="{{../fromPlayerData.id}}" data-player="from">
+          <div class="thm-rarity-bg"></div>
+          <img class="thm-item-icon" src="{{this.img}}" alt="{{this.name}}" />
+          {{#if (gt this.quantity 1)}}
+          <span class="thm-item-qty">{{this.quantity}}</span>
+          {{/if}}
+          <div class="item-hover-overlay"><i class="fas fa-arrow-up"></i></div>
+        </div>
+        {{/each}}
+        {{else}}
+        {{#each toPlayerData.items}}
+        <div class="thm-item-slot rarity-{{this.rarityId}} inventory-item-slot item-row inventory-item"
+          data-item-id="{{this.id}}" data-actor-id="{{../toPlayerData.id}}" data-player="to">
+          <div class="thm-rarity-bg"></div>
+          <img class="thm-item-icon" src="{{this.img}}" alt="{{this.name}}" />
+          {{#if (gt this.quantity 1)}}
+          <span class="thm-item-qty">{{this.quantity}}</span>
+          {{/if}}
+          <div class="item-hover-overlay"><i class="fas fa-arrow-up"></i></div>
+        </div>
+        {{/each}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО ВЫБОРА КОЛИЧЕСТВА -->
+  <div class="quantity-modal" id="quantityModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Разделение стопки</h3>
+        <button type="button" class="modal-close" id="closeQuantityModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="item-preview">
+          <img id="modalItemImage" src="" alt="">
+          <div class="item-info">
+            <h4 id="modalItemName"></h4>
+            <div class="item-rarity" id="modalItemRarity"></div>
+          </div>
+        </div>
+        <div class="quantity-selector">
+          <div class="quantity-controls">
+            <button type="button" class="quantity-btn" id="decreaseQuantity"><i class="fas fa-minus"></i></button>
+            <input type="number" id="quantityInput" min="1" max="1" value="1">
+            <button type="button" class="quantity-btn" id="increaseQuantity"><i class="fas fa-plus"></i></button>
+          </div>
+          <div class="quantity-slider">
+            <input type="range" id="quantitySlider" min="1" max="1" value="1">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="confirm-btn" id="confirmQuantity">Выложить</button>
+          <button type="button" class="cancel-btn" id="cancelQuantity">Отмена</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</form>

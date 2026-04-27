@@ -1,0 +1,272 @@
+/**
+ * Treasure Hoard Manager - Global Theme & Design System (V3.3 - RESTORED)
+ * Исправленная версия: Темная тема + Идеальные ячейки без вложенности.
+ */
+
+:root {
+  /* --- Цветовая палитра (Premium Dark) --- */
+  --thm-bg-primary: #151310;
+  --thm-bg-secondary: #221e1a;
+  --thm-bg-tertiary: #2e2822;
+
+  --thm-border-gold: #9f824e;
+  --thm-border-gold-low: rgba(159, 130, 78, 0.4);
+  --thm-border-bronze-low: rgba(139, 105, 56, 0.3);
+
+  --thm-text-primary: #e8dcc0;
+  --thm-text-secondary: #b8a88a;
+  --thm-text-muted: #7a6e5a;
+  --thm-text-bright: #ffffff;
+
+  --thm-accent-red: #c0392b;
+  --thm-accent-green: #27ae60;
+  --thm-accent-gold: #ffd700;
+
+  /* --- Редкость (Rarity Colors) --- */
+  --thm-rarity-common: #3d362d;
+  --thm-rarity-uncommon: #44bd32;
+  --thm-rarity-rare: #0097e6;
+  --thm-rarity-veryrare: #9c88ff;
+  --thm-rarity-legendary: #f1c40f;
+  --thm-rarity-artifact: #e84118;
+
+  --thm-shadow-main: 0 10px 40px rgba(0, 0, 0, 0.95);
+  --thm-font-main: "Signika", sans-serif;
+  --thm-font-fancy: "Modesto Condensed", "Signika", serif;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ОКОН (WINDOW FIXES)
+   ========================================== */
+
+.thm-window-fix.window-app .window-content {
+  background: none !important;
+  color: var(--thm-text-primary) !important;
+  padding: 0 !important;
+}
+
+.thm-window-fix.window-app {
+  background: radial-gradient(circle at center, var(--thm-bg-secondary) 0%, var(--thm-bg-primary) 100%) !important;
+  border: 1px solid var(--thm-border-gold) !important;
+  box-shadow: var(--thm-shadow-main) !important;
+  border-radius: 8px !important;
+}
+
+.thm-window-fix.window-app .window-header {
+  background: rgba(0, 0, 0, 0.5) !important;
+  border-bottom: 1px solid var(--thm-border-gold-low) !important;
+  color: var(--thm-text-secondary) !important;
+}
+
+/* ==========================================
+   ГЛАВНЫЙ КОНТЕЙНЕР (PREMIUM WINDOW)
+   ========================================== */
+
+.thm-premium-window {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.thm-premium-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), transparent);
+  border-bottom: 1px solid var(--thm-border-gold-low);
+  gap: 15px;
+}
+
+.thm-window-title {
+  margin: 0;
+  font-size: 22px;
+  color: var(--thm-text-bright);
+  font-family: var(--thm-font-fancy);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================
+   ЯЧЕЙКИ ПРЕДМЕТОВ (SQUARE SLOTS V3.3)
+   ========================================== */
+
+.thm-item-slot,
+.item-row.thm-item-slot {
+  position: relative !important;
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid var(--thm-rarity-common) !important;
+  border-radius: 4px !important;
+  padding: 0 !important;
+  margin: 1px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  transition: all 0.15s ease !important;
+  overflow: hidden !important;
+}
+
+.thm-item-slot:hover {
+  transform: scale(1.05) !important;
+  z-index: 10 !important;
+  border-color: #fff !important;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2) !important;
+}
+
+.thm-item-icon {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border: none !important;
+  display: block !important;
+}
+
+.thm-item-qty {
+  position: absolute !important;
+  bottom: 2px !important;
+  right: 2px !important;
+  background: rgba(0, 0, 0, 0.85) !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  padding: 0 4px !important;
+  border-radius: 2px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  z-index: 10 !important;
+  font-weight: bold !important;
+}
+
+/* Редкость через рамку (Single Border System) */
+.rarity-uncommon.thm-item-slot {
+  border-color: var(--thm-rarity-uncommon) !important;
+}
+
+.rarity-rare.thm-item-slot {
+  border-color: var(--thm-rarity-rare) !important;
+}
+
+.rarity-veryrare.thm-item-slot {
+  border-color: var(--thm-rarity-veryrare) !important;
+}
+
+.rarity-legendary.thm-item-slot {
+  border-color: var(--thm-rarity-legendary) !important;
+  box-shadow: inset 0 0 10px rgba(241, 196, 15, 0.3) !important;
+}
+
+.rarity-artifact.thm-item-slot {
+  border-color: var(--thm-rarity-artifact) !important;
+}
+
+/* Совместимость с thm-rarity-bg (делаем его невидимым, чтобы не мешал) */
+.thm-rarity-bg {
+  display: none !important;
+}
+
+/* ==========================================
+   ВАЛЮТА (CURRENCY)
+   ========================================== */
+
+.thm-currency-block {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 5px;
+}
+
+.thm-currency-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--thm-border-bronze-low);
+  border-radius: 15px;
+  color: var(--thm-text-primary);
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.thm-currency-item.pp { color: #e5e5e5; }
+.thm-currency-item.gp { color: #ffd700; }
+.thm-currency-item.ep { color: #9ec5d3; }
+.thm-currency-item.sp { color: #c0c0c0; }
+.thm-currency-item.cp { color: #cd7f32; }
+
+/* ==========================================
+   КНОПКИ (BUTTONS)
+   ========================================== */
+
+.thm-btn {
+  background: linear-gradient(180deg, #3a3028, #1a1814) !important;
+  border: 1px solid var(--thm-border-gold-low) !important;
+  color: var(--thm-text-primary) !important;
+  border-radius: 4px !important;
+  padding: 6px 15px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  transition: all 0.2s !important;
+}
+
+.thm-btn:hover:not(:disabled) {
+  border-color: var(--thm-border-gold) !important;
+  background: linear-gradient(180deg, #4a4038, #2a2824) !important;
+  box-shadow: 0 0 10px rgba(159, 130, 78, 0.3) !important;
+}
+
+/* ==========================================
+   ПОРТРЕТЫ (PORTRAITS)
+   ========================================== */
+
+.thm-portrait-frame {
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--thm-border-gold-low);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #000;
+  flex-shrink: 0;
+}
+
+.thm-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ==========================================
+   ФОРМЫ И СЕЛЕКТЫ (FORMS & SELECTS)
+   ========================================== */
+
+.thm-window-fix select {
+  background: var(--thm-bg-tertiary) !important;
+  color: var(--thm-text-primary) !important;
+  border: 1px solid var(--thm-border-gold-low) !important;
+  border-radius: 4px !important;
+  padding: 2px 5px !important;
+  font-family: var(--thm-font-main) !important;
+  cursor: pointer !important;
+}
+
+.thm-window-fix select:hover,
+.thm-window-fix select:focus {
+  border-color: var(--thm-border-gold) !important;
+  box-shadow: 0 0 5px rgba(159, 130, 78, 0.3) !important;
+  outline: none !important;
+}
+
+/* Стилизация опций внутри списков */
+.thm-window-fix select option {
+  background: var(--thm-bg-secondary) !important;
+  color: var(--thm-text-primary) !important;
+  padding: 5px !important;
+}

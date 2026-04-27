@@ -1,0 +1,102 @@
+{
+  "THM": {
+    "Name": "Treasure Hoard Manager",
+    "SETTINGS": {
+      "AutoPriceItems": {
+        "Name": "Автоматически назначать цены предметам",
+        "Hint": "Автоматически назначает цену всем новым предметам при добавлении в инвентарь актера"
+      },
+      "AutoPriceMethod": {
+        "Name": "Метод генерации цен",
+        "Hint": "Выберите метод для автоматической генерации цен предметов"
+      },
+      "PriceMethod": {
+        "DMG": "DMG (диапазоны)",
+        "XGE": "XGE (кубики)"
+      },
+      "DebugMode": {
+        "Name": "Режим отладки",
+        "Hint": "Включает детальное логирование для отладки системы цен"
+      }
+    },
+    "Settings": {
+      "Enabled": "Включено",
+      "InteractionDistance": "Ограничение дистанции",
+      "ShowItemCards": "Показывать карточки предметов",
+      "DeleteWhenEmpty": "Удалять когда пуст",
+      "StackItems": "Собирать в стопки",
+      "ReputationModule": "Зависимость от репутации (модуль)",
+      "TimeModule": "Зависимость от времени (модуль)",
+      "BuiltinReputation": "Использовать встроенную репутацию",
+      "CurrencyOverride": "Переопределение валют",
+      "ItemFilterOverride": "Фильтры предметов",
+      "RequiredProperties": "Свойства предметов"
+    },
+    "ContextMenu": {
+      "TransformToHoard": "Превратить в кучу добычи",
+      "TransformToShop": "Превратить в магазин",
+      "TransformToContainer": "Превратить в контейнер",
+      "TransformToVault": "Превратить в хранилище",
+      "Configure": "Настроить",
+      "ShowToPlayers": "Показать игрокам"
+    },
+    "Types": {
+      "hoard": "Куча добычи",
+      "container": "Контейнер",
+      "shop": "Магазин",
+      "vault": "Хранилище"
+    },
+    "Notifications": {
+      "TransformSuccess": "Актер {actorName} успешно превращен в {typeName}",
+      "SettingsUpdated": "Настройки для {actorName} обновлены",
+      "TradeStarted": "Торговля начата между {actor1} и {actor2}"
+    },
+    "Errors": {
+      "NoPermission": "У вас нет прав для этого действия",
+      "TooFar": "Вы слишком далеко для взаимодействия",
+      "EmptyInventory": "Инвентарь пуст",
+      "InvalidItem": "Неверный тип предмета"
+    },
+    "UI": {
+      "Save": "Сохранить",
+      "Cancel": "Отмена",
+      "Close": "Закрыть",
+      "Configure": "Настроить",
+      "Add": "Добавить",
+      "Remove": "Удалить",
+      "Edit": "Редактировать",
+      "Price": "Цена",
+      "Quantity": "Количество",
+      "Total": "Итого",
+      "Accept": "Принять",
+      "Decline": "Отклонить",
+      "Bid": "Сделать ставку"
+    },
+    "Shop": {
+      "InventorySources": "Источники инвентаря",
+      "PricingRules": "Правила ценообразования",
+      "OpeningHours": "Время работы",
+      "AddSource": "Добавить источник",
+      "AddPricingRule": "Добавить правило",
+      "BasePrice": "Базовая цена",
+      "PriceModifier": "Модификатор цены",
+      "ReputationInfluence": "Влияние репутации"
+    },
+    "Hoard": {
+      "AutoCollect": "Автоматический сбор",
+      "VisibilitySettings": "Настройки видимости",
+      "ItemFilters": "Фильтры предметов",
+      "SplitLoot": "Разделить добычу"
+    },
+    "Container": {
+      "AccessSettings": "Настройки доступа",
+      "LockSettings": "Настройки блокировки",
+      "AccessLog": "Журнал доступа"
+    },
+    "Vault": {
+      "AccessPermissions": "Права доступа",
+      "CapacityLimits": "Лимиты вместимости",
+      "LoggingSystem": "Система логирования"
+    }
+  }
+}

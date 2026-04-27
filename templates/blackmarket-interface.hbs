@@ -1,0 +1,95 @@
+<div class="thm-premium-window thm-blackmarket-window blackmarket-interface">
+  <div class="thm-premium-header blackmarket-header">
+    <div class="thm-portrait-frame">
+      <img class="thm-portrait-img" src="{{actor.img}}" alt="{{actor.name}}">
+    </div>
+    <div class="market-info">
+      <h2 class="market-title">{{actor.name}}</h2>
+      <p class="market-subtitle">Теневой рынок • Эксклюзивные товары и скрытые услуги</p>
+    </div>
+  </div>
+
+  <div class="blackmarket-content">
+    <!-- Левая колонка - Услуги -->
+    <div class="services-column">
+      <h3 class="section-title"><i class="fas fa-handshake"></i> Теневые услуги</h3>
+      
+      <div class="services-grid">
+        {{#each servicesList}}
+        <div class="service-card {{#if this.isBought}}is-bought{{/if}}" data-service="{{this.id}}">
+          <div class="service-card-inner">
+            <!-- Лицевая сторона -->
+            <div class="service-front" style="background-image: url('{{this.img}}');">
+              <div class="service-icon"><i class="{{this.icon}}"></i></div>
+              <h4 class="service-title">{{this.name}}</h4>
+            </div>
+            <!-- Обратная сторона -->
+            <div class="service-back">
+              <h4 class="service-title-back">{{this.name}}</h4>
+              <p class="service-description">{{this.desc}}</p>
+              
+              {{#if this.isBought}}
+                <div class="service-bought-status">
+                  <i class="fas fa-lock" style="font-size: 34px; color: #2ecc71; filter: drop-shadow(0 0 10px rgba(46, 204, 113, 0.6));"></i>
+                  <div style="font-weight: bold; letter-spacing: 2px; color: #2ecc71; font-size: 1.1em; margin-top: 5px;">ПРИОБРЕТЕНО</div>
+                  <small style="font-style: italic; opacity: 0.8; color: #e8dcc0;">Контракт в силе</small>
+                </div>
+              {{else}}
+                <div class="service-price">
+                  <i class="fas fa-coins"></i>
+                  <span class="price-amount">{{this.price}}</span>
+                  <span class="price-currency">{{currencyLabel}}</span>
+                </div>
+                <button type="button" class="thm-btn buy-service-btn" data-service="{{this.id}}" data-price="{{this.price}}">
+                  <i class="fas fa-shopping-cart"></i> Купить
+                </button>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+
+    <!-- Правая колонка - Эксклюзивный предмет -->
+    <div class="exclusive-column">
+      {{#if exclusiveOffer}}
+        <div class="exclusive-timer">
+          {{#if timeRemaining}}
+            <div class="timer-display">Осталось: {{timeRemaining.hours}}ч {{timeRemaining.minutes}}м {{timeRemaining.seconds}}с</div>
+          {{else}}
+            <div class="timer-expired">Срок истёк</div>
+          {{/if}}
+        </div>
+      {{/if}}
+      
+      <h3 class="section-title"><i class="fas fa-gem"></i> Эксклюзив</h3>
+      
+      {{#if exclusiveOffer}}
+      <div class="exclusive-item">
+        <div class="thm-item-slot rarity-{{exclusiveOffer.itemRarity}} exclusive-item-frame inventory-item" 
+             data-item-id="{{exclusiveOffer.itemId}}" 
+             data-actor-id="{{actor._id}}">
+          <div class="thm-rarity-bg"></div>
+          <img class="thm-item-icon" src="{{exclusiveOffer.itemImg}}" alt="{{exclusiveOffer.itemName}}">
+        </div>
+
+        <div class="exclusive-price-badge">
+          <i class="fas fa-coins"></i> {{exclusiveOffer.markupPrice}} {{currencyLabel}}
+        </div>
+        
+        <div class="exclusive-item-info">
+          <button type="button" class="thm-btn buy-exclusive-btn" data-offer-id="{{exclusiveOffer.id}}" data-price="{{exclusiveOffer.markupPrice}}">
+            <i class="fas fa-crown"></i> Выкупить
+          </button>
+        </div>
+      </div>
+      {{else}}
+      <div class="no-exclusive">
+        <div class="no-exclusive-icon"><i class="fas fa-box-open"></i></div>
+        <p>Пусто</p>
+      </div>
+      {{/if}}
+    </div>
+  </div>
+</div>

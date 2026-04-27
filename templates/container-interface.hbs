@@ -1,0 +1,79 @@
+<form class="thm-premium-window thm-loot-window" autocomplete="off">
+  
+  <!-- HEADER -->
+  <div class="thm-premium-header">
+    <div class="thm-portrait-frame">
+      <img class="thm-portrait-img" src="icons/svg/chest.svg" alt="Container">
+    </div>
+    <div class="header-info">
+      <h1 class="thm-window-title">{{actor.name}}</h1>
+    </div>
+
+    {{#if isGM}}
+    <div class="header-controls">
+      <div class="lock-controls">
+        <label class="lock-toggle">
+          <input type="checkbox" class="lock-checkbox" {{#if isLocked}}checked{{/if}}>
+          <span class="lock-label">
+            <i class="fas fa-lock{{#unless isLocked}}-open{{/unless}}"></i>
+            {{#if isLocked}}Заперто{{else}}Открыто{{/if}}
+          </span>
+        </label>
+      </div>
+    </div>
+    {{/if}}
+  </div>
+
+  <div class="loot-body">
+    
+    <!-- Items Grid -->
+    <div class="items-grid">
+      {{#if (and isLocked (not isGM))}}
+        <!-- Сообщение для игроков когда контейнер заперт -->
+        <div class="locked-message">
+          <i class="fas fa-lock"></i>
+          <div>Сундук заперт</div>
+        </div>
+      {{else}}
+        {{#each items}}
+          <div class="thm-item-slot rarity-{{this.rarity}} item-row inventory-item" data-item-id="{{this.id}}" data-actor-id="{{../actor._id}}">
+            <div class="thm-rarity-bg"></div>
+            <img class="thm-item-icon" src="{{this.img}}" alt="{{this.name}}"/>
+            {{#if (gt this.quantity 1)}}
+              <span class="thm-item-qty">{{this.quantity}}</span>
+            {{/if}}
+          </div>
+        {{else}}
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <h3>Сундук пуст</h3>
+          </div>
+        {{/each}}
+      {{/if}}
+    </div>
+  </div>
+
+  <!-- ОБЛАСТЬ ДЕНЕГ -->
+  {{#if hasCurrency}}
+  <div class="currency-area">
+    <div class="currency-title">Доступно денег:</div>
+    <div class="thm-currency-block">
+      {{{currencyHtml}}}
+    </div>
+  </div>
+  {{/if}}
+
+  <!-- FOOTER -->
+  <div class="loot-footer">
+    {{#if hasCurrency}}
+    <button type="button" class="thm-btn take-currency-btn" title="Забрать все деньги">
+      <i class="fas fa-coins"></i>
+      Забрать деньги
+    </button>
+    {{/if}}
+    
+    <button type="button" class="thm-btn loot-all-btn">
+      <i class="fas fa-gem"></i>
+      Взять всё
+    </button>
+  </div>
+</form>

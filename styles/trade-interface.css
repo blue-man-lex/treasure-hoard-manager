@@ -1,0 +1,444 @@
+/**
+ * Treasure Hoard Manager - Trade Interface Styles (Refactored)
+ */
+
+/* Исправление прозрачности и базового окна */
+.app.thm-trade-interface {
+  border: 1px solid var(--thm-border-gold) !important;
+  box-shadow: var(--thm-shadow-main) !important;
+}
+
+.app.thm-trade-interface .window-content {
+  background: radial-gradient(circle at center, var(--thm-bg-secondary) 0%, var(--thm-bg-primary) 100%) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Основной стол обмена */
+.trade-table-section {
+  display: flex;
+  flex: 0 0 50%;
+  min-height: 280px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.4));
+  border-bottom: 1px solid var(--thm-border-gold-low);
+  border-top: 1px solid var(--thm-border-gold-low);
+  position: relative;
+}
+
+.trade-side {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.player-from {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.3) 0%, transparent 100%);
+}
+
+.player-to {
+  background: linear-gradient(270deg, rgba(0, 0, 0, 0.3) 0%, transparent 100%);
+}
+
+.participant-header {
+  display: flex !important;
+  align-items: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.left-aligned { 
+  flex-direction: row; 
+  text-align: left; 
+  gap: 15px; 
+  justify-content: flex-start;
+}
+
+.right-aligned { 
+  flex-direction: row; 
+  text-align: right; 
+  gap: 15px; 
+  justify-content: flex-end;
+}
+
+.participant-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.right-aligned .participant-info { 
+  align-items: flex-end;
+}
+
+.left-aligned .participant-info { 
+  align-items: flex-start;
+}
+
+.participant-name {
+  margin: 0;
+  font-size: 18px;
+  color: var(--thm-accent-gold);
+  font-family: var(--thm-font-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-to .trade-zone-title { text-align: right; }
+
+.participant-status {
+  font-size: 11px;
+  color: var(--thm-text-muted);
+  margin: 5px 0;
+  display: block;
+}
+
+.left-aligned .participant-status { text-align: left; }
+.right-aligned .participant-status { text-align: right; }
+
+.participant-status.confirmed {
+  color: var(--thm-accent-green);
+  font-weight: bold;
+}
+
+/* Центральный разделитель */
+.trade-separator {
+  width: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 1px solid var(--thm-border-gold-low);
+  border-right: 1px solid var(--thm-border-gold-low);
+  z-index: 2;
+}
+
+.separator-line {
+  flex: 1;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--thm-border-gold), transparent);
+}
+
+.exchange-icon-wrapper {
+  padding: 10px 0;
+  color: var(--thm-border-gold);
+  font-size: 18px;
+}
+
+.trade-zone-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--thm-text-muted);
+  margin: 15px 0 8px 0;
+  letter-spacing: 1px;
+}
+
+.trade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
+  gap: 10px;
+  min-height: 80px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border: 1px solid var(--thm-border-gold-low);
+}
+
+/* Зона управления */
+.trade-controls-section {
+  padding: 15px 25px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid var(--thm-border-gold-low);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-banner.ready-glow {
+  color: var(--thm-accent-green);
+  text-shadow: 0 0 10px rgba(78, 140, 78, 0.6);
+}
+
+/* Сетка инвентаря снизу */
+.inventory-section {
+  flex: 1;
+  padding: 20px 25px;
+  background: rgba(0, 0, 0, 0.4);
+  /* Затемняем фон инвентаря */
+  overflow-y: auto;
+  border-top: 1px solid var(--thm-border-gold-low);
+}
+
+.inventory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--thm-border-gold-low);
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
+  /* Расширяем сетку */
+  gap: 10px;
+}
+
+/* Специфичные кнопки удаления */
+.remove-from-trade {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--thm-accent-red);
+  color: #fff;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 10;
+}
+
+.thm-item-slot:hover .remove-from-trade {
+  opacity: 1;
+}
+
+.item-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: var(--thm-border-gold);
+  font-size: 20px;
+}
+
+.thm-item-slot:hover .item-hover-overlay {
+  opacity: 1;
+}
+
+/* МОДАЛЬНОЕ ОКНО ВЫБОРА КОЛИЧЕСТВА */
+.quantity-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: none; /* Переключается через JS */
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+  backdrop-filter: blur(4px);
+}
+
+.quantity-modal.active { display: flex; }
+
+.quantity-modal .modal-content {
+  background: var(--thm-bg-secondary);
+  border: 1px solid var(--thm-border-gold);
+  border-radius: 12px;
+  width: 380px;
+  box-shadow: 0 10px 50px rgba(0,0,0,1);
+  overflow: hidden;
+  animation: thm-fade-in-scale 0.2s ease-out;
+}
+
+@keyframes thm-fade-in-scale {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.quantity-modal .modal-header { 
+  padding: 12px 16px; 
+  background: rgba(0,0,0,0.4); 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  border-bottom: 1px solid var(--thm-border-gold-low);
+}
+
+.quantity-modal .modal-header h3 { 
+  font-size: 16px; 
+  margin: 0; 
+  color: var(--thm-accent-gold);
+  font-family: var(--thm-font-title);
+}
+
+.quantity-modal .modal-close { 
+  background: none; 
+  border: none; 
+  color: var(--thm-text-muted); 
+  font-size: 24px; 
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.quantity-modal .modal-close:hover { color: #ff4444; }
+
+.quantity-modal .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+.quantity-modal .item-preview { 
+  display: flex; 
+  align-items: center; 
+  gap: 15px; 
+  background: rgba(0,0,0,0.3); 
+  padding: 12px; 
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.quantity-modal .item-preview {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.quantity-modal .item-preview img { 
+  flex-shrink: 0;
+  width: 64px; 
+  height: 64px; 
+  object-fit: contain;
+  border-radius: 6px; 
+  border: 1px solid var(--thm-border-gold-low);
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.2);
+}
+
+.quantity-modal .item-info h4 { 
+  font-size: 15px; 
+  margin: 0 0 4px 0; 
+  color: var(--thm-text-bright); 
+}
+
+.quantity-modal .item-rarity { 
+  font-size: 10px; 
+  opacity: 1; 
+  font-weight: bold; 
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 1px 6px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 3px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.quantity-modal .item-rarity.rarity-common { color: #fff; }
+.quantity-modal .item-rarity.rarity-uncommon { color: #4cd137; }
+.quantity-modal .item-rarity.rarity-rare { color: #00a8ff; }
+.quantity-modal .item-rarity.rarity-veryrare { color: #9c88ff; }
+.quantity-modal .item-rarity.rarity-legendary { color: #fbc531; }
+.quantity-modal .item-rarity.rarity-artifact { color: #e66767; }
+
+.quantity-modal .quantity-selector { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 15px;
+  padding: 10px 0;
+}
+
+.quantity-modal .quantity-controls { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 15px; 
+}
+
+.quantity-modal .quantity-btn { 
+  width: 40px; 
+  height: 40px; 
+  border-radius: 8px; 
+  border: 1px solid #444; 
+  background: linear-gradient(180deg, #444, #222); 
+  color: #fff; 
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s;
+}
+.quantity-modal .quantity-btn:hover { border-color: var(--thm-border-gold); color: var(--thm-accent-gold); }
+
+.quantity-modal #quantityInput { 
+  width: 70px; 
+  height: 40px; 
+  text-align: center; 
+  background: #000; 
+  border: 1px solid var(--thm-border-gold); 
+  color: var(--thm-accent-gold); 
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 6px;
+}
+
+.quantity-modal .quantity-slider { padding: 0 10px; }
+
+.quantity-modal #quantitySlider {
+  width: 100%;
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.quantity-modal #quantitySlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--thm-accent-gold);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #000;
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+.quantity-modal .modal-footer { 
+  display: flex; 
+  gap: 12px; 
+  margin-top: 10px; 
+}
+
+.quantity-modal .modal-footer button { 
+  flex: 1; 
+  padding: 12px; 
+  font-size: 14px; 
+  font-weight: bold; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  border: 1px solid rgba(255,255,255,0.1);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+
+.quantity-modal .confirm-btn { 
+  background: var(--thm-accent-gold) !important; 
+  color: #000 !important; 
+  border: 1px solid #000 !important;
+}
+
+.quantity-modal .confirm-btn:hover { 
+  filter: brightness(1.2); 
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); 
+}
+
+.quantity-modal .cancel-btn { 
+  background: #222 !important; 
+  color: #888 !important; 
+  border: 1px solid #444 !important;
+}
+
+.quantity-modal .cancel-btn:hover { 
+  background: #333 !important; 
+  color: #fff !important; 
+}

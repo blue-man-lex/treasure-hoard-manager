@@ -1,0 +1,620 @@
+<form class="{{cssClasses}}" autocomplete="off">
+
+  <!-- ПРЕДУПРЕЖДЕНИЕ: Нет токена -->
+  {{#if warning}}
+  <div class="notification warning">
+    <i class="fas fa-exclamation-triangle"></i>
+    <p>{{warning}}</p>
+  </div>
+  {{/if}}
+
+  <!-- ШАПКА: Основное переключение -->
+  <header class="sheet-header">
+    <img class="profile-img" src="{{currentImg}}" title="{{actor.name}}" height="64" width="64" />
+
+    <div class="header-content">
+      <h1 class="charname">{{actor.name}}</h1>
+
+      <!-- Главный переключатель -->
+      <div class="form-group highlight-box">
+        <label class="checkbox-label">
+          <input type="checkbox" name="isHoard" {{checked isHoard}}>
+          <span class="label-text"><strong>Является хранилищем</strong></span>
+        </label>
+        <p class="notes">Включите, чтобы активировать функционал менеджера сокровищ для этого актера.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ТЕЛО: Настройки (Показываются только если галочка включена) -->
+  {{#if isHoard}}
+
+  <div class="thm-settings-body">
+
+    <!-- 1. Выбор типа и иконки -->
+    <div class="form-group type-selector-group">
+      <label><i class="fas fa-shapes"></i> Тип объекта:</label>
+      <div class="form-fields">
+        <select name="hoardType">
+          {{selectOptions types selected=hoardType}}
+        </select>
+      </div>
+      <p class="notes">Это определит поведение и доступные настройки.</p>
+    </div>
+
+    <!-- Навигация по вкладкам -->
+    <nav class="sheet-tabs tabs" data-group="primary">
+      <a class="item" data-tab="general"><i class="fas fa-cogs"></i> Общие</a>
+      <a class="item" data-tab="specific"><i class="fas fa-sliders-h"></i> Настройки Типа</a>
+    </nav>
+
+    <section class="content">
+
+      <!-- Вкладка: ОБЩИЕ -->
+      <div class="tab" data-tab="general">
+        <div class="form-group">
+          <label>Дистанция (клетки)</label>
+          <div class="form-fields">
+            <input type="number" name="interactionDistance" value="{{general.interactionDistance}}" placeholder="∞">
+          </div>
+          <p class="notes">Пустое значение = можно открывать с любой дистанции.</p>
+        </div>
+
+        <div class="form-group">
+          <label>Карточки предметов</label>
+          <div class="form-fields">
+            <input type="checkbox" name="showItemCards" {{checked general.showItemCards}}>
+          </div>
+          <p class="notes">Показывать описание при клике на предмет.</p>
+        </div>
+
+        <div class="form-group">
+          <label>Стакать предметы</label>
+          <div class="form-fields">
+            <input type="checkbox" name="stackItems" {{checked general.stackItems}}>
+          </div>
+          <p class="notes">Объединять одинаковые предметы в стопки.</p>
+        </div>
+      </div>
+
+      <!-- Вкладка: СПЕЦИФИЧНЫЕ -->
+      <div class="tab" data-tab="specific">
+
+        {{#if hasTypeSpecific}}
+
+        <!-- НАСТРОЙКИ КОНТЕЙНЕРА (СУНДУКА) -->
+        {{#if isContainer}}
+        <h3 class="divider"><i class="fas fa-box"></i> Параметры Контейнера</h3>
+
+        <!-- Иконка токена для контейнера -->
+        <div class="form-group">
+          <label><i class="fas fa-image"></i> Иконка токена:</label>
+          <div class="form-fields">
+            <file-picker name="customImage" type="image" value="{{currentImg}}"></file-picker>
+          </div>
+          <p class="notes">Выберите изображение для токена сундука.</p>
+        </div>
+
+        <div class="form-group">
+          <label>Распределение валюты:</label>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" id="ms-equal" name="moneySplit" value="equal" {{checked (eq
+                typeSpecific.moneySplit "equal" )}}>
+              <label for="ms-equal">Поровну между группой</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" id="ms-winner" name="moneySplit" value="winner" {{checked (eq
+                typeSpecific.moneySplit "winner" )}}>
+              <label for="ms-winner">Кто открыл - тот и забрал</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Кто участвует в дележке:</label>
+          <div class="checkbox-group">
+            <div class="checkbox-option">
+              <input type="checkbox" id="acc-online" name="accessOnline" {{checked typeSpecific.access.online}}>
+              <label for="acc-online">Только игроки Онлайн</label>
+            </div>
+            <div class="checkbox-option">
+              <input type="checkbox" id="acc-scene" name="accessScene" {{checked typeSpecific.access.scene}}>
+              <label for="acc-scene">Только игроки на этой Сцене</label>
+            </div>
+          </div>
+          <p class="notes">Если выбрано оба, условия суммируются.</p>
+        </div>
+
+        <div class="form-group">
+          <label>Состояние:</label>
+          <p class="notes">Механика замков будет добавлена позже.</p>
+        </div>
+
+        <div class="form-group">
+          <label>Удалять пустой</label>
+          <div class="form-fields">
+            <input type="checkbox" name="deleteWhenEmpty" {{checked typeSpecific.deleteWhenEmpty}}>
+          </div>
+          <p class="notes">Токен удалится, когда в нем не останется предметов.</p>
+        </div>
+        {{/if}}
+
+
+        <!-- НАСТРОЙКИ МАГАЗИНА -->
+        {{#if isShop}}
+        <h3 class="divider"><i class="fas fa-store"></i> Параметры Магазина</h3>
+
+        <!-- Генерация имени -->
+        <div class="form-group thm-generation-group" style="border-left: 3px solid #c0a060;">
+          <label><i class="fas fa-magic"></i> Генерация имени:</label>
+          <div class="form-fields" style="justify-content: flex-start;">
+            <input type="checkbox" id="ow-name" name="overwriteName" {{checked typeSpecific.overwriteName}}>
+            <select name="shopGender">
+              <option value="any" {{#if (eq typeSpecific.shopGender 'any' )}}selected{{/if}}>Случайный пол</option>
+              <option value="male" {{#if (eq typeSpecific.shopGender 'male' )}}selected{{/if}}>Мужчина</option>
+              <option value="female" {{#if (eq typeSpecific.shopGender 'female' )}}selected{{/if}}>Женщина</option>
+            </select>
+          </div>
+          <p class="notes">Генерирует случайное имя и устанавливает подходящий арт токена при сохранении настроек.
+            Текущие имя и изображение будут перезаписаны.</p>
+        </div>
+
+        <!-- Источники товаров: Система Тегов -->
+        <div class="form-group thm-compendium-group" style="flex-direction: column; align-items: flex-start;">
+          <label style="width: 100%; margin-bottom: 5px;">Источники товаров:</label>
+          <p class="notes" style="margin-top: 0; margin-bottom: 10px;">Добавьте компендиумы, из которых будут браться
+            товары.</p>
+
+          <input type="hidden" name="inventorySources" value="{{typeSpecific.inventorySources}}">
+
+          <!-- 1. АКТИВНЫЕ ТЕГИ -->
+          <div id="active-compendium-tags" class="compendium-tags-container"></div>
+
+          <!-- 2. ПОИСК -->
+          <div class="thm-compendium-search-row">
+            <input type="text" id="compendium-search-input" placeholder="Введите название (например: items)">
+            <button type="button" id="btn-search-compendiums">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+
+          <!-- 3. РЕЗУЛЬТАТЫ -->
+          <div id="compendium-search-results" class="compendium-results"></div>
+        </div>
+
+        <!-- Тип торговца и портрет -->
+        <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+          <label style="width: 100%;">Тип торговца:</label>
+          <p class="notes" style="margin-top: 0;">Выберите тип торговца для автоматической настройки портрета и
+            ассортимента.</p>
+
+          <div class="shop-type-selector">
+            {{#each shopTypes}}
+            <div class="shop-type-option" data-type="{{@key}}">
+              <input type="radio" name="shopType" value="{{@key}}" id="shop-{{@key}}" {{checked (eq
+                ../typeSpecific.shopType @key)}}>
+              <label for="shop-{{@key}}" class="shop-type-label">
+                <div class="shop-type-icon">
+                  <img src="{{icon}}" alt="{{name}}">
+                </div>
+                <div class="shop-type-info">
+                  <h4>{{name}}</h4>
+                  <p>{{description}}</p>
+                </div>
+              </label>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+
+        <!-- Категории товаров -->
+        <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+          <label style="width: 100%;">Категории товаров:</label>
+          <p class="notes" style="margin-top: 0;">Автоматически настраивается на основе типа торговца.</p>
+
+          <div class="category-grid">
+            <div class="category-item">
+              <label>
+                <input type="checkbox" name="categoryWeapons" {{checked typeSpecific.categoryWeapons}}>
+                <div class="category-content">
+                  <i class="fas fa-sword"></i> <span>Оружие</span>
+                </div>
+              </label>
+            </div>
+            <div class="category-item">
+              <label>
+                <input type="checkbox" name="categoryArmor" {{checked typeSpecific.categoryArmor}}>
+                <div class="category-content">
+                  <i class="fas fa-shield"></i> <span>Броня</span>
+                </div>
+              </label>
+            </div>
+            <div class="category-item">
+              <label>
+                <input type="checkbox" name="categoryPotions" {{checked typeSpecific.categoryPotions}}>
+                <div class="category-content">
+                  <i class="fas fa-flask"></i> <span>Зелья</span>
+                </div>
+              </label>
+            </div>
+            <div class="category-item">
+              <label>
+                <input type="checkbox" name="categoryScrolls" {{checked typeSpecific.categoryScrolls}}>
+                <div class="category-content">
+                  <i class="fas fa-scroll"></i> <span>Свитки</span>
+                </div>
+              </label>
+            </div>
+            <div class="category-item">
+              <label>
+                <input type="checkbox" name="categoryFood" {{checked typeSpecific.categoryFood}}>
+                <div class="category-content">
+                  <i class="fas fa-drumstick-bite"></i> <span>Еда</span>
+                </div>
+              </label>
+            </div>
+            <div class="category-item">
+              <label>
+                <input type="checkbox" name="categoryGems" {{checked typeSpecific.categoryGems}}>
+                <div class="category-content">
+                  <i class="fas fa-gem"></i> <span>Камни</span>
+                </div>
+              </label>
+            </div>
+            <div class="category-item">
+              <label>
+                <input type="checkbox" name="categoryMaterials" {{checked typeSpecific.categoryMaterials}}>
+                <div class="category-content">
+                  <i class="fas fa-hammer"></i> <span>Материалы</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Настройки редкости -->
+        <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+          <label style="width: 100%;">Редкость товаров:</label>
+          <p class="notes" style="margin-top: 0;">Настройте распределение товаров. Сумма должна быть 100%.</p>
+
+          <div class="rarity-settings">
+            <div class="rarity-row">
+              <label>Обычные (Common):</label>
+              <input type="range" name="rarityCommon" value="{{typeSpecific.rarityCommon}}" min="1" max="100">
+              <span class="rarity-value">{{typeSpecific.rarityCommon}}%</span>
+            </div>
+            <div class="rarity-row">
+              <label>Необычные (Uncommon):</label>
+              <input type="range" name="rarityUncommon" value="{{typeSpecific.rarityUncommon}}" min="1" max="100">
+              <span class="rarity-value">{{typeSpecific.rarityUncommon}}%</span>
+            </div>
+            <div class="rarity-row">
+              <label>Редкие (Rare):</label>
+              <input type="range" name="rarityRare" value="{{typeSpecific.rarityRare}}" min="1" max="100">
+              <span class="rarity-value">{{typeSpecific.rarityRare}}%</span>
+            </div>
+            <div class="rarity-row">
+              <label>Очень редкие (Very Rare):</label>
+              <input type="range" name="rarityVeryRare" value="{{typeSpecific.rarityVeryRare}}" min="1" max="100">
+              <span class="rarity-value">{{typeSpecific.rarityVeryRare}}%</span>
+            </div>
+            <div class="rarity-row">
+              <label>Легендарные (Legendary):</label>
+              <input type="range" name="rarityLegendary" value="{{typeSpecific.rarityLegendary}}" min="1" max="100">
+              <span class="rarity-value">{{typeSpecific.rarityLegendary}}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Умная адаптивная система -->
+        <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+          <label style="width: 100%;">Адаптивный ассортимент по уровню:</label>
+          <div class="checkbox-option" style="margin: 5px 0;">
+            <input type="checkbox" id="smart-adapt" name="smartAdaptive" {{checked typeSpecific.smartAdaptive}}>
+            <label for="smart-adapt">Включить умную адаптивность</label>
+          </div>
+          <p class="notes" style="margin-top: 0;">Система автоматически обновляет ассортимент при входе игроков.</p>
+
+          <div class="base-rarity">
+            <div class="rarity-base"
+              style="margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+              <label>Уровень торговца (если адаптивность выкл.):</label>
+              <div class="price-input-group">
+                <input type="number" name="merchantLevel" value="{{typeSpecific.merchantLevel}}" min="1" max="20"
+                  placeholder="1">
+                <span class="price-info">ур.</span>
+              </div>
+            </div>
+            <div class="rarity-base">
+              <label>Множитель за уровень:</label>
+              <div class="price-input-group">
+                <input type="number" name="levelMultiplier" value="{{typeSpecific.levelMultiplier}}" min="0.1" max="10"
+                  step="0.1" placeholder="2">
+                <span class="price-info">%</span>
+              </div>
+            </div>
+            <div class="rarity-base">
+              <label>Обычные (Common):</label>
+              <div class="price-input-group">
+                <input type="number" name="baseCommon" value="{{typeSpecific.baseCommon}}" min="1" max="100"
+                  placeholder="70">
+                <span class="price-info">%</span>
+              </div>
+            </div>
+            <div class="rarity-base">
+              <label>Необычные (Uncommon):</label>
+              <div class="price-input-group">
+                <input type="number" name="baseUncommon" value="{{typeSpecific.baseUncommon}}" min="1" max="100"
+                  placeholder="30">
+                <span class="price-info">%</span>
+              </div>
+            </div>
+            <div class="rarity-base">
+              <label>Редкие (Rare):</label>
+              <div class="price-input-group">
+                <input type="number" name="baseRare" value="{{typeSpecific.baseRare}}" min="1" max="100"
+                  placeholder="10">
+                <span class="price-info">%</span>
+              </div>
+            </div>
+            <div class="rarity-base">
+              <label>Очень редкие (Very Rare):</label>
+              <div class="price-input-group">
+                <input type="number" name="baseVeryRare" value="{{typeSpecific.baseVeryRare}}" min="1" max="100"
+                  placeholder="2">
+                <span class="price-info">%</span>
+              </div>
+            </div>
+            <div class="rarity-base">
+              <label>Легендарные (Legendary):</label>
+              <div class="price-input-group">
+                <input type="number" name="baseLegendary" value="{{typeSpecific.baseLegendary}}" min="1" max="100"
+                  placeholder="1">
+                <span class="price-info">% (с 15 ур.)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ограничение количества товаров -->
+        <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+          <label style="width: 100%;">Ограничение ассортимента:</label>
+          <p class="notes" style="margin-top: 0;">Контроль количества товаров у торговца.</p>
+
+          <div class="inventory-limits">
+            <div class="limit-row">
+              <label>Макс. видов товаров:</label>
+              <div class="price-input-group">
+                <input type="number" name="maxItemTypes" value="{{typeSpecific.maxItemTypes}}" min="1" max="100"
+                  placeholder="20">
+                <span class="price-info">штук</span>
+              </div>
+            </div>
+            <div class="limit-row">
+              <label>Макс. количество одного товара:</label>
+              <div class="price-input-group">
+                <input type="number" name="maxItemQuantity" value="{{typeSpecific.maxItemQuantity}}" min="1" max="999"
+                  placeholder="10">
+                <span class="price-info">штук</span>
+              </div>
+            </div>
+            <div class="limit-row">
+              <label>Мин. количество одного товара:</label>
+              <div class="price-input-group">
+                <input type="number" name="minItemQuantity" value="{{typeSpecific.minItemQuantity}}" min="1" max="999"
+                  placeholder="1">
+                <span class="price-info">штук</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Правила ценообразования -->
+        <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+          <label style="width: 100%;">Правила ценообразования:</label>
+
+          <div class="pricing-settings">
+            <div class="pricing-row">
+              <label>Метод цен:</label>
+              <div class="price-input-group">
+                <select name="priceMethod">
+                  <option value="dmg" {{#if (eq typeSpecific.priceMethod 'dmg' )}}selected{{/if}}>DMG (диапазоны)
+                  </option>
+                  <option value="xge" {{#if (eq typeSpecific.priceMethod 'xge' )}}selected{{/if}}>XGE (кубики)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="pricing-row">
+              <label>Базовая наценка (%):</label>
+              <div class="price-input-group">
+                <input type="number" name="priceMarkup" value="{{typeSpecific.priceMarkup}}" min="-50" max="500"
+                  placeholder="100">
+                <span class="price-info">100 = базовая цена</span>
+              </div>
+            </div>
+
+            <div class="pricing-row">
+              <label>Базовый выкуп (%):</label>
+              <div class="price-input-group">
+                <input type="number" name="priceBuyback" value="{{typeSpecific.priceBuyback}}" min="0" max="150"
+                  placeholder="50">
+                <span class="price-info">50 = выкуп за 50%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Время работы и Репутация -->
+        <div class="form-group">
+          <label>Дополнительно:</label>
+          <div class="checkbox-group">
+            <div class="checkbox-option">
+              <input type="checkbox" id="always-open" name="alwaysOpen" {{checked typeSpecific.alwaysOpen}}>
+              <label for="always-open">Работает круглосуточно</label>
+            </div>
+            <div class="checkbox-option">
+              <input type="checkbox" id="use-rep" name="useReputation" {{checked typeSpecific.useReputation}}>
+              <label for="use-rep">Учитывать репутацию, НПС с ии </label>
+            </div>
+            <div class="checkbox-option">
+              <input type="checkbox" id="use-npc-currency" name="useNpcCurrency" {{checked
+                typeSpecific.useNpcCurrency}}>
+              <label for="use-npc-currency">Учитывать кошелек торговца (лимит денег)</label>
+            </div>
+          </div>
+        </div>
+        {{/if}}
+
+        <!-- НАСТРОЙКИ ЧЁРНОГО РЫНКА -->
+        {{#if isBlackMarket}}
+        <h3 class="divider"><i class="fas fa-user-secret"></i> Параметры Чёрного Рынка</h3>
+
+        <!-- Генерация имени и портрета (Как в магазине) -->
+        <div class="form-group thm-generation-group" style="border-left: 3px solid #8b00ff;">
+          <label><i class="fas fa-magic"></i> Теневая личность:</label>
+          <div class="form-fields" style="justify-content: flex-start;">
+            <input type="checkbox" id="bm-name" name="overwriteName" {{checked typeSpecific.overwriteName}}>
+            <select name="shopGender">
+              <option value="any" {{#if (eq typeSpecific.shopGender 'any' )}}selected{{/if}}>Любой пол</option>
+              <option value="male" {{#if (eq typeSpecific.shopGender 'male' )}}selected{{/if}}>Мужчина</option>
+              <option value="female" {{#if (eq typeSpecific.shopGender 'female' )}}selected{{/if}}>Женщина</option>
+            </select>
+          </div>
+          <p class="notes">Сгенерировать случайное имя контрабандиста и установить портрет.</p>
+        </div>
+
+        <!-- Источник ОДНОГО редкого предмета -->
+        <div class="form-group thm-compendium-group" style="flex-direction: column; align-items: flex-start;">
+          <label style="width: 100%; margin-bottom: 5px;"><i class="fas fa-gem"></i> Источник эксклюзива:</label>
+          <p class="notes" style="margin-top: 0; margin-bottom: 10px;">Выберите компендиум. Система выберет оттуда
+            ТОЛЬКО ОДИН самый редкий предмет и завысит на него цену.</p>
+
+          <input type="hidden" name="inventorySources" value="{{typeSpecific.inventorySources}}">
+          <div id="active-compendium-tags" class="compendium-tags-container"></div>
+          <div class="thm-compendium-search-row">
+            <input type="text" id="compendium-search-input" placeholder="Поиск компендиума...">
+            <button type="button" id="btn-search-compendiums"><i class="fas fa-search"></i></button>
+          </div>
+          <div id="compendium-search-results" class="compendium-results"></div>
+        </div>
+
+        <!-- Таймер акции (Привязка к реальному времени) -->
+        <div class="form-group">
+          <label><i class="fas fa-hourglass-half"></i> Время предложения (часов):</label>
+          <div class="form-fields">
+            <input type="number" name="bmOfferDuration" value="{{typeSpecific.bmOfferDuration}}" placeholder="24"
+              min="1">
+          </div>
+          <p class="notes">Через сколько часов реального времени товар исчезнет.</p>
+        </div>
+
+        <!-- Услуги Чёрного рынка (Плашки) -->
+        <div class="form-group" style="flex-direction: column; align-items: flex-start; margin-top: 20px;">
+          <label style="width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
+            <i class="fas fa-handshake"></i> Настройка теневых услуг:
+          </label>
+
+          <div class="services-config-list"
+            style="width: 100%; display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+
+            <!-- 1. Помощь теневого мира -->
+            <div style="background: rgba(0,0,0,0.2); border: 1px solid #444; padding: 10px; border-radius: 5px;">
+              <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                <input type="checkbox" name="srv1_enabled" {{checked typeSpecific.services.srv1.enabled}}>
+                <strong>Помощь теневого мира</strong>
+                <span style="margin-left: auto;">Цена:</span>
+                <input type="number" name="srv1_price" value="{{typeSpecific.services.srv1.price}}"
+                  style="width: 60px;">
+              </div>
+              <div class="form-fields" style="margin-bottom: 5px;">
+                <file-picker name="srv1_img" type="image" value="{{typeSpecific.services.srv1.img}}"
+                  placeholder="Путь к картинке..."></file-picker>
+              </div>
+              <textarea name="srv1_desc" rows="2" placeholder="Описание услуги..."
+                style="width: 100%; font-size: 13px; color: #e8dcc0; background: rgba(0,0,0,0.5); border: 1px solid #7a7971; padding: 8px; border-radius: 4px; box-sizing: border-box; margin-top: 5px;">{{typeSpecific.services.srv1.desc}}</textarea>
+            </div>
+
+            <!-- 2. Заказ на убийство -->
+            <div style="background: rgba(0,0,0,0.2); border: 1px solid #444; padding: 10px; border-radius: 5px;">
+              <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                <input type="checkbox" name="srv2_enabled" {{checked typeSpecific.services.srv2.enabled}}>
+                <strong>Заказ на убийство</strong>
+                <span style="margin-left: auto;">Цена:</span>
+                <input type="number" name="srv2_price" value="{{typeSpecific.services.srv2.price}}"
+                  style="width: 60px;">
+              </div>
+              <div class="form-fields" style="margin-bottom: 5px;">
+                <file-picker name="srv2_img" type="image" value="{{typeSpecific.services.srv2.img}}"
+                  placeholder="Путь к картинке..."></file-picker>
+              </div>
+              <textarea name="srv2_desc" rows="2" placeholder="Описание услуги..."
+                style="width: 100%; font-size: 13px; color: #e8dcc0; background: rgba(0,0,0,0.5); border: 1px solid #7a7971; padding: 8px; border-radius: 4px; box-sizing: border-box; margin-top: 5px;">{{typeSpecific.services.srv2.desc}}</textarea>
+            </div>
+
+            <!-- 3. Покупка информации -->
+            <div style="background: rgba(0,0,0,0.2); border: 1px solid #444; padding: 10px; border-radius: 5px;">
+              <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                <input type="checkbox" name="srv3_enabled" {{checked typeSpecific.services.srv3.enabled}}>
+                <strong>Покупка информации</strong>
+                <span style="margin-left: auto;">Цена:</span>
+                <input type="number" name="srv3_price" value="{{typeSpecific.services.srv3.price}}"
+                  style="width: 60px;">
+              </div>
+              <div class="form-fields" style="margin-bottom: 5px;">
+                <file-picker name="srv3_img" type="image" value="{{typeSpecific.services.srv3.img}}"
+                  placeholder="Путь к картинке..."></file-picker>
+              </div>
+              <textarea name="srv3_desc" rows="2" placeholder="Описание услуги..."
+                style="width: 100%; font-size: 13px; color: #e8dcc0; background: rgba(0,0,0,0.5); border: 1px solid #7a7971; padding: 8px; border-radius: 4px; box-sizing: border-box; margin-top: 5px;">{{typeSpecific.services.srv3.desc}}</textarea>
+            </div>
+
+            <!-- 4. Особый заказ -->
+            <div style="background: rgba(0,0,0,0.2); border: 1px solid #444; padding: 10px; border-radius: 5px;">
+              <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                <input type="checkbox" name="srv4_enabled" {{checked typeSpecific.services.srv4.enabled}}>
+                <strong>Особый заказ (Кастом)</strong>
+                <span style="margin-left: auto;">Цена:</span>
+                <input type="number" name="srv4_price" value="{{typeSpecific.services.srv4.price}}"
+                  style="width: 60px;">
+              </div>
+              <div class="form-fields" style="margin-bottom: 5px;">
+                <file-picker name="srv4_img" type="image" value="{{typeSpecific.services.srv4.img}}"
+                  placeholder="Путь к картинке..."></file-picker>
+              </div>
+              <textarea name="srv4_desc" rows="2" placeholder="Описание услуги..."
+                style="width: 100%; font-size: 13px; color: #e8dcc0; background: rgba(0,0,0,0.5); border: 1px solid #7a7971; padding: 8px; border-radius: 4px; box-sizing: border-box; margin-top: 5px;">{{typeSpecific.services.srv4.desc}}</textarea>
+            </div>
+
+          </div>
+        </div>
+        {{/if}}
+
+        <!-- НАСТРОЙКИ ХРАНИЛИЩА -->
+        {{#if isVault}}
+        <h3 class="divider"><i class="fas fa-lock"></i> Параметры Хранилища</h3>
+        <div class="form-group">
+          <p class="notes">Настройки банка появятся здесь в будущих обновлениях.</p>
+        </div>
+        {{/if}}
+
+        {{else}}
+        <!-- ✅ ЕСЛИ ТИП НЕ ВЫБРАН -->
+        <div class="form-group">
+          <p class="notes warning" style="color: #ffaa00;">⚠️ Сначала выберите тип объекта на вкладке "Общие"</p>
+        </div>
+        {{/if}}
+
+      </div>
+    </section>
+  </div>
+  {{/if}}
+
+  <!-- ПОДВАЛ: Кнопки -->
+  <footer class="sheet-footer">
+    <button type="submit">
+      <i class="fas fa-check"></i> Сохранить настройки
+    </button>
+  </footer>
+</form>

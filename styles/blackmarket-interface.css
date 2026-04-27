@@ -1,0 +1,152 @@
+/**
+ * Treasure Hoard Manager - Black Market Interface (Refactored)
+ */
+
+.blackmarket-content {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  padding: 15px 20px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.services-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--thm-border-gold-low);
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.section-title {
+  font-family: var(--thm-font-fancy);
+  color: var(--thm-border-gold);
+  border-bottom: 1px solid var(--thm-border-gold-low);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* 3D Flip Card System */
+.service-card {
+  perspective: 1000px;
+  height: 220px;
+  cursor: pointer;
+}
+
+.service-card-inner {
+  position: relative;
+  width: 100%; height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.service-card:hover .service-card-inner { transform: rotateY(180deg); }
+
+.service-front, .service-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  border: 1px solid var(--thm-border-bronze-low);
+  overflow: hidden;
+}
+
+.service-front {
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.8)), #111;
+  background-size: cover;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 15px;
+}
+
+.service-back {
+  background: var(--thm-bg-secondary);
+  transform: rotateY(180deg);
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 15px;
+  text-align: center;
+}
+
+.service-icon {
+  position: absolute; top: 15px; right: 15px;
+  font-size: 24px; color: var(--thm-border-gold);
+}
+
+/* Exclusive Column */
+.exclusive-column {
+  width: 260px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--thm-border-gold);
+  border-radius: 12px;
+  padding: 15px;
+  display: flex; flex-direction: column; align-items: center;
+}
+
+.exclusive-timer { width: 100%; margin-bottom: 15px; }
+
+.timer-display {
+  background: rgba(196, 78, 78, 0.1);
+  border: 1px solid var(--thm-accent-red);
+  color: #ff6b6b;
+  padding: 8px; border-radius: 6px;
+  font-size: 13px; font-weight: bold; text-align: center;
+}
+
+.exclusive-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 20px; width: 100%;
+}
+
+.exclusive-price-badge {
+  margin-top: -10px;
+  background: #0b0b0b;
+  border: 1px solid var(--thm-border-gold);
+  color: var(--thm-accent-gold);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  white-space: nowrap;
+}
+
+.service-bought-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: #2ecc71;
+  background: rgba(46, 204, 113, 0.05);
+  border: 1px dashed rgba(46, 204, 113, 0.3);
+  border-radius: 8px;
+  padding: 15px;
+  text-shadow: 0 0 10px rgba(46, 204, 113, 0.4);
+}
+
+.service-bought-status i {
+  font-size: 2.5em;
+  filter: drop-shadow(0 0 5px rgba(46, 204, 113, 0.6));
+  margin-bottom: 5px;
+}
+
+/* Принудительный разворот карточки если куплено (опционально, но помогает видеть статус) */
+.service-card.is-bought .service-card-inner {
+  transform: rotateY(180deg);
+}

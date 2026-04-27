@@ -1,0 +1,236 @@
+<form class="{{cssClasses}} thm-premium-window thm-barter-window" autocomplete="off">
+  
+  <!-- ГЛАВНАЯ ПАНЕЛЬ -->
+  <div class="barter-main-panel">
+    
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ С ПОРТРЕТАМИ -->
+    <header class="thm-premium-header barter-header">
+      <!-- Портрет игрока -->
+      <div class="participant player">
+        <div class="thm-portrait-frame">
+          <img class="thm-portrait-img" src="{{playerData.img}}" alt="{{playerData.name}}" />
+        </div>
+        <div class="participant-info">
+          <h3 class="participant-name">{{playerData.name}}</h3>
+          <div class="participant-funds thm-currency-block">
+            {{{currencyHtmlPlayer}}}
+          </div>
+        </div>
+      </div>
+
+      <!-- Центральная зона -->
+      <div class="header-center">
+        <div class="exchange-icon">
+          <i class="fas fa-exchange-alt"></i>
+        </div>
+        {{#if isGM}}
+        <div class="sync-trade-center">
+          <button type="button" class="thm-btn icon-button" id="refreshInventory" title="Обновить ассортимент">
+            <i class="fas fa-sync"></i>
+          </button>
+        </div>
+        {{/if}}
+      </div>
+
+      <!-- Портрет торговца -->
+      <div class="participant merchant">
+        <div class="thm-portrait-frame">
+          <img class="thm-portrait-img" src="{{shopData.img}}" alt="{{shopData.name}}" />
+        </div>
+        <div class="participant-info">
+          <h3 class="participant-name">{{shopData.name}}</h3>
+          <div class="participant-funds thm-currency-block justify-right">
+            {{#if useNpcCurrency}}
+              {{{currencyHtmlMerchant}}}
+            {{else}}
+              <span class="currency-gp" style="font-size: 18px;" title="Бесконечные средства">∞</span>
+              <span style="font-size: 12px; opacity: 0.7;">Безлимит</span>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ОСНОВНАЯ ОБЛАСТЬ БАРТЕРА -->
+    <div class="barter-content">
+      
+      <!-- ЛЕВАЯ ПАНЕЛЬ: ИНВЕНТАРЬ ИГРОКА -->
+      <section class="inventory-panel player-inventory">
+        <div class="panel-header">
+          <h2 class="panel-title">Ваш инвентарь</h2>
+          <div class="panel-controls">
+            <select class="thm-select rarity-filter">
+              <option value="" {{#if (eq rarityFilter "")}}selected{{/if}}>Все редкости</option>
+              <option value="common" {{#if (eq rarityFilter "common")}}selected{{/if}}>Обычные</option>
+              <option value="uncommon" {{#if (eq rarityFilter "uncommon")}}selected{{/if}}>Необычные</option>
+              <option value="rare" {{#if (eq rarityFilter "rare")}}selected{{/if}}>Редкие</option>
+              <option value="veryRare" {{#if (eq rarityFilter "veryRare")}}selected{{/if}}>Очень редкие</option>
+              <option value="legendary" {{#if (eq rarityFilter "legendary")}}selected{{/if}}>Легендарные</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="inventory-grid">
+          {{#each playerData.items}}
+          <div class="thm-item-slot rarity-{{this.rarityClass}} inventory-item" data-item-id="{{this._id}}" data-actor-id="{{../playerData.id}}" data-uuid="{{this.uuid}}">
+            <div class="thm-rarity-bg"></div>
+            <img class="thm-item-icon" src="{{this.img}}" />
+            {{#if (gt this.system.quantity 1)}}
+            <div class="thm-item-qty">{{this.system.quantity}}</div>
+            {{/if}}
+          </div>
+          {{/each}}
+        </div>
+      </section>
+
+      <!-- ПРАВАЯ ПАНЕЛЬ: ИНВЕНТАРЬ ТОРГОВЦА -->
+      <section class="inventory-panel merchant-inventory">
+        <div class="panel-header">
+          <h2 class="panel-title">Товары торговца</h2>
+          <div class="panel-controls">
+            <select class="thm-select category-filter">
+              <option value="" {{#if (eq categoryFilter "")}}selected{{/if}}>Все категории</option>
+              <option value="weapons" {{#if (eq categoryFilter "weapons")}}selected{{/if}}>Оружие</option>
+              <option value="armor" {{#if (eq categoryFilter "armor")}}selected{{/if}}>Броня и Щиты</option>
+              <option value="potions" {{#if (eq categoryFilter "potions")}}selected{{/if}}>Зелья и Яды</option>
+              <option value="scrolls" {{#if (eq categoryFilter "scrolls")}}selected{{/if}}>Свитки</option>
+              <option value="food" {{#if (eq categoryFilter "food")}}selected{{/if}}>Еда и Напитки</option>
+              <option value="gems" {{#if (eq categoryFilter "gems")}}selected{{/if}}>Драгоценности</option>
+              <option value="materials" {{#if (eq categoryFilter "materials")}}selected{{/if}}>Материалы</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="inventory-grid">
+          {{#each shopData.inventory}}
+          <div class="thm-item-slot rarity-{{this.rarityClass}} inventory-item" data-item-id="{{this._id}}" data-actor-id="{{../shopData.id}}" data-uuid="{{this.uuid}}">
+            <div class="thm-rarity-bg"></div>
+            <img class="thm-item-icon" src="{{this.img}}" />
+            {{#if (gt this.system.quantity 1)}}
+            <div class="thm-item-qty">{{this.system.quantity}}</div>
+            {{/if}}
+          </div>
+          {{/each}}
+        </div>
+      </section>
+    </div>
+
+    <!-- НИЖНЯЯ ПАНЕЛЬ: ЗОНА ОБМЕНА -->
+    <section class="barter-trade-panel">
+      <div class="trade-zones">
+        
+        <!-- ЗОНА ИГРОКА -->
+        <div class="trade-zone player-trade">
+          <div class="zone-header">
+            <h3>Ваше предложение</h3>
+            <div class="zone-value {{#if (lt playerTotalValue merchantTotalValue)}}negative{{else}}positive{{/if}}">
+              {{playerTotalValue}} зм
+            </div>
+          </div>
+          <div class="trade-items" id="player-trade-items">
+            <!-- Предметы игрока добавляются динамически -->
+          </div>
+        </div>
+
+        <!-- РАЗДЕЛИТЕЛЬ -->
+        <div class="trade-divider">
+          <i class="fas fa-arrows-alt-h"></i>
+        </div>
+
+        <!-- ЗОНА ТОРГОВЦА -->
+        <div class="trade-zone merchant-trade">
+          <div class="zone-header">
+            <h3>Предложение торговца</h3>
+            <div class="zone-value {{#if (gt playerTotalValue merchantTotalValue)}}negative{{else}}positive{{/if}}">
+              {{merchantTotalValue}} зм
+            </div>
+          </div>
+          <div class="trade-items" id="merchant-trade-items">
+            <!-- Предметы торговца добавляются динамически -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ПАНЕЛЬ УПРАВЛЕНИЯ СДЕЛКОЙ -->
+      <div class="trade-controls">
+        <div class="balance-info">
+          <div class="balance-amount {{#if (gt playerTotalValue merchantTotalValue)}}positive{{else}}negative{{/if}}">
+            {{#if (gt playerTotalValue merchantTotalValue)}}
+              Ваша выгода: {{subtract playerTotalValue merchantTotalValue}} зм
+            {{else}}
+              Доплатить: {{subtract merchantTotalValue playerTotalValue}} зм
+            {{/if}}
+          </div>
+        </div>
+        
+        <div class="trade-buttons">
+          <button type="button" class="thm-btn balance-button" id="balanceTrade" title="Сбалансировать сделку">
+            <i class="fas fa-balance-scale"></i>
+          </button>
+          <button type="button" class="thm-btn reset-button" id="resetTrade">
+            <i class="fas fa-undo"></i>
+            Сбросить
+          </button>
+          <button type="button" class="thm-btn trade-button {{#if (lt playerTotalValue merchantTotalValue)}}disabled{{/if}}" id="confirmTrade">
+            <i class="fas fa-handshake"></i>
+            Торговать
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+  <!-- ПОДВАЛ УДАЛЕН -->
+
+  <!-- ПРЕМИАЛЬНОЕ МОДАЛЬНОЕ ОКНО ВЫБОРА КОЛИЧЕСТВА -->
+  <div class="quantity-modal" id="quantityModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="header-title">
+          <i class="fas fa-layer-group"></i>
+          <span>Выберите количество</span>
+        </div>
+        <button type="button" class="modal-close" id="closeQuantityModal">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="item-preview-card">
+          <div class="preview-image">
+            <img id="modalItemImage" src="" alt="">
+          </div>
+          <div class="preview-info">
+            <h4 id="modalItemName"></h4>
+            <div class="item-rarity-badge" id="modalItemRarity">COMMON</div>
+          </div>
+        </div>
+
+        <div class="quantity-controls-group">
+          <div class="input-stepper">
+            <button type="button" class="step-btn" id="decreaseQuantity"><i class="fas fa-minus"></i></button>
+            <input type="number" id="quantityInput" min="1" value="1">
+            <button type="button" class="step-btn" id="increaseQuantity"><i class="fas fa-plus"></i></button>
+          </div>
+          
+          <div class="slider-container">
+            <input type="range" id="quantitySlider" min="1" step="1" value="1">
+            <div class="slider-track"></div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="confirm-btn" id="confirmQuantity">ПОДТВЕРДИТЬ</button>
+          <button type="button" class="cancel-btn" id="cancelQuantity">ОТМЕНА</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- СКРЫТЫЕ ДАННЫЕ ДЛЯ JAVASCRIPT -->
+  <div class="hidden-data" style="display: none;">
+    <div id="playerItemId">{{playerData.id}}</div>
+    <div id="merchantItemId">{{shopData.id}}</div>
+    <!-- Добавлены скрытые поля для всех валют, если они требуются твоему JS -->
+    <div id="playerGold">{{playerData.currency.gp}}</div>
+    <div id="merchantGold">{{shopData.currency.gp}}</div>
+  </div>
+
+</form>

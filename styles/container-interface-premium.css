@@ -1,0 +1,95 @@
+/**
+ * Treasure Hoard Manager - Container Interface Styles (Refactored)
+ */
+
+/* Специфичные настройки сетки контейнера */
+.thm-loot-window .items-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin: 25px 30px;
+}
+
+/* Настройки Body */
+.thm-loot-window .loot-body {
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 200px;
+}
+
+/* Область валюты */
+.thm-loot-window .currency-area {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--thm-border-gold-low);
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin: 0 30px 20px 30px;
+  backdrop-filter: blur(5px);
+}
+
+.thm-loot-window .currency-title {
+  color: var(--thm-text-secondary);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+/* Специфичные контроли замка */
+.thm-loot-window .header-controls {
+  margin-left: auto;
+}
+
+.thm-loot-window .lock-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 15px;
+  border: 1px solid var(--thm-border-gold-low);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.thm-loot-window .lock-toggle:hover {
+  background: rgba(0, 0, 0, 0.6);
+  border-color: var(--thm-border-gold);
+}
+
+.thm-loot-window .lock-checkbox { display: none; }
+
+.thm-loot-window .lock-label i {
+  transition: color 0.3s ease;
+}
+
+.thm-loot-window .lock-checkbox:checked ~ .lock-label i { color: var(--thm-accent-red); }
+.thm-loot-window .lock-checkbox:not(:checked) ~ .lock-label i { color: var(--thm-accent-green); }
+
+/* Сообщения */
+.thm-loot-window .locked-message, 
+.thm-loot-window .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  color: var(--thm-text-muted);
+}
+
+.thm-loot-window .locked-message i {
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: var(--thm-accent-red);
+}
+
+/* Футер */
+.thm-loot-window .loot-footer {
+  background: rgba(0, 0, 0, 0.5);
+  border-top: 1px solid var(--thm-border-gold-low);
+  padding: 20px 30px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}

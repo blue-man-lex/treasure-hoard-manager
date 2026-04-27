@@ -1,0 +1,102 @@
+{
+  "THM": {
+    "Name": "Treasure Hoard Manager",
+    "SETTINGS": {
+      "AutoPriceItems": {
+        "Name": "Auto-price Items",
+        "Hint": "Automatically assigns prices to all new items when added to actor inventory"
+      },
+      "AutoPriceMethod": {
+        "Name": "Price Generation Method",
+        "Hint": "Choose the method for automatic item price generation"
+      },
+      "PriceMethod": {
+        "DMG": "DMG (ranges)",
+        "XGE": "XGE (dice rolls)"
+      },
+      "DebugMode": {
+        "Name": "Debug Mode",
+        "Hint": "Enables detailed logging for pricing system debugging"
+      }
+    },
+    "Settings": {
+      "Enabled": "Enabled",
+      "InteractionDistance": "Interaction Distance",
+      "ShowItemCards": "Show Item Cards",
+      "DeleteWhenEmpty": "Delete When Empty",
+      "StackItems": "Stack Items",
+      "ReputationModule": "Reputation Module",
+      "TimeModule": "Time Module",
+      "BuiltinReputation": "Builtin Reputation",
+      "CurrencyOverride": "Currency Override",
+      "ItemFilterOverride": "Item Filter Override",
+      "RequiredProperties": "Required Properties"
+    },
+    "ContextMenu": {
+      "TransformToHoard": "Transform to Hoard",
+      "TransformToShop": "Transform to Shop",
+      "TransformToContainer": "Transform to Container",
+      "TransformToVault": "Transform to Vault",
+      "Configure": "Configure",
+      "ShowToPlayers": "Show to Players"
+    },
+    "Types": {
+      "hoard": "Hoard",
+      "container": "Container",
+      "shop": "Shop",
+      "vault": "Vault"
+    },
+    "Notifications": {
+      "TransformSuccess": "Actor {actorName} successfully transformed to {typeName}",
+      "SettingsUpdated": "Settings for {actorName} updated",
+      "TradeStarted": "Trade started between {actor1} and {actor2}"
+    },
+    "Errors": {
+      "NoPermission": "You don't have permission for this action",
+      "TooFar": "You are too far to interact",
+      "EmptyInventory": "Inventory is empty",
+      "InvalidItem": "Invalid item type"
+    },
+    "UI": {
+      "Save": "Save",
+      "Cancel": "Cancel",
+      "Close": "Close",
+      "Configure": "Configure",
+      "Add": "Add",
+      "Remove": "Remove",
+      "Edit": "Edit",
+      "Price": "Price",
+      "Quantity": "Quantity",
+      "Total": "Total",
+      "Accept": "Accept",
+      "Decline": "Decline",
+      "Bid": "Place Bid"
+    },
+    "Shop": {
+      "InventorySources": "Inventory Sources",
+      "PricingRules": "Pricing Rules",
+      "OpeningHours": "Opening Hours",
+      "AddSource": "Add Source",
+      "AddPricingRule": "Add Pricing Rule",
+      "BasePrice": "Base Price",
+      "PriceModifier": "Price Modifier",
+      "ReputationInfluence": "Reputation Influence"
+    },
+    "Hoard": {
+      "AutoCollect": "Auto Collect",
+      "VisibilitySettings": "Visibility Settings",
+      "ItemFilters": "Item Filters",
+      "SplitLoot": "Split Loot"
+    },
+    "Container": {
+      "AccessSettings": "Access Settings",
+      "LockSettings": "Lock Settings",
+      "AccessLog": "Access Log"
+    },
+    "Vault": {
+      "AccessPermissions": "Access Permissions",
+      "CapacityLimits": "Capacity Limits",
+      "LoggingSystem": "Logging System"
+    }
+  }
+}
