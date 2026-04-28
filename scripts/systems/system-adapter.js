@@ -28,7 +28,15 @@ export class SystemAdapter {
    * Получение цены предмета
    */
   getItemPrice(item) {
-    return 10;
+    if (!item || !item.system) return 0;
+    return item.system.price?.value ?? 0;
+  }
+
+  /**
+   * Путь для сохранения цены в предмете
+   */
+  getPricePath() {
+    return "system.price.value";
   }
 
   /**
@@ -45,6 +53,22 @@ export class SystemAdapter {
   async updateActorCurrency(actor, currencyData) {
     const path = this.getCurrencyPath();
     return actor.update({ [path]: currencyData });
+  }
+
+  /**
+   * Списание валюты с актера (атомы)
+   */
+  async spendWealth(actor, amountAtoms) {
+    const currency = this.getActorCurrency(actor);
+    const totalAtoms = this.convertCurrencyToAtoms(currency);
+
+    if (totalAtoms < amountAtoms) return false;
+
+    const remainingAtoms = totalAtoms - amountAtoms;
+    const newCurrency = this.convertAtomsToCurrency(remainingAtoms);
+
+    await this.updateActorCurrency(actor, newCurrency);
+    return true;
   }
 
   /**
@@ -141,6 +165,13 @@ export class SystemAdapter {
   }
 
   /**
+   * Получение ключа основной валюты системы
+   */
+  getPrimaryCurrencyKey() {
+    return "gp"; // По умолчанию золото
+  }
+
+  /**
    * Перевод объекта валют в "атомы"
    */
   convertCurrencyToAtoms(currencyData) {
@@ -207,6 +238,13 @@ export class SystemAdapter {
   }
 
   /**
+   * Генерация стартового капитала для торговца
+   */
+  async generateMerchantWealth(actor) {
+    return true; // Агностик-заглушка
+  }
+
+  /**
    * Безопасное списание валюты
    */
   async subtractCurrency(actor, baseAmount) {
@@ -215,12 +253,7 @@ export class SystemAdapter {
     return true; 
   }
 
-  /**
-   * Списание богатства (универсальное)
-   */
-  async spendWealth(actor, amount) {
-    return true; // Агностик-заглушка
-  }
+
 
   /**
    * Получение уровня актера

@@ -175,20 +175,22 @@ export class ContainerInterface extends FormApplication {
       .map(i => {
         // Определяем редкость предмета
         let rarity = 'common';
-        // Безопасное получение редкости для разных версий DnD 5e
-        const rarityValue = i.system.rarity?.toLowerCase?.() || i.system.rarity?.value?.toLowerCase?.() || '';
-        if (rarityValue) {
-          // Убираем пробелы и дефисы ("very rare" -> "veryrare")
-          rarity = rarityValue.replace(/\s+/g, '').replace(/-/g, '');
+        if (adapter && typeof adapter.getItemRarity === 'function') {
+          rarity = (adapter.getItemRarity(i) || 'common').replace(/\s+/g, '').replace(/-/g, '');
+        } else {
+          const rarityValue = i.system.rarity?.toLowerCase?.() || i.system.rarity?.value?.toLowerCase?.() || '';
+          if (rarityValue) {
+            rarity = rarityValue.replace(/\s+/g, '').replace(/-/g, '');
+          }
         }
 
         return {
           id: i.id,
           name: i.name,
           img: i.img,
-          quantity: i.system.quantity || 1,
-          price: i.system.price?.value || 0,
-          rarity: rarity // Добавляем редкость
+          quantity: (adapter && typeof adapter.getItemQuantity === 'function') ? adapter.getItemQuantity(i) : (i.system.quantity || 1),
+          price: (adapter && typeof adapter.getItemPrice === 'function') ? adapter.getItemPrice(i) : (i.system.price?.value || 0),
+          rarity: rarity
         };
       });
 

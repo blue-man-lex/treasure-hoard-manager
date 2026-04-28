@@ -274,7 +274,8 @@ export class SocketManager {
       for (const player of activePlayers) {
         const playerActor = player.character;
         const playerCurrency = adapter.getActorCurrency(playerActor);
-        const updates = {};
+        const newCurrency = { ...playerCurrency };
+        let hasUpdates = false;
 
         for (const key of configKeys) {
           const amount = containerCurrency[key] || 0;
@@ -282,19 +283,20 @@ export class SocketManager {
 
           const share = Math.floor(amount / participantCount);
           if (share > 0) {
-            updates[`${currencyPath}.${key}`] = (playerCurrency[key] || 0) + share;
+            newCurrency[key] = (newCurrency[key] || 0) + share;
+            hasUpdates = true;
           }
         }
 
-        if (Object.keys(updates).length > 0) {
-          await playerActor.update(updates);
+        if (hasUpdates) {
+          await adapter.updateActorCurrency(playerActor, newCurrency);
         }
       }
 
       // Очищаем валюту в контейнере
       const emptyCurrency = {};
       for (const key of configKeys) emptyCurrency[key] = 0;
-      await container.update({ [currencyPath]: emptyCurrency });
+      await adapter.updateActorCurrency(container, emptyCurrency);
 
       // Оповещение в чат о делении
       ChatMessage.create({
@@ -318,17 +320,17 @@ export class SocketManager {
     } else {
       // РЕЖИМ "ВСЁ ОДНОМУ": Отдаем всё тому, кто залутал
       const looterCurrency = adapter.getActorCurrency(looter);
-      const looterUpdates = {};
+      const newLooterCurrency = { ...looterCurrency };
       const emptyCurrency = {};
 
       for (const key of configKeys) {
         const amount = containerCurrency[key] || 0;
-        looterUpdates[`${currencyPath}.${key}`] = (looterCurrency[key] || 0) + amount;
+        newLooterCurrency[key] = (newLooterCurrency[key] || 0) + amount;
         emptyCurrency[key] = 0;
       }
 
-      await looter.update(looterUpdates);
-      await container.update({ [currencyPath]: emptyCurrency });
+      await adapter.updateActorCurrency(looter, newLooterCurrency);
+      await adapter.updateActorCurrency(container, emptyCurrency);
     }
   }
 

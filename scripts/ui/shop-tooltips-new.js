@@ -185,7 +185,8 @@ class ShopTooltipsNew {
     const displayName = isIdentified ? item.name : (item.system.unidentified?.name || `Неопознанный предмет (${item.type})`);
     const rawDescription = isIdentified ? (item.system.description?.value || '') : (item.system.unidentified?.description || '<p>Свойства этого предмета неизвестны. Требуется опознание.</p>');
     
-    const price = item.system.price?.value || 0;
+    const adapter = game.THM?.manager?.systemAdapter || game.modules.get('treasure-hoard-manager')?.manager?.systemAdapter;
+    const price = adapter && typeof adapter.getItemPrice === 'function' ? adapter.getItemPrice(item) : (item.system.price?.value || 0);
     const weight = item.system.weight || 0;
     
     let enrichedDescription = "<i>Нет описания</i>";
@@ -277,13 +278,20 @@ class ShopTooltipsNew {
    * Форматирование валюты через системный адаптер
    */
   _formatCurrency(priceValue) {
-    const adapter = game.THM?.manager?.systemAdapter;
+    const adapter = game.THM?.manager?.systemAdapter || game.modules.get('treasure-hoard-manager')?.manager?.systemAdapter;
     if (!adapter) {
       return `${priceValue} gp`;
     }
     
-    // В DnD5e priceValue — это обычно золото (gp). Адаптер ожидает атомы (cp).
-    // Поэтому переводим gp -> cp (умножаем на 100)
+    // Если адаптер имеет convertCurrencyToAtoms/convertAtomsToCurrency, значит он поддерживает атомы.
+    // Но мы не знаем, что такое priceValue (в DnD это gp, в CPR это eb).
+    // Создаем объект валюты. В базовом адаптере нет метода для создания объекта из базовой цены,
+    // но мы можем проверить тип системы.
+    if (adapter.systemId === 'cyberpunk-red-core') {
+      return adapter.formatCurrencyHtml({ eb: priceValue });
+    }
+    
+    // Для DnD5e priceValue — это обычно золото (gp). Адаптер ожидает атомы (cp).
     return adapter.formatCurrencyHtml(priceValue * 100);
   }
 

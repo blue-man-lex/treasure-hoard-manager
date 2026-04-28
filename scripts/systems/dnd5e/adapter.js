@@ -168,6 +168,28 @@ export class Dnd5eAdapter extends SystemAdapter {
   }
 
   /**
+   * Получение коэффициента конвертации для указанной валюты
+   */
+  getCurrencyConversion(key) {
+    const config = this.getCurrencyConfig();
+    return config[key]?.weight || 1;
+  }
+
+  /**
+   * Получение ключа основной валюты системы
+   */
+  getPrimaryCurrencyKey() {
+    return "gp";
+  }
+
+  /**
+   * Получение названия валюты для отображения
+   */
+  getCurrencyLabel() {
+    return "gp";
+  }
+
+  /**
    * Перевод объекта валют в "атомы" (медь)
    */
   convertCurrencyToAtoms(currencyData) {

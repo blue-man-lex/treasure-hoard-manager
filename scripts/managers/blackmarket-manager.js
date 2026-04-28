@@ -307,9 +307,10 @@ export class BlackMarketManager {
       return;
     }
 
-    // Переводим цену из золота (gp) в медь (cp) для 5е через адаптер
-    const gpConversion = adapter.getCurrencyConversion('gp');
-    const priceInAtoms = price * gpConversion;
+    // Переводим цену из основной валюты системы (gp для 5е, eb для CPR) в атомы
+    const primaryCurrencyKey = adapter.getPrimaryCurrencyKey();
+    const conversion = adapter.getCurrencyConversion(primaryCurrencyKey);
+    const priceInAtoms = price * conversion;
 
     const success = await adapter.spendWealth(playerActor, priceInAtoms);
 
@@ -326,12 +327,13 @@ export class BlackMarketManager {
       [`flags.${CONSTANTS.MODULE_NAME}.data.purchasedServices`]: purchasedServices
     });
 
-    console.log(`THM | Service ${serviceType} purchased for ${actor.name}. Flags updated on: ${updateTarget.constructor.name}`);
+    console.log(`THM | Service ${serviceType} purchased for ${actor.name}. Flags updated on: ${doc.constructor.name}`);
 
     // Сообщение в чат
     const serviceName = this._getServiceName(serviceType);
-    // Для чата отображаем именно в золоте, как в меню
-    const priceHtml = adapter.formatCurrencyHtml({ gp: price });
+    // Создаем объект валюты для корректного отображения
+    const currencyObj = adapter.convertAtomsToCurrency(priceInAtoms);
+    const priceHtml = adapter.formatCurrencyHtml(currencyObj);
 
     ChatMessage.create({
       content: `
@@ -388,17 +390,9 @@ export class BlackMarketManager {
 
     const adapter = this.mainManager.systemAdapter;
 
-    // Пытаемся получить конвертацию для 'gp' (золото), если нет - используем 100 (дефолт DnD)
-    let gpConversion = 100;
-    try {
-      gpConversion = adapter.getCurrencyConversion('gp');
-    } catch (e) {
-      // Если метод не реализован или валюты нет, пробуем найти золото в конфиге
-      const config = adapter.getCurrencyConfig();
-      gpConversion = config.gp?.weight || config.gp?.conversion || 100;
-    }
-
-    const priceInAtoms = price * gpConversion;
+    const primaryCurrencyKey = adapter.getPrimaryCurrencyKey();
+    const conversion = adapter.getCurrencyConversion(primaryCurrencyKey);
+    const priceInAtoms = price * conversion;
 
     // Снимаем деньги
     const success = await adapter.spendWealth(playerActor, priceInAtoms);

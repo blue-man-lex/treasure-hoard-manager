@@ -133,7 +133,8 @@ export class BlackMarketInterface extends FormApplication {
       }
     }
 
-    const currencyLabel = game.THM.manager.systemAdapter.getCurrencyLabel?.() || 'зм';
+    const adapter = game.THM.manager.systemAdapter;
+    const currencyLabel = adapter.getCurrencyLabel?.() || 'зм';
 
     return { actor: this.actor.toObject(), servicesList, exclusiveOffer, timeRemaining, currencyLabel };
   }

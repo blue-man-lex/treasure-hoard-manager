@@ -228,12 +228,12 @@ export class TreasureHoardManager {
       if (this.state > Application.RENDER_STATES.NONE) {
         if (renderTHMInterface) {
           // Наш интерфейс открыт через хук, НЕ вызываем стандартный
-          return;
+          return this;
         } else {
           return wrapped(forced, options, ...args);
         }
       }
-      if (renderTHMInterface) return; // КЛЮЧЕВОЕ! БЛОКИРУЕМ СТАНДАРТНЫЙ
+      if (renderTHMInterface) return this; // КЛЮЧЕВОЕ! БЛОКИРУЕМ СТАНДАРТНЫЙ
       return wrapped(forced, options, ...args);
     };
 
@@ -511,6 +511,10 @@ export class TreasureHoardManager {
       // Получаем или создаем актера для лутбоксов
       const lootActor = await this.getOrCreateLootActor(itemData.img);
       
+      if (!lootActor) {
+        throw new Error("Could not create or find loot actor");
+      }
+      
       // Определяем сцену
       const scene = game.scenes.get(sceneId || canvas.scene.id);
       if (!scene) {
@@ -595,9 +599,13 @@ export class TreasureHoardManager {
       console.log("THM | Creating default loot actor");
       
       // Создаем нового актера с изображением предмета если есть
+      const actorType = (this.systemAdapter && typeof this.systemAdapter.getDefaultActorType === 'function') 
+        ? this.systemAdapter.getDefaultActorType() 
+        : "npc";
+
       lootActor = await Actor.create({
         name: "THM Loot Pile",
-        type: "npc",
+        type: actorType,
         img: itemImg || "icons/svg/item-bag.svg",
         flags: {
           "treasure-hoard-manager": {

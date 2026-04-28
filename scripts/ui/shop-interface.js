@@ -107,16 +107,32 @@ export class ShopInterface extends FormApplication {
       .filter(i => adapter.canItemBeInHoard(i))
       .map(i => {
         const o = i.toObject ? i.toObject() : i;
-        const raw = o.system?.rarity?.value || o.system?.rarity || 'common';
+        const raw = (adapter && typeof adapter.getItemRarity === 'function') ? adapter.getItemRarity(o) : (o.system?.rarity?.value || o.system?.rarity || 'common');
         o.rarityClass = String(raw).toLowerCase().replace(/\s+/g, '').replace(/-/g, '');
+        
+        // Нормализация количества
+        o.system = o.system || {};
+        o.system.quantity = (adapter && typeof adapter.getItemQuantity === 'function') 
+          ? adapter.getItemQuantity(o) 
+          : (o.system?.quantity || 1);
+          
         return o;
       });
 
-    let merchantItems = foundry.utils.deepClone(shopData.inventory || []).map(o => {
-      const raw = o.system?.rarity?.value || o.system?.rarity || 'common';
-      o.rarityClass = String(raw).toLowerCase().replace(/\s+/g, '').replace(/-/g, '');
-      return o;
-    });
+    let merchantItems = foundry.utils.deepClone(shopData.inventory || [])
+      .filter(i => adapter.canItemBeInHoard(i))
+      .map(o => {
+        const raw = (adapter && typeof adapter.getItemRarity === 'function') ? adapter.getItemRarity(o) : (o.system?.rarity?.value || o.system?.rarity || 'common');
+        o.rarityClass = String(raw).toLowerCase().replace(/\s+/g, '').replace(/-/g, '');
+        
+        // Нормализация количества
+        o.system = o.system || {};
+        o.system.quantity = (adapter && typeof adapter.getItemQuantity === 'function') 
+          ? adapter.getItemQuantity(o) 
+          : (o.system?.quantity || 1);
+          
+        return o;
+      });
 
     // 2. Логика вычитания для «стола»
     this.playerTradeItems.forEach(tradeItem => {
@@ -1313,27 +1329,35 @@ export class ShopInterface extends FormApplication {
     const adapter = this.shopManager.mainManager.systemAdapter;
     
     // Если есть переопределение цены (ручной ввод на столе)
-    if (priceOverride !== null) {
+    if (priceOverride !== null && priceOverride !== undefined && priceOverride !== '') {
       if (adapter.systemId === 'dnd5e') {
         return Math.floor(Number(priceOverride) * 100);
       }
       return Number(priceOverride);
     }
 
-    const priceData = item?.system?.price;
-    if (!priceData) return 0;
-
+    // Если у адаптера есть getItemPrice, используем его
     let value = 0;
-    let denom = 'gp'; 
-
-    if (typeof priceData === 'number') {
-      value = priceData;
-    } else if (typeof priceData === 'object') {
-      value = Number(priceData.value) || 0;
-      denom = priceData.denomination || (adapter.systemId === 'cyberpunk-red-core' ? 'eb' : 'gp');
+    let denom = 'gp';
+    
+    if (adapter && typeof adapter.getItemPrice === 'function') {
+      value = adapter.getItemPrice(item);
+    } else {
+      const priceData = item?.system?.price;
+      if (!priceData) return 0;
+      if (typeof priceData === 'number') {
+        value = priceData;
+      } else if (typeof priceData === 'object') {
+        value = Number(priceData.value) || 0;
+        denom = priceData.denomination || (adapter.systemId === 'cyberpunk-red-core' ? 'eb' : 'gp');
+      }
     }
 
     if (adapter.systemId === 'dnd5e') {
+      if (adapter && typeof adapter.getItemPrice === 'function') {
+        // getItemPrice для dnd5e возвращает gp
+        return value * 100; 
+      }
       const rates = { pp: 1000, gp: 100, ep: 50, sp: 10, cp: 1 };
       const multiplier = rates[String(denom).toLowerCase()] || 100;
       return value * multiplier;
@@ -1464,7 +1488,7 @@ export class ShopInterface extends FormApplication {
 
     // 1. ПРОВЕРКА КОШЕЛЬКА ТОРГОВЦА ПЕРЕД СДЕЛКОЙ
     if (useNpcCurrency && differenceAtoms > 0) {
-      const merchantWalletAtoms = adapter.convertCurrencyToAtoms(merchant.system?.currency);
+      const merchantWalletAtoms = adapter.convertCurrencyToAtoms(adapter.getActorCurrency(merchant));
       if (merchantWalletAtoms < differenceAtoms) {
         ui.notifications.error(`У торговца недостаточно средств! Не хватает: ${adapter.formatCurrencyHtml(differenceAtoms - merchantWalletAtoms)}`);
         return false;

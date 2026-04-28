@@ -1,4 +1,4 @@
-/**
+ /**
  * Treasure Hoard Manager - Shop Manager
  * Управление магазинами с поддержкой категорий и адаптивности
  */
@@ -22,7 +22,7 @@ export class ShopManager {
 
     const settings = actor.getFlag(CONSTANTS.MODULE_NAME, 'settings');
     const shopType = this.detectShopType(settings?.specific);
-    const category = this.shopCategories[shopType] || this.shopCategories.general;
+    const category = this.shopCategories[shopType] || this.shopCategories.general || Object.values(this.shopCategories)[0] || { defaultRarity: { common: 50, uncommon: 30, rare: 15, veryrare: 5, legendary: 0 } };
 
     // ОПРЕДЕЛЯЕМ ИМЯ (Оставляем текущее ИЛИ генерируем новое, если стоит галочка)
     let finalShopName = actor.name;
@@ -244,11 +244,8 @@ export class ShopManager {
     if (!settings?.specific?.inventorySources || settings?.specific?.inventorySources.trim() === '') {
       console.log(`THM Shop Manager | No compendium sources specified, using existing inventory for ${actor.name}`);
 
-      // Просто отмечаем, что это магазин и генерируем деньги если нужно
+      // Просто отмечаем, что это магазин
       await actor.setFlag(CONSTANTS.MODULE_NAME, `${CONSTANTS.FLAGS.DATA}.inventoryGenerated`, true);
-
-      // НОВОЕ: Генерируем деньги торговцу через адаптер
-      await this.mainManager.systemAdapter.generateMerchantWealth(actor);
 
       // Генерируем цены для уже существующих предметов, если они равны 0
       const priceMethod = settings?.specific?.priceMethod || 'dmg';
@@ -276,7 +273,7 @@ export class ShopManager {
     }
 
     // Оригинальная логика для компендиумов
-    const category = this.shopCategories[settings?.specific?.shopType] || this.shopCategories.general;
+    const category = this.shopCategories[settings?.specific?.shopType] || this.shopCategories.general || Object.values(this.shopCategories)[0] || { defaultRarity: { common: 50, uncommon: 30, rare: 15, veryrare: 5, legendary: 0 } };
     const raritySettings = settings?.raritySettings || this.calculateRaritySettings(settings?.specific, category.defaultRarity);
 
     const inventory = await this.loadItemsFromCompendiums(settings?.specific?.inventorySources);
@@ -297,10 +294,16 @@ export class ShopManager {
     const balancedInventory = this.balanceItemsByRarity(filteredInventory, raritySettings);
     let limitedInventory = this.applyInventoryLimits(balancedInventory, settings.specific);
 
-    // Очищаем существующий инвентарь магазина
-    const existingItems = actor.items.map(i => i.id);
-    if (existingItems.length > 0) {
-      await actor.deleteEmbeddedDocuments("Item", existingItems);
+    // Очищаем существующий инвентарь магазина (только те предметы, которые могут быть лутом)
+    const adapter = this.mainManager.systemAdapter;
+    const itemsToRemove = actor.items.filter(i => adapter.canItemBeInHoard(i)).map(i => i.id);
+    if (itemsToRemove.length > 0) {
+      await actor.deleteEmbeddedDocuments("Item", itemsToRemove);
+    }
+    
+    // Генерируем деньги торговцу через адаптер (для всех магазинов)
+    if (typeof adapter.generateMerchantWealth === 'function') {
+      await adapter.generateMerchantWealth(actor);
     }
 
     // Подготавливаем предметы для Foundry (удаляем системные поля и устанавливаем цены)
@@ -328,11 +331,21 @@ export class ShopManager {
       const priceMethod = settings?.specific?.priceMethod || 'dmg'; // DMG по умолчанию
       const finalPrice = await this.mainManager.systemAdapter.generateItemPrice(newItem, priceMethod);
 
-      // Записываем цену в карточку предмета
-      newItem.system.price.value = finalPrice;
+      // Записываем цену в карточку предмета (используя путь из адаптера)
+      const pricePath = (typeof adapter.getPricePath === 'function') ? adapter.getPricePath() : "system.price.value";
+      foundry.utils.setProperty(newItem, pricePath, finalPrice);
 
       return newItem;
     }));
+
+    // Временно закрываем окна персонажа, чтобы обойти баг системы CPR v13 (handleMookDraggedItem / recursiveGetAllInstalledItems)
+    const appsToClose = Object.values(actor.apps || {}).filter(app => app.constructor.name.includes('ActorSheet'));
+    if (appsToClose.length > 0) {
+      console.log(`THM Shop Manager | Closing actor sheets to prevent system hook crash`);
+      for (const app of appsToClose) {
+        await app.close();
+      }
+    }
 
     // Создаем реальные предметы в инвентаре НПС
     await actor.createEmbeddedDocuments("Item", limitedInventory);
@@ -377,8 +390,9 @@ export class ShopManager {
         if (isFolder && folderId) {
           // Загружаем предметы из конкретной папки
           try {
+            const adapter = this.mainManager.systemAdapter;
             const items = await pack.getDocuments();
-            const folderItems = items.filter(item => item.folder?.id === folderId);
+            const folderItems = items.filter(item => item.folder?.id === folderId && adapter.canItemBeInHoard(item));
             console.log(`THM Shop Manager | Found ${folderItems.length} items in folder ${folderId} of ${packId}`);
             allItems = [...allItems, ...folderItems.map(item => item.toObject())];
           } catch (error) {
@@ -386,9 +400,11 @@ export class ShopManager {
           }
         } else {
           // Загружаем весь компендиум
+          const adapter = this.mainManager.systemAdapter;
           const items = await pack.getDocuments();
-          console.log(`THM Shop Manager | Found ${items.length} items in ${packId}`);
-          allItems = [...allItems, ...items.map(item => item.toObject())];
+          const validItems = items.filter(item => adapter.canItemBeInHoard(item));
+          console.log(`THM Shop Manager | Found ${validItems.length} valid items in ${packId}`);
+          allItems = [...allItems, ...validItems.map(item => item.toObject())];
         }
       } else {
         console.warn(`THM Shop Manager | Не удалось загрузить компендиум с ID: ${packId}`);
@@ -468,17 +484,21 @@ export class ShopManager {
     return limitedTypes.map(item => {
       // ОПРЕДЕЛЯЕМ: Можно ли стакать этот тип?
       const isStackable = this.mainManager.systemAdapter.isStackable(item);
+      const adapter = this.mainManager.systemAdapter;
+      
+      const qtyPath = (adapter && typeof adapter.getQuantityPath === 'function') 
+        ? adapter.getQuantityPath() 
+        : "system.quantity";
 
-      return {
-        ...item,
-        system: {
-          ...item.system,
-          // Если это оружие или броня - всегда 1 шт, иначе - рандом из настроек
-          quantity: isStackable
-            ? (Math.floor(Math.random() * (maxQuantity - minQuantity + 1)) + minQuantity)
-            : 1
-        }
-      };
+      // Создаем копию предмета и устанавливаем количество по правильному пути
+      const newItem = foundry.utils.deepClone(item);
+      const quantity = isStackable
+        ? (Math.floor(Math.random() * (maxQuantity - minQuantity + 1)) + minQuantity)
+        : 1;
+
+      foundry.utils.setProperty(newItem, qtyPath, quantity);
+
+      return newItem;
     });
   }
 
@@ -575,10 +595,11 @@ export class ShopManager {
     const balancedInventory = this.balanceItemsByRarity(filteredInventory, currentRaritySettings);
     let limitedInventory = this.applyInventoryLimits(balancedInventory, settings.specific);
 
-    // Очищаем старый инвентарь
-    const existingItems = actor.items.map(i => i.id);
-    if (existingItems.length > 0) {
-      await actor.deleteEmbeddedDocuments("Item", existingItems);
+    // Очищаем старый инвентарь (только те предметы, которые могут быть лутом)
+    const adapter = this.mainManager.systemAdapter;
+    const itemsToRemove = actor.items.filter(i => adapter.canItemBeInHoard(i)).map(i => i.id);
+    if (itemsToRemove.length > 0) {
+      await actor.deleteEmbeddedDocuments("Item", itemsToRemove);
     }
 
     // Подготавливаем и создаем новые предметы с улучшенной системой цен
@@ -606,11 +627,21 @@ export class ShopManager {
       const priceMethod = settings?.specific?.priceMethod || 'dmg'; // DMG по умолчанию
       const finalPrice = await this.mainManager.systemAdapter.generateItemPrice(newItem, priceMethod);
 
-      // Записываем цену в карточку предмета
-      newItem.system.price.value = finalPrice;
+      // Записываем цену в карточку предмета (используя путь из адаптера)
+      const pricePath = (typeof adapter.getPricePath === 'function') ? adapter.getPricePath() : "system.price.value";
+      foundry.utils.setProperty(newItem, pricePath, finalPrice);
 
       return newItem;
     }));
+
+    // Временно закрываем окна персонажа, чтобы обойти баг системы CPR v13 (handleMookDraggedItem / recursiveGetAllInstalledItems)
+    const appsToClose = Object.values(actor.apps || {}).filter(app => app.constructor.name.includes('ActorSheet'));
+    if (appsToClose.length > 0) {
+      console.log(`THM Shop Manager | Closing actor sheets to prevent system hook crash`);
+      for (const app of appsToClose) {
+        await app.close();
+      }
+    }
 
     await actor.createEmbeddedDocuments("Item", limitedInventory);
 
@@ -657,7 +688,7 @@ export class ShopManager {
       transactionHistory: data.transactionHistory || [],
       raritySettings: data.raritySettings || {},
       settings: settings,
-      currency: actor.system?.currency || { cp: 0, sp: 0, ep: 0, gp: 1000, pp: 0 }
+      currency: this.mainManager.systemAdapter.getActorCurrency(actor)
     };
   }
 

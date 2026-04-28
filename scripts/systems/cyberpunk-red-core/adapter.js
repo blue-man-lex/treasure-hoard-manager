@@ -58,8 +58,10 @@ export class CyberpunkRedAdapter extends SystemAdapter {
    * Обновление валюты актера
    */
   async updateActorCurrency(actor, currencyData) {
-    const amount = currencyData.eb ?? 0;
-    return actor.update({ "system.wealth.value": amount });
+    // В CPR валюта - это просто число (eb), а не объект
+    const wealth = currencyData?.eb ?? 0;
+    console.log(`THM | CPR Adapter | Updating wealth for ${actor.name} to ${wealth}`);
+    return await actor.update({ "system.wealth.value": wealth });
   }
 
   /**
@@ -136,6 +138,20 @@ export class CyberpunkRedAdapter extends SystemAdapter {
   }
 
   /**
+   * Получение ключа основной валюты системы
+   */
+  getPrimaryCurrencyKey() {
+    return "eb";
+  }
+
+  /**
+   * Получение названия валюты для отображения
+   */
+  getCurrencyLabel() {
+    return "eb";
+  }
+
+  /**
    * Конвертация в атомы (для внутренних расчетов)
    */
   convertCurrencyToAtoms(currencyData) {
@@ -150,10 +166,36 @@ export class CyberpunkRedAdapter extends SystemAdapter {
   }
 
   /**
+   * Путь для сохранения цены в предмете
+   */
+  getPricePath() {
+    return "system.price.market";
+  }
+
+  /**
+   * Генерация цены для предмета
+   */
+  async generateItemPrice(itemData, method = 'dmg') {
+    // В Cyberpunk Red цены фиксированные (зависят от категории стоимости), поэтому просто возвращаем оригинальную цену
+    if (itemData.system?.price?.market !== undefined) {
+      return itemData.system.price.market;
+    }
+    if (itemData.system?.price?.value !== undefined) {
+      return itemData.system.price.value;
+    }
+    return 0;
+  }
+
+  /**
    * HTML отображение валюты
    */
   formatCurrencyHtml(currencyData) {
-    const amount = currencyData?.eb || 0;
+    let data = currencyData;
+    // Если передали число (атомы), конвертируем
+    if (typeof currencyData === 'number') {
+      data = this.convertAtomsToCurrency(currencyData);
+    }
+    const amount = data?.eb || 0;
     return `<span class="currency eb" title="Eurobucks"><span class="amount">${amount}</span> <span class="unit">eb</span></span>`;
   }
 
@@ -162,7 +204,7 @@ export class CyberpunkRedAdapter extends SystemAdapter {
    */
   isStackable(item) {
     // В CPR стакаются расходники, патроны и обычное снаряжение
-    const nonStackable = ["weapon", "armor", "cyberware", "cyberdeck", "vehicle"];
+    const nonStackable = ["weapon", "armor", "cyberware", "cyberdeck", "vehicle", "clothing"];
     return !nonStackable.includes(item.type);
   }
 
@@ -173,14 +215,51 @@ export class CyberpunkRedAdapter extends SystemAdapter {
     return actor.system?.reputation?.value || 1;
   }
 
+  /**
+   * Получение типа актера по умолчанию для CPR
+   */
+  getDefaultActorType() {
+    return "container";
+  }
+
+  /**
+   * Получение типа предмета по умолчанию для CPR
+   */
+  getDefaultItemType() {
+    return "item";
+  }
+
+  /**
+   * Путь к количеству предмета
+   */
+  getQuantityPath() {
+    return "system.amount";
+  }
+
+  /**
+   * Путь к валюте актера
+   */
+  getCurrencyPath() {
+    return "system.wealth.value";
+  }
+
   // === КЛАССИФИКАЦИЯ ПРЕДМЕТОВ CPR ===
 
-  isWeapon(item) { return item.type === 'weapon'; }
+  isWeapon(item) { return ['weapon', 'ammo'].includes(item.type); }
   isArmor(item) { return item.type === 'armor' || item.type === 'clothing'; }
   isConsumable(item) { return ["drug", "ammo"].includes(item.type); }
   isPotion(item) { return item.type === "drug"; }
   isScroll(item) { return item.type === "program"; } // Программы как аналог свитков
   isMaterial(item) { return item.type === "itemUpgrade" || item.type === "gear"; }
+  isGem(item) { return item.type === "item" && (item.name.toLowerCase().includes("чип") || item.name.toLowerCase().includes("карта")); }
+
+  /**
+   * Генерация стартового капитала для торговца (в эдди)
+   */
+  async generateMerchantWealth(actor) {
+    const wealth = Math.floor(Math.random() * 5000) + 1000; // 1000-6000 eb
+    await this.updateActorCurrency(actor, { eb: wealth });
+  }
 
   /**
    * Конфигурация магазинов Найт-Сити
