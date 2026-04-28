@@ -2,7 +2,7 @@
   "id": "treasure-hoard-manager",
   "title": "Treasure Hoard Manager",
   "description": "<p>Advanced loot, trade and black market system with reputation-based pricing and dynamic merchant management.</p>",
-  "version": "1.13.3",
+  "version": "1.13.4",
   "compatibility": {
     "minimum": "12",
     "verified": "13",
@@ -72,7 +72,7 @@
   "socket": true,
   "url": "https://github.com/blue-man-lex/treasure-hoard-manager",
   "manifest": "https://raw.githubusercontent.com/blue-man-lex/treasure-hoard-manager/main/module.json",
-  "download": "https://github.com/blue-man-lex/treasure-hoard-manager/releases/download/1.13.3/treasure-hoard-manager.zip",
+  "download": "https://github.com/blue-man-lex/treasure-hoard-manager/releases/download/1.13.4/treasure-hoard-manager.zip",
   "readme": "https://github.com/blue-man-lex/treasure-hoard-manager/blob/main/README.md",
   "bugs": "https://github.com/blue-man-lex/treasure-hoard-manager/issues",
   "flags": {}

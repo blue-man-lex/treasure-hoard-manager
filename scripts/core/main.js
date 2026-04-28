@@ -251,7 +251,7 @@ export class TreasureHoardManager {
       let clicked = false;
       window.addEventListener("mousedown", (event) => {
         if (!canvas.ready) return;
-        if (!(canvas.activeLayer instanceof foundry.canvas.layers.TokenLayer)) return;
+        if (!(canvas.activeLayer instanceof (typeof TokenLayer !== 'undefined' ? TokenLayer : Object))) return;
         if (game.activeTool !== "select") return;
         
         const hover = document.elementFromPoint(event.clientX, event.clientY);
@@ -372,7 +372,7 @@ export class TreasureHoardManager {
       // Если это токен, проверяем права токена через testUserPermission
       if (target instanceof TokenDocument) {
         hasPermission = hasPermission || target.testUserPermission(game.user, CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER);
-      } else if (target instanceof foundry.canvas.placeables.Token) {
+      } else if (typeof Token !== 'undefined' && target instanceof Token) {
         hasPermission = hasPermission || target.document.testUserPermission(game.user, CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER);
       } else {
         hasPermission = hasPermission || target.testUserPermission(game.user, CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER);
@@ -749,7 +749,7 @@ export class TreasureHoardManager {
    * Универсальная вставка кнопок
    */
   _insertTHMHeaderButtons(app, buttons) {
-    if (app.document instanceof foundry.documents.BaseActor) {
+    if (app.document instanceof Actor) {
       return this._appendTHMHeaderControls(app, buttons);
     }
   }

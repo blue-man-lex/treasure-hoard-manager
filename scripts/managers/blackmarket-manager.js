@@ -308,8 +308,13 @@ export class BlackMarketManager {
     }
 
     // Переводим цену из основной валюты системы (gp для 5е, eb для CPR) в атомы
-    const primaryCurrencyKey = adapter.getPrimaryCurrencyKey();
-    const conversion = adapter.getCurrencyConversion(primaryCurrencyKey);
+    let conversion = adapter.getCurrencyConversion(adapter.getPrimaryCurrencyKey());
+    
+    // ПРИНУДИТЕЛЬНАЯ СТРАХОВКА ДЛЯ DnD 5e (1 gp = 100 cp)
+    if (game.system.id === 'dnd5e') {
+      conversion = 100;
+    }
+    
     const priceInAtoms = price * conversion;
 
     const success = await adapter.spendWealth(playerActor, priceInAtoms);
@@ -390,8 +395,13 @@ export class BlackMarketManager {
 
     const adapter = this.mainManager.systemAdapter;
 
-    const primaryCurrencyKey = adapter.getPrimaryCurrencyKey();
-    const conversion = adapter.getCurrencyConversion(primaryCurrencyKey);
+    let conversion = adapter.getCurrencyConversion(adapter.getPrimaryCurrencyKey());
+    
+    // ПРИНУДИТЕЛЬНАЯ СТРАХОВКА ДЛЯ DnD 5e (1 gp = 100 cp)
+    if (game.system.id === 'dnd5e') {
+      conversion = 100;
+    }
+    
     const priceInAtoms = price * conversion;
 
     // Снимаем деньги
