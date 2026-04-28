@@ -167,13 +167,7 @@ export class Dnd5eAdapter extends SystemAdapter {
     };
   }
 
-  /**
-   * Получение коэффициента конвертации для указанной валюты
-   */
-  getCurrencyConversion(key) {
-    const config = this.getCurrencyConfig();
-    return config[key]?.weight || 1;
-  }
+
 
   /**
    * Получение ключа основной валюты системы

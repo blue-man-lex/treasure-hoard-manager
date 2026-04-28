@@ -268,7 +268,7 @@ export class ShopManager {
 
       const currentItemCount = actor.items.size;
       console.log(`THM Shop Manager | Shop created with ${currentItemCount} existing items for ${actor.name}`);
-      ui.notifications.success(`Магазин "${actor.name}" создан с ${currentItemCount} предметами из инвентаря!`);
+      ui.notifications.info(`Магазин "${actor.name}" создан с ${currentItemCount} предметами из инвентаря!`);
       return;
     }
 
@@ -338,12 +338,16 @@ export class ShopManager {
       return newItem;
     }));
 
-    // Временно закрываем окна персонажа, чтобы обойти баг системы CPR v13 (handleMookDraggedItem / recursiveGetAllInstalledItems)
+    // Временно закрываем окна персонажа, чтобы обойти баг систем (handleMookDraggedItem / recursiveGetAllInstalledItems)
     const appsToClose = Object.values(actor.apps || {}).filter(app => app.constructor.name.includes('ActorSheet'));
     if (appsToClose.length > 0) {
       console.log(`THM Shop Manager | Closing actor sheets to prevent system hook crash`);
       for (const app of appsToClose) {
-        await app.close();
+        try {
+          if (app.rendered) await app.close();
+        } catch (err) {
+          console.warn("THM | Failed to close app safely:", err);
+        }
       }
     }
 
@@ -357,7 +361,7 @@ export class ShopManager {
     await this.mainManager.systemAdapter.generateMerchantWealth(actor);
 
     console.log(`THM Shop Manager | Successfully created ${limitedInventory.length} real items for ${actor.name}`);
-    ui.notifications.success(`Создано ${limitedInventory.length} товаров для "${actor.name}"!`);
+    ui.notifications.info(`Создано ${limitedInventory.length} товаров для "${actor.name}"!`);
   }
 
   /**

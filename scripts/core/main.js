@@ -385,8 +385,12 @@ export class TreasureHoardManager {
     }
     
     // Закрываем стандартный лист если открыт
-    if (actor.sheet) {
-      actor.sheet.close({ force: true });
+    if (actor.sheet && actor.sheet.rendered) {
+      try {
+        actor.sheet.close();
+      } catch (err) {
+        console.warn("THM | Failed to close standard actor sheet safely:", err);
+      }
     }
 
     // МУЛЬТИПЛЕЕРНАЯ ПОДДЕРЖКА

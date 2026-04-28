@@ -1461,7 +1461,7 @@ export class ShopInterface extends FormApplication {
       const success = await this.executeTrade(playerTotalAtoms, merchantTotalAtoms, this.isBalancedMode);
 
       if (success) {
-        ui.notifications.success('Сделка успешно совершена!');
+        ui.notifications.info('Сделка успешно совершена!');
       } else {
         // Если сделка отменена (нет денег и т.д.), возвращаем кнопку
         tradeBtn.prop('disabled', false).html(originalHtml);

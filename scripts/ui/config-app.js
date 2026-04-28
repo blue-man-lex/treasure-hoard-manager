@@ -565,7 +565,7 @@ export class TreasureHoardConfig extends FormApplication {
         try {
           // ПЕРЕДАЕМ targetDoc ТОКЕН
           await bmManager.createExclusiveOffer(targetDoc, firstCompendium, durationHours);
-          ui.notifications.success("Эксклюзивный товар успешно сгенерирован!");
+          ui.notifications.info("Эксклюзивный товар успешно сгенерирован!");
         } catch (err) {
           console.error("THM Config | Ошибка генерации эксклюзива:", err);
           ui.notifications.error(err.message || "Не удалось сгенерировать эксклюзив.");

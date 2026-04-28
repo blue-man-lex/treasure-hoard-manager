@@ -196,6 +196,18 @@ export class SystemAdapter {
    * Получение коэффициента конвертации для указанной валюты
    */
   getCurrencyConversion(key) {
+    const config = this.getCurrencyConfig();
+    if (config && config[key] && typeof config[key].weight === 'number') {
+      return config[key].weight;
+    }
+    
+    // Жёсткая страховка для DnD 5e
+    if (game.system.id === 'dnd5e') {
+      if (key === 'gp') return 100;
+      if (key === 'pp') return 1000;
+      if (key === 'sp') return 10;
+    }
+
     // В агностик-режиме считаем всё 1 к 1, если не переопределено
     return 1;
   }
