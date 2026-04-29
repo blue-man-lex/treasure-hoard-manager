@@ -147,6 +147,66 @@
   border: 1px solid var(--thm-border-gold-low);
 }
 
+/* Зона валюты в трейде */
+.trade-currency-zone {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.currency-offered {
+  font-size: 13px;
+  color: var(--thm-accent-gold);
+  padding: 6px 10px;
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid var(--thm-border-gold-low);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.currency-input-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.currency-amount-input {
+  flex: 1;
+  height: 30px;
+  padding: 0 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--thm-border-gold-low);
+  border-radius: 4px;
+  color: var(--thm-text-bright);
+  font-size: 13px;
+}
+
+.currency-amount-input:focus {
+  border-color: var(--thm-accent-gold);
+  outline: none;
+}
+
+.send-currency-btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.05));
+  border: 1px solid var(--thm-border-gold-low);
+  border-radius: 4px;
+  color: var(--thm-accent-gold);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.send-currency-btn:hover {
+  border-color: var(--thm-accent-gold);
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.4), rgba(255, 215, 0, 0.1));
+}
+
 /* Зона управления */
 .trade-controls-section {
   padding: 15px 25px;

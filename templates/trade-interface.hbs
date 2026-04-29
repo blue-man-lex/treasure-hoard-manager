@@ -42,6 +42,24 @@
         </div>
         {{/each}}
       </div>
+
+      <!-- Валюта Игрока 1 -->
+      <div class="trade-currency-zone">
+        {{#if fromCurrencyDisplay}}
+        <div class="currency-offered">
+          <i class="fas fa-coins"></i> На столе: <strong>{{fromCurrencyDisplay}}</strong>
+        </div>
+        {{/if}}
+        {{#if (eq userSide "from")}}
+        <div class="currency-input-row">
+          <input type="number" class="currency-amount-input" min="1" step="1"
+            placeholder="{{#if isCPR}}Сумма (eb){{else}}Золото (зм){{/if}}">
+          <button type="button" class="thm-btn send-currency-btn" title="Выложить валюту на стол">
+            <i class="fas fa-coins"></i>
+          </button>
+        </div>
+        {{/if}}
+      </div>
     </div>
 
     <!-- ЦЕНТРАЛЬНЫЙ РАЗДЕЛИТЕЛЬ -->
@@ -91,6 +109,24 @@
           {{/if}}
         </div>
         {{/each}}
+      </div>
+
+      <!-- Валюта Игрока 2 -->
+      <div class="trade-currency-zone">
+        {{#if toCurrencyDisplay}}
+        <div class="currency-offered">
+          <i class="fas fa-coins"></i> На столе: <strong>{{toCurrencyDisplay}}</strong>
+        </div>
+        {{/if}}
+        {{#if (eq userSide "to")}}
+        <div class="currency-input-row">
+          <input type="number" class="currency-amount-input" min="1" step="1"
+            placeholder="{{#if isCPR}}Сумма (eb){{else}}Золото (зм){{/if}}">
+          <button type="button" class="thm-btn send-currency-btn" title="Выложить валюту на стол">
+            <i class="fas fa-coins"></i>
+          </button>
+        </div>
+        {{/if}}
       </div>
     </div>
 

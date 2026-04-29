@@ -1,0 +1,347 @@
+/**
+ * Treasure Hoard Manager - Container Tooltips (Cyberpunk Red Edition)
+ * Полностью переработанные подсказки для кибер-интерфейса
+ */
+
+/* ==========================================
+   НОВЫЕ ПОДСКАЗКИ ДЛЯ КОНТЕЙНЕРА (CYBERPUNK)
+   ========================================= */
+
+/* Базовый контейнер подсказки - стилизация под окно терминала */
+body.thm-loot-window-active .thm-container-tooltip {
+  position: absolute;
+  z-index: 10000;
+  max-width: 400px;
+  min-width: 200px;
+
+  /* Темный фон с сеткой */
+  background-color: #050505;
+  background-image:
+    linear-gradient(rgba(255, 0, 60, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 60, 0.05) 1px, transparent 1px);
+  background-size: 10px 10px;
+
+  /* Жесткая рамка без скруглений */
+  border: 1px solid #5a0015;
+  border-radius: 0;
+
+  /* Неоновое свечение */
+  box-shadow: 0 4px 15px rgba(255, 0, 60, 0.15), inset 0 0 10px rgba(255, 0, 60, 0.05);
+
+  /* Компактные отступы */
+  padding: 12px;
+  margin: 8px;
+
+  /* Типографика - Киберпанк */
+  font-family: "Rajdhani", "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.3;
+  color: #ffffff;
+  text-transform: uppercase;
+
+  /* Динамическая высота до 85% экрана */
+  max-height: 85vh;
+  overflow-y: auto;
+
+  /* Плавное появление (имитация включения экрана) */
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+}
+
+/* Декоративный уголок подсказки */
+body.thm-loot-window-active .thm-container-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px;
+  width: 8px; height: 8px;
+  border-top: 2px solid #ff003c;
+  border-left: 2px solid #ff003c;
+}
+
+/* Заголовок подсказки */
+.thm-container-tooltip .tooltip-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #5a0015;
+}
+
+/* Изображение предмета */
+.thm-container-tooltip .tooltip-image {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border: 1px solid #ff003c;
+  border-radius: 0; /* Строгий квадрат */
+  flex-shrink: 0;
+  background: #000;
+  filter: contrast(1.2) grayscale(0.2); /* Приглушаем цвета для суровости */
+}
+
+/* Информация о предмете */
+.thm-container-tooltip .tooltip-info {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Название предмета */
+.thm-container-tooltip .item-name {
+  font-weight: bold;
+  font-size: 14px;
+  color: #ff003c;
+  margin: 0 0 2px 0;
+  line-height: 1.2;
+  word-wrap: break-word;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(255, 0, 60, 0.5);
+}
+
+/* Тип и редкость */
+.thm-container-tooltip .item-type {
+  font-size: 11px;
+  color: #ff809b;
+  margin: 0 0 4px 0;
+  letter-spacing: 1px;
+}
+
+/* Описание предмета */
+.thm-container-tooltip .item-description {
+  color: #cccccc;
+  font-size: 11px;
+  line-height: 1.4;
+  margin-bottom: 6px;
+  padding-right: 4px;
+  text-transform: none; /* Оставляем описание читаемым в нормальном регистре */
+}
+
+/* Активное состояние подсказки */
+body.thm-loot-window-active .thm-container-tooltip.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Детали предмета */
+.thm-container-tooltip .item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  margin-top: 5px;
+  border-top: 1px dashed rgba(255, 0, 60, 0.2);
+  padding-top: 5px;
+}
+
+/* Цена */
+.thm-container-tooltip .item-price {
+  color: #00ff41; /* Цифровой зеленый для денег */
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.4);
+}
+
+/* Вес */
+.thm-container-tooltip .item-weight {
+  color: #888888;
+  font-size: 11px;
+  font-family: monospace;
+}
+
+/* ==========================================
+   ЦВЕТА РЕДКОСТИ (CYBERPUNK NEON)
+   ========================================= */
+
+/* Common (Хлам - Серый) */
+.thm-container-tooltip.rarity-common,
+.thm-container-tooltip.common {
+  border-color: #666666 !important;
+  box-shadow: inset 0 0 15px rgba(102, 102, 102, 0.1), 0 0 10px rgba(102, 102, 102, 0.2) !important;
+}
+.thm-container-tooltip[class*="common"] .item-name { color: #cccccc; text-shadow: none; }
+
+/* Uncommon (Стандартный Тех - Зеленый) */
+.thm-container-tooltip.rarity-uncommon,
+.thm-container-tooltip.uncommon {
+  border-color: #00ff41 !important;
+  box-shadow: inset 0 0 15px rgba(0, 255, 65, 0.1), 0 0 10px rgba(0, 255, 65, 0.2) !important;
+}
+.thm-container-tooltip[class*="uncommon"] .item-name { color: #00ff41; text-shadow: 0 0 5px rgba(0, 255, 65, 0.5); }
+
+/* Rare (Продвинутый Тех - Неоновый Голубой) */
+.thm-container-tooltip.rarity-rare,
+.thm-container-tooltip.rare {
+  border-color: #00e5ff !important;
+  box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.1), 0 0 10px rgba(0, 229, 255, 0.3) !important;
+}
+.thm-container-tooltip[class*="rare"] .item-name { color: #00e5ff; text-shadow: 0 0 5px rgba(0, 229, 255, 0.5); }
+
+/* Very Rare (Черный Рынок - Неоновый Пурпурный) */
+.thm-container-tooltip.rarity-very-rare,
+.thm-container-tooltip.rarity-veryrare,
+.thm-container-tooltip.rarity-veryRare,
+.thm-container-tooltip.very-rare,
+.thm-container-tooltip.veryrare {
+  border-color: #b026ff !important;
+  box-shadow: inset 0 0 15px rgba(176, 38, 255, 0.1), 0 0 12px rgba(176, 38, 255, 0.3) !important;
+}
+.thm-container-tooltip[class*="very"] .item-name { color: #b026ff; text-shadow: 0 0 5px rgba(176, 38, 255, 0.5); }
+
+/* Legendary (Корпо-Тех - Кибер-Желтый) */
+.thm-container-tooltip.rarity-legendary,
+.thm-container-tooltip.legendary {
+  border-color: #fce205 !important;
+  box-shadow: inset 0 0 15px rgba(252, 226, 5, 0.1), 0 0 15px rgba(252, 226, 5, 0.3) !important;
+}
+.thm-container-tooltip[class*="legendary"] .item-name { color: #fce205; text-shadow: 0 0 5px rgba(252, 226, 5, 0.5); }
+
+/* Artifact (Реликвия - Кроваво-Красный) */
+.thm-container-tooltip.rarity-artifact,
+.thm-container-tooltip.artifact {
+  border-color: #ff003c !important;
+  box-shadow: inset 0 0 15px rgba(255, 0, 60, 0.15), 0 0 20px rgba(255, 0, 60, 0.4) !important;
+}
+.thm-container-tooltip[class*="artifact"] .item-name { color: #ff003c; text-shadow: 0 0 8px rgba(255, 0, 60, 0.8); }
+
+/* Раскрашиваем линию под шапкой в цвет редкости */
+.thm-container-tooltip[class*="common"] .tooltip-header { border-bottom-color: rgba(102, 102, 102, 0.5) !important; }
+.thm-container-tooltip[class*="uncommon"] .tooltip-header { border-bottom-color: rgba(0, 255, 65, 0.5) !important; }
+.thm-container-tooltip[class*="rare"] .tooltip-header { border-bottom-color: rgba(0, 229, 255, 0.5) !important; }
+.thm-container-tooltip[class*="very"] .tooltip-header { border-bottom-color: rgba(176, 38, 255, 0.5) !important; }
+.thm-container-tooltip[class*="legendary"] .tooltip-header { border-bottom-color: rgba(252, 226, 5, 0.5) !important; }
+.thm-container-tooltip[class*="artifact"] .tooltip-header { border-bottom-color: rgba(255, 0, 60, 0.5) !important; }
+
+/* ==========================================
+   ЦИФРОВАЯ ВАЛЮТА (ЗАМЕНА ФЭНТЕЗИЙНЫХ МОНЕТ)
+   ========================================= */
+.thm-container-tooltip .currency-cp,
+.thm-container-tooltip .currency-sp,
+.thm-container-tooltip .currency-ep,
+.thm-container-tooltip .currency-gp,
+.thm-container-tooltip .currency-pp {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 0; /* Острые углы */
+  font-size: 11px;
+  font-family: monospace;
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+/* Убираем фэнтезийные картинки монет, используем текстовые дата-теги */
+.thm-container-tooltip .currency-cp::before,
+.thm-container-tooltip .currency-sp::before,
+.thm-container-tooltip .currency-ep::before,
+.thm-container-tooltip .currency-gp::before,
+.thm-container-tooltip .currency-pp::before {
+  background-image: none !important;
+  display: inline-block;
+  font-weight: bold;
+}
+
+/* CP (Медь -> Низкоуровневые кредиты) */
+.thm-container-tooltip .currency-cp { background: rgba(255, 80, 80, 0.15); border: 1px solid #ff5050; color: #ff5050; }
+.thm-container-tooltip .currency-cp::before { content: '[C]'; }
+
+/* SP (Серебро -> Стандартные кредиты) */
+.thm-container-tooltip .currency-sp { background: rgba(200, 200, 200, 0.15); border: 1px solid #cccccc; color: #cccccc; }
+.thm-container-tooltip .currency-sp::before { content: '[S]'; }
+
+/* EP (Электрум -> Корпоративные токены) */
+.thm-container-tooltip .currency-ep { background: rgba(0, 229, 255, 0.15); border: 1px solid #00e5ff; color: #00e5ff; }
+.thm-container-tooltip .currency-ep::before { content: '[E]'; }
+
+/* GP (Золото -> Евробаксы) */
+.thm-container-tooltip .currency-gp { background: rgba(252, 226, 5, 0.15); border: 1px solid #fce205; color: #fce205; }
+.thm-container-tooltip .currency-gp::before { content: '[EB]'; }
+
+/* PP (Платина -> Зашифрованные данные) */
+.thm-container-tooltip .currency-pp { background: rgba(176, 38, 255, 0.15); border: 1px solid #b026ff; color: #b026ff; }
+.thm-container-tooltip .currency-pp::before { content: '[P]'; }
+
+/* ==========================================
+   СКРОЛЛБАР - CYBERPUNK СТИЛЬ
+   ========================================= */
+.thm-container-tooltip::-webkit-scrollbar {
+  width: 4px;
+}
+.thm-container-tooltip::-webkit-scrollbar-track {
+  background: #050505;
+  border-left: 1px solid #5a0015;
+}
+.thm-container-tooltip::-webkit-scrollbar-thumb {
+  background: #5a0015;
+  border-radius: 0;
+}
+.thm-container-tooltip::-webkit-scrollbar-thumb:hover {
+  background: #ff003c;
+}
+
+/* ==========================================
+   СПЕЦИАЛЬНЫЕ ЭФФЕКТЫ
+   ========================================= */
+
+/* Эффект сканирования при наведении на изображение */
+.thm-container-tooltip .tooltip-image:hover {
+  transform: scale(1.05);
+  border-color: #00ff41;
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+  transition: all 0.2s ease;
+}
+
+/* ==========================================
+   СТИЛИ ДЛЯ ОБОГАЩЕННОГО HTML (LINKS / ROLLS)
+   ========================================= */
+.thm-container-tooltip .foundry-enriched p {
+  margin: 0 0 6px 0;
+  color: #dddddd;
+}
+
+.thm-container-tooltip .foundry-enriched a.content-link,
+.thm-container-tooltip .foundry-enriched a.inline-roll {
+  background: rgba(255, 0, 60, 0.1);
+  border: 1px solid #5a0015;
+  border-radius: 0; /* Строгие кнопки */
+  padding: 1px 6px;
+  color: #00e5ff; /* Неоновый голубой для линков */
+  text-decoration: none;
+  white-space: nowrap;
+  word-break: break-all;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: monospace;
+}
+
+.thm-container-tooltip .foundry-enriched a.content-link i,
+.thm-container-tooltip .foundry-enriched a.inline-roll i {
+  color: #ff003c;
+}
+
+.thm-container-tooltip .foundry-enriched a:hover {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: #00e5ff;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
+  box-shadow: 0 0 5px rgba(0, 229, 255, 0.3);
+}
+
+.thm-container-tooltip .foundry-enriched ul {
+  margin: 0 0 6px 0;
+  padding-left: 15px;
+  list-style-type: square; /* Квадратные буллиты */
+}
+.thm-container-tooltip .foundry-enriched ul li::marker {
+  color: #ff003c;
+}
+
+.thm-container-tooltip .foundry-enriched strong {
+  color: #ffffff;
+  font-weight: bold;
+  border-bottom: 1px solid #ff003c; /* Подчеркиваем важные слова красным */
+}

@@ -109,6 +109,10 @@ export class TradeInterface extends Application {
     const currencyHtmlFrom = adapter.formatCurrencyHtml(this.fromPlayerData.currency);
     const currencyHtmlTo = adapter.formatCurrencyHtml(this.toPlayerData.currency);
 
+    // Подготовка данных валюты для передачи
+    const currencyLabel = adapter.getCurrencyLabel?.() || 'зм';
+    const isCPR = game.system.id === 'cyberpunk-red-core';
+
     return {
       cssClasses: this.options.classes.join(' '),
       tradeId: this.tradeId,
@@ -120,7 +124,13 @@ export class TradeInterface extends Application {
       toTradeItems: this.toTradeItems,
       bothConfirmed: this.trade.fromConfirmed && this.trade.toConfirmed,
       userSide: this.userSide,
-      rarityFilters: this.rarityFilters
+      rarityFilters: this.rarityFilters,
+      currencyLabel: currencyLabel,
+      isCPR: isCPR,
+      fromCurrencyAtoms: this.trade.fromCurrencyAtoms || 0,
+      toCurrencyAtoms: this.trade.toCurrencyAtoms || 0,
+      fromCurrencyDisplay: this.trade.fromCurrencyAtoms > 0 ? adapter.formatAtoms(this.trade.fromCurrencyAtoms) : '',
+      toCurrencyDisplay: this.trade.toCurrencyAtoms > 0 ? adapter.formatAtoms(this.trade.toCurrencyAtoms) : ''
     };
   }
 
@@ -201,6 +211,9 @@ export class TradeInterface extends Application {
     // Фильтры редкости
     html.find('.rarity-filter').change(this._handleRarityFilter.bind(this));
 
+    // Ввод валюты для передачи
+    html.find('.send-currency-btn').click(this._handleSendCurrency.bind(this));
+
     // Добавляем класс для стилей
     document.body.classList.add('thm-trade-window-active');
 
@@ -266,6 +279,69 @@ export class TradeInterface extends Application {
     } else {
       this._showQuantityModal(itemData, playerSide, maxQuantity, sendItemToTrade);
     }
+  }
+
+  /**
+   * Обработка ввода валюты для передачи
+   */
+  async _handleSendCurrency(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const btn = $(event.currentTarget);
+    const input = btn.siblings('.currency-amount-input');
+    const rawAmount = parseFloat(input.val());
+
+    if (!rawAmount || rawAmount <= 0) {
+      ui.notifications.warn('Введите сумму больше 0!');
+      return;
+    }
+
+    const adapter = this.mainManager.systemAdapter;
+    const isCPR = game.system.id === 'cyberpunk-red-core';
+
+    // Для DnD: ввод в золоте → конвертируем в медь (атомы). Для CPR: ввод = атомы (eb)
+    const amountAtoms = isCPR ? Math.floor(rawAmount) : Math.floor(rawAmount * 100);
+
+    // Проверяем достаточно ли средств
+    const actor = this.userSide === 'from' ? this.fromPlayerData.actor : this.toPlayerData.actor;
+    const currentCurrency = adapter.getActorCurrency(actor);
+    const currentAtoms = adapter.convertCurrencyToAtoms(currentCurrency);
+
+    if (currentAtoms < amountAtoms) {
+      ui.notifications.warn('Недостаточно средств!');
+      return;
+    }
+
+    // ВАЖНО: Обновляем локальный trade НЕМЕДЛЕННО (сокеты не доставляют сообщение отправителю!)
+    const localTrade = this.tradeManager.activeTrades.get(this.tradeId);
+    if (localTrade) {
+      if (this.userSide === 'from') {
+        localTrade.fromCurrencyAtoms = amountAtoms;
+      } else {
+        localTrade.toCurrencyAtoms = amountAtoms;
+      }
+      localTrade.fromConfirmed = false;
+      localTrade.toConfirmed = false;
+      console.log(`THM Trade | Local currency set: ${amountAtoms} atoms (${this.userSide})`, localTrade);
+    }
+
+    // Отправляем обновление второму игроку через сокеты
+    await this.mainManager.socketManager.executeForUsers(
+      CONSTANTS.SOCKET_HOOKS.TRADE_UPDATE,
+      [this.trade.fromUser, this.trade.toUser],
+      {
+        action: 'setCurrency',
+        tradeId: this.tradeId,
+        playerSide: this.userSide,
+        amountAtoms: amountAtoms
+      }
+    );
+
+    // Очищаем поле ввода и обновляем UI
+    input.val('');
+    ui.notifications.info(`Выложено на стол: ${adapter.formatAtoms?.(amountAtoms) || amountAtoms}`);
+    this.render(true);
   }
 
   /**

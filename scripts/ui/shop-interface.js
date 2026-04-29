@@ -170,10 +170,33 @@ export class ShopInterface extends FormApplication {
       currencyHtmlMerchant: adapter.formatCurrencyHtml(adapter.getActorCurrency(this.actor)),
       rarityFilter: this.rarityFilter,
       categoryFilter: this.categoryFilter,
+      categoryFilterOptions: this._getCategoryFilterOptions(),
       isBalancedMode: this.isBalancedMode,
       useNpcCurrency: shopData.settings?.specific?.useNpcCurrency ?? true,
       calculateItemPrice: (basePrice) => this.calculatePrice(basePrice, shopData.settings?.specific?.priceMarkup || 100)
     };
+  }
+
+  /**
+   * Построение опций фильтра категорий из адаптера
+   */
+  _getCategoryFilterOptions() {
+    const adapter = game.THM?.manager?.systemAdapter;
+    const categories = adapter?.getItemCategories?.() || [
+      { key: 'categoryWeapons', label: 'Оружие' },
+      { key: 'categoryArmor', label: 'Броня и Щиты' },
+      { key: 'categoryPotions', label: 'Зелья и Яды' },
+      { key: 'categoryScrolls', label: 'Свитки' },
+      { key: 'categoryFood', label: 'Еда и Напитки' },
+      { key: 'categoryGems', label: 'Драгоценности' },
+      { key: 'categoryMaterials', label: 'Материалы' }
+    ];
+
+    // Преобразуем ключи: categoryWeapons -> weapons, categoryArmor -> armor и т.д.
+    return categories.map(c => ({
+      value: c.key.replace('category', '').toLowerCase(),
+      label: c.label
+    }));
   }
 
   activateListeners(html) {

@@ -1,0 +1,638 @@
+/**
+ * Treasure Hoard Manager - Barter Interface Styles (Cyberpunk Red Edition)
+ */
+
+/* ==========================================================
+   ЛОКАЛЬНЫЕ ПЕРЕМЕННЫЕ CYBERPUNK ДЛЯ ОКНА БАРТЕРА
+   ========================================================== */
+.barter-main-panel {
+  --cyb-bg-main: #050505;
+  --cyb-bg-panel: rgba(15, 15, 17, 0.9);
+  --cyb-red-neon: #ff003c;
+  --cyb-red-dark: #5a0015;
+  --cyb-green-toxic: #00ff41;
+  --cyb-blue-neon: #00e5ff;
+  --cyb-text-main: #ffffff;
+  --cyb-text-muted: #ff809b;
+  --cyb-font-tech: "Rajdhani", "Courier New", monospace;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  background-color: var(--cyb-bg-main);
+  background-image:
+    linear-gradient(rgba(255, 0, 60, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 60, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  font-family: var(--cyb-font-tech);
+  color: var(--cyb-text-main);
+  text-transform: uppercase;
+}
+
+/* ==========================================================
+   ШАПКА (УЧАСТНИКИ СДЕЛКИ)
+   ========================================================== */
+.barter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px !important;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  min-height: 70px;
+  border-bottom: 2px solid var(--cyb-red-dark);
+  background: rgba(10, 10, 12, 0.8);
+  box-shadow: inset 0 -10px 20px rgba(255, 0, 60, 0.05);
+}
+
+.participant {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 1 45%;
+}
+
+.participant.merchant {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.participant-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--cyb-red-neon);
+  letter-spacing: 2px;
+  text-shadow: 0 0 5px rgba(255, 0, 60, 0.5);
+}
+
+.header-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.thm-currency-block {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.thm-currency-block.justify-right {
+  justify-content: flex-end;
+}
+
+.thm-currency-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+.exchange-icon {
+  font-size: 18px;
+  color: var(--cyb-blue-neon); /* Голубой цвет для передачи данных */
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+  animation: data-transfer 1.5s infinite alternate;
+}
+
+@keyframes data-transfer {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.1); opacity: 1; text-shadow: 0 0 15px rgba(0, 229, 255, 1); }
+}
+
+/* ==========================================================
+   КОНТЕНТ (ИНВЕНТАРИ)
+   ========================================================== */
+.barter-content {
+  display: flex;
+  gap: 12px;
+  padding: 10px 20px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.inventory-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--cyb-bg-panel);
+  border: 1px solid var(--cyb-red-dark);
+  border-radius: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Декоративные уголки */
+.inventory-panel::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px;
+  width: 10px; height: 10px;
+  border-top: 2px solid var(--cyb-red-neon);
+  border-left: 2px solid var(--cyb-red-neon);
+}
+
+.panel-header {
+  padding: 6px 12px;
+  background: rgba(255, 0, 60, 0.05);
+  border-bottom: 1px dashed var(--cyb-red-dark);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  margin: 0;
+  color: var(--cyb-text-main);
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.panel-title::before {
+  content: '>';
+  color: var(--cyb-red-neon);
+  animation: cyb-blink 1s infinite;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 4px;
+  padding: 8px;
+  overflow-y: auto;
+  align-content: start;
+}
+
+/* ==========================================================
+   ФУТЕР (ЗОНА СДЕЛКИ / ОБМЕННИК)
+   ========================================================== */
+.barter-trade-panel {
+  background: rgba(5, 5, 5, 0.95);
+  border-top: 2px solid var(--cyb-red-neon);
+  padding: 10px 20px;
+  position: relative;
+  box-shadow: 0 -5px 15px rgba(255, 0, 60, 0.1);
+}
+
+.trade-zones {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 5px;
+}
+
+.trade-zone {
+  flex: 1;
+  background: rgba(10, 10, 12, 0.9);
+  border: 1px dashed var(--cyb-red-dark);
+  border-radius: 0;
+  padding: 8px;
+  min-height: 64px;
+  transition: border-color 0.3s;
+}
+
+.trade-zone:hover {
+  border-color: var(--cyb-red-neon);
+}
+
+.zone-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--cyb-red-dark);
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+.zone-header h3 {
+  margin: 0;
+  font-size: 11px;
+  color: var(--cyb-text-muted);
+  letter-spacing: 2px;
+}
+
+.trade-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* ==========================================================
+   УПРАВЛЕНИЕ И БАЛАНС
+   ========================================================== */
+.trade-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.balance-amount {
+  font-size: 16px;
+  font-weight: bold;
+  font-family: monospace;
+  transition: all 0.3s;
+  letter-spacing: 1px;
+}
+
+/* ЗЕЛЕНЫЙ = Прибыль / Успех */
+.balance-amount.positive {
+  color: var(--cyb-green-toxic) !important;
+  text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+}
+
+/* КРАСНЫЙ = Убыток / Недостаток средств */
+.balance-amount.negative {
+  color: var(--cyb-red-neon) !important;
+  text-shadow: 0 0 10px rgba(255, 0, 60, 0.6);
+}
+
+.trade-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.trade-buttons .thm-btn {
+  min-width: 100px;
+  padding: 6px 15px !important;
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid var(--cyb-red-neon);
+  color: var(--cyb-red-neon);
+  border-radius: 0;
+  font-family: var(--cyb-font-tech);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.trade-buttons .thm-btn:hover {
+  background: var(--cyb-red-neon);
+  color: #000;
+  box-shadow: 0 0 15px rgba(255, 0, 60, 0.5);
+}
+
+/* Кнопка удаления предмета из обмена */
+.trade-item-remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 0; /* Острые углы */
+  background: var(--cyb-red-neon);
+  color: #000;
+  border: 1px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 10;
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.thm-item-slot:hover .trade-item-remove {
+  opacity: 1;
+}
+
+.trade-item-remove:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 5px var(--cyb-red-neon);
+}
+
+/* ==========================================================
+   МОДАЛЬНОЕ ОКНО ВЫБОРА КОЛИЧЕСТВА (ТЕРМИНАЛ)
+   ========================================================== */
+.quantity-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+  backdrop-filter: blur(4px);
+}
+
+.quantity-modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--cyb-bg-main);
+  border: 1px solid var(--cyb-red-neon);
+  border-radius: 0; /* Строгий прямоугольник */
+  width: 420px;
+  box-shadow: 0 0 30px rgba(255, 0, 60, 0.2), inset 0 0 15px rgba(255, 0, 60, 0.1);
+  overflow: hidden;
+  animation: cyb-modal-appear 0.2s ease-out;
+  position: relative;
+}
+
+/* Декоративная полоса загрузки терминала */
+.modal-content::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; height: 2px; width: 100%;
+  background: var(--cyb-blue-neon);
+  box-shadow: 0 0 10px var(--cyb-blue-neon);
+  animation: modal-scan 2s linear infinite;
+}
+
+@keyframes modal-scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes cyb-modal-appear {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+  padding: 15px 20px;
+  background: rgba(255, 0, 60, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed var(--cyb-red-dark);
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--cyb-red-neon);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 5px rgba(255, 0, 60, 0.4);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--cyb-text-muted);
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: monospace;
+}
+
+.modal-close:hover {
+  color: var(--cyb-red-neon);
+  text-shadow: 0 0 8px var(--cyb-red-neon);
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.item-preview-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(10, 10, 12, 0.8);
+  padding: 15px;
+  border-radius: 0;
+  border: 1px solid var(--cyb-red-dark);
+  border-left: 3px solid var(--cyb-red-neon);
+}
+
+.preview-image {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+}
+
+.preview-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Меняем на cover для строгости */
+  border-radius: 0;
+  border: 1px solid var(--cyb-red-dark);
+  background: #000;
+  filter: contrast(1.2) grayscale(0.2);
+}
+
+.preview-info h4 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  color: var(--cyb-text-main);
+  letter-spacing: 1px;
+}
+
+/* ==========================================================
+   РЕДКОСТИ В МОДАЛКЕ
+   ========================================================== */
+.item-rarity-badge {
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 8px;
+  background: #000;
+  border-radius: 0;
+  color: #fff;
+  border: 1px solid #444;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.item-rarity-badge.rarity-common { color: #cccccc; border-color: #666; }
+.item-rarity-badge.rarity-uncommon { color: var(--cyb-green-toxic); border-color: var(--cyb-green-toxic); box-shadow: 0 0 5px rgba(0, 255, 65, 0.2); }
+.item-rarity-badge.rarity-rare { color: var(--cyb-blue-neon); border-color: var(--cyb-blue-neon); box-shadow: 0 0 5px rgba(0, 229, 255, 0.2); }
+.item-rarity-badge.rarity-veryrare { color: #b026ff; border-color: #b026ff; box-shadow: 0 0 5px rgba(176, 38, 255, 0.2); }
+.item-rarity-badge.rarity-legendary { color: #fce205; border-color: #fce205; box-shadow: 0 0 5px rgba(252, 226, 5, 0.2); }
+.item-rarity-badge.rarity-artifact { color: var(--cyb-red-neon); border-color: var(--cyb-red-neon); box-shadow: 0 0 5px rgba(255, 0, 60, 0.3); }
+
+/* ==========================================================
+   КОНТРОЛЛЕРЫ КОЛИЧЕСТВА
+   ========================================================== */
+.quantity-controls-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-stepper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.step-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 0;
+  border: 1px solid var(--cyb-red-dark);
+  background: #000;
+  color: var(--cyb-text-main);
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s;
+  font-family: monospace;
+}
+
+.step-btn:hover {
+  border-color: var(--cyb-red-neon);
+  color: var(--cyb-red-neon);
+  background: rgba(255, 0, 60, 0.1);
+  box-shadow: 0 0 10px rgba(255, 0, 60, 0.3);
+}
+
+#quantityInput {
+  width: 80px;
+  height: 44px;
+  text-align: center;
+  background: #000;
+  border: 1px solid var(--cyb-red-neon);
+  color: var(--cyb-green-toxic); /* Ввод светится зеленым как в терминале */
+  font-size: 20px;
+  font-weight: bold;
+  font-family: monospace;
+  border-radius: 0;
+  box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.1);
+}
+
+#quantityInput:focus {
+  outline: none;
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.3), inset 0 0 10px rgba(0, 255, 65, 0.1);
+}
+
+.slider-container {
+  padding: 0 5px;
+  position: relative;
+}
+
+#quantitySlider {
+  width: 100%;
+  height: 6px;
+  background: #000;
+  border: 1px solid var(--cyb-red-dark);
+  border-radius: 0;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  z-index: 2;
+}
+
+/* Ползунок в стиле тумблера/фейдера */
+#quantitySlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 24px;
+  background: var(--cyb-red-neon);
+  border-radius: 0;
+  cursor: pointer;
+  border: 1px solid #fff;
+  box-shadow: 0 0 10px rgba(255, 0, 60, 0.5);
+  transition: transform 0.1s;
+}
+
+#quantitySlider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  background: #fff;
+  border-color: var(--cyb-red-neon);
+}
+
+/* Кнопки подтверждения сделки */
+.modal-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 14px;
+  border-radius: 0;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.2s;
+  font-family: var(--cyb-font-tech);
+}
+
+.confirm-btn {
+  background: transparent !important;
+  border: 1px solid var(--cyb-green-toxic) !important;
+  color: var(--cyb-green-toxic) !important;
+  box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.1);
+}
+
+.confirm-btn:hover {
+  background: var(--cyb-green-toxic) !important;
+  color: #000 !important;
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+}
+
+.cancel-btn {
+  background: transparent !important;
+  border: 1px solid var(--cyb-text-muted) !important;
+  color: var(--cyb-text-muted) !important;
+}
+
+.cancel-btn:hover {
+  border-color: var(--cyb-red-neon) !important;
+  color: var(--cyb-red-neon) !important;
+  background: rgba(255, 0, 60, 0.1) !important;
+}
+
+/* ==========================================================
+   ФИКС ДЛЯ ОТОБРАЖЕНИЯ ВАЛЮТЫ (Стилизован под киберпанк)
+   ========================================================== */
+.thm-currency-item, .balance-info, .zone-value, .currency-requirements {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+}
+
+/* Приглушаем иконки монет, чтобы они смотрелись как электронные чипы */
+.thm-currency-item img {
+  width: 16px !important;
+  height: 16px !important;
+  margin: 0 0 0 4px !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  border-radius: 0 !important;
+  filter: contrast(1.5) grayscale(0.8) hue-rotate(180deg) !important;
+}
+
+/* Скроллбары для грида инвентаря */
+.inventory-grid::-webkit-scrollbar {
+  width: 6px;
+}
+.inventory-grid::-webkit-scrollbar-track {
+  background: var(--cyb-bg-main);
+  border-left: 1px solid var(--cyb-red-dark);
+}
+.inventory-grid::-webkit-scrollbar-thumb {
+  background: var(--cyb-red-dark);
+  border-radius: 0;
+}
+.inventory-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--cyb-red-neon);
+}

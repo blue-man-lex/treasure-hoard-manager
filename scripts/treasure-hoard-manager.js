@@ -28,6 +28,9 @@ class TreasureHoardModule {
     // 0. Регистрация настроек модуля
     THMSettings.registerSettings();
 
+    // 0.5. Динамическая загрузка стилей по теме
+    this._loadThemeStyles();
+
     // 1. Определение адаптера системы
     const systemId = game.system.id;
     if (systemId === 'dnd5e') {
@@ -50,7 +53,7 @@ class TreasureHoardModule {
     // 4. Сохраняем в объект модуля для доступа
     game.modules.get('treasure-hoard-manager').manager = this.manager;
 
-    // 4. Создаем API для внешних модулей (например SLS)
+    // 5. Создаем API для внешних модулей (например SLS)
     game.modules.get('treasure-hoard-manager').api = {
       hoardManager: this.manager.hoardManager,
       shopManager: this.manager.shopManager,
@@ -61,6 +64,53 @@ class TreasureHoardModule {
 
     console.log('THM INIT | API создан и доступен для внешних модулей');
     console.log('THM INIT | Модуль успешно инициализирован');
+  }
+
+  /**
+   * Динамическая загрузка CSS файлов в зависимости от активной темы
+   */
+  _loadThemeStyles() {
+    const theme = THMSettings.getActiveTheme();
+    this.activeTheme = theme;
+
+    // Сохраняем тему на модуле для доступа из других компонентов
+    game.modules.get('treasure-hoard-manager').activeTheme = theme;
+
+    const basePath = theme === 'cyberpunk'
+      ? 'modules/treasure-hoard-manager/styles-CPR'
+      : 'modules/treasure-hoard-manager/styles';
+
+    const cssFiles = [
+      'thm-theme.css',
+      'treasure-hoard-manager.css',
+      'shop-interface-barter.css',
+      'shop-tooltips-new.css',
+      'container-interface-premium.css',
+      'container-tooltips-new.css',
+      'trade-interface.css',
+      'blackmarket-interface.css'
+    ];
+
+    for (const file of cssFiles) {
+      const linkId = `thm-style-${file.replace('.css', '')}`;
+      if (document.getElementById(linkId)) continue;
+
+      const link = document.createElement('link');
+      link.id = linkId;
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = `${basePath}/${file}`;
+      document.head.appendChild(link);
+    }
+
+    // Устанавливаем класс-маркер на body для доп. стилизации
+    if (theme === 'cyberpunk') {
+      document.body.classList.add('thm-theme-cpr');
+    } else {
+      document.body.classList.remove('thm-theme-cpr');
+    }
+
+    console.log(`THM INIT | Загружена тема: ${theme} (путь: ${basePath}/)`);
   }
 
   async onReady() {

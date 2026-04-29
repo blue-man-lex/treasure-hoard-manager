@@ -90,13 +90,9 @@
           <div class="panel-controls">
             <select class="thm-select category-filter">
               <option value="" {{#if (eq categoryFilter "")}}selected{{/if}}>Все категории</option>
-              <option value="weapons" {{#if (eq categoryFilter "weapons")}}selected{{/if}}>Оружие</option>
-              <option value="armor" {{#if (eq categoryFilter "armor")}}selected{{/if}}>Броня и Щиты</option>
-              <option value="potions" {{#if (eq categoryFilter "potions")}}selected{{/if}}>Зелья и Яды</option>
-              <option value="scrolls" {{#if (eq categoryFilter "scrolls")}}selected{{/if}}>Свитки</option>
-              <option value="food" {{#if (eq categoryFilter "food")}}selected{{/if}}>Еда и Напитки</option>
-              <option value="gems" {{#if (eq categoryFilter "gems")}}selected{{/if}}>Драгоценности</option>
-              <option value="materials" {{#if (eq categoryFilter "materials")}}selected{{/if}}>Материалы</option>
+              {{#each categoryFilterOptions}}
+              <option value="{{value}}" {{#if (eq ../categoryFilter value)}}selected{{/if}}>{{label}}</option>
+              {{/each}}
             </select>
           </div>
         </div>

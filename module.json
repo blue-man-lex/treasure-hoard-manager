@@ -2,7 +2,7 @@
   "id": "treasure-hoard-manager",
   "title": "Treasure Hoard Manager",
   "description": "<p>Advanced loot, trade and black market system with reputation-based pricing and dynamic merchant management.</p>",
-  "version": "1.13.4",
+  "version": "1.13.5",
   "compatibility": {
     "minimum": "12",
     "verified": "13",
@@ -10,8 +10,8 @@
   },
   "authors": [
     {
-      "name": "Your Name",
-      "discord": "YourDiscord#0000",
+      "name": "Art_Lex",
+      "discord": "",
       "flags": {}
     }
   ],
@@ -46,15 +46,7 @@
   "esmodules": [
     "scripts/treasure-hoard-manager.js"
   ],
-  "styles": [
-    "styles/thm-theme.css",
-    "styles/treasure-hoard-manager.css",
-    "styles/shop-interface-barter.css",
-    "styles/shop-tooltips-new.css",
-    "styles/container-interface-premium.css",
-    "styles/trade-interface.css",
-    "styles/blackmarket-interface.css"
-  ],
+  "styles": [],
   "languages": [
     {
       "lang": "en",
@@ -72,7 +64,7 @@
   "socket": true,
   "url": "https://github.com/blue-man-lex/treasure-hoard-manager",
   "manifest": "https://raw.githubusercontent.com/blue-man-lex/treasure-hoard-manager/main/module.json",
-  "download": "https://github.com/blue-man-lex/treasure-hoard-manager/releases/download/1.13.4/treasure-hoard-manager.zip",
+  "download": "https://github.com/blue-man-lex/treasure-hoard-manager/releases/download/1.13.5/treasure-hoard-manager.zip",
   "readme": "https://github.com/blue-man-lex/treasure-hoard-manager/blob/main/README.md",
   "bugs": "https://github.com/blue-man-lex/treasure-hoard-manager/issues",
   "flags": {}

@@ -184,6 +184,20 @@ export class Dnd5eAdapter extends SystemAdapter {
   }
 
   /**
+   * Форматирование атомов (меди) для отображения в чате
+   */
+  formatAtoms(atoms) {
+    const gp = Math.floor(atoms / 100);
+    const sp = Math.floor((atoms % 100) / 10);
+    const cp = atoms % 10;
+    const parts = [];
+    if (gp > 0) parts.push(`${gp} зм`);
+    if (sp > 0) parts.push(`${sp} см`);
+    if (cp > 0) parts.push(`${cp} мм`);
+    return parts.join(' ') || '0 зм';
+  }
+
+  /**
    * Перевод объекта валют в "атомы" (медь)
    */
   convertCurrencyToAtoms(currencyData) {

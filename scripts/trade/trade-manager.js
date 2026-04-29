@@ -31,6 +31,8 @@ export class TradeManager {
       status: CONSTANTS.TRADE_STATUS.PENDING,
       fromItems: [],
       toItems: [],
+      fromCurrencyAtoms: 0,
+      toCurrencyAtoms: 0,
       fromConfirmed: false,
       toConfirmed: false,
       createdAt: new Date().toISOString()
@@ -246,9 +248,11 @@ export class TradeManager {
     
     if (userId === trade.fromUser) {
       trade.fromItems = [];
+      trade.fromCurrencyAtoms = 0;
       trade.fromConfirmed = false;
     } else if (userId === trade.toUser) {
       trade.toItems = [];
+      trade.toCurrencyAtoms = 0;
       trade.toConfirmed = false;
     }
     
@@ -274,6 +278,13 @@ export class TradeManager {
     // ЗАЩИТА: Если сделка уже завершается или завершена - прерываем
     if (!trade || trade.status === CONSTANTS.TRADE_STATUS.COMPLETED) return;
     
+    console.log(`THM Trade Manager | Trade data before completion:`, {
+      fromItems: trade.fromItems?.length,
+      toItems: trade.toItems?.length,
+      fromCurrencyAtoms: trade.fromCurrencyAtoms,
+      toCurrencyAtoms: trade.toCurrencyAtoms
+    });
+
     trade.status = CONSTANTS.TRADE_STATUS.COMPLETED;
     
     // Если нажимает сам Мастер - выполняем перенос локально и сразу
@@ -302,6 +313,14 @@ export class TradeManager {
     // Защита от повторного выполнения (Race Condition)
     if (!trade || trade.isProcessing) return;
     trade.isProcessing = true; 
+
+    console.log(`THM Trade GM | Processing trade ${tradeId}:`, {
+      fromCurrencyAtoms: trade.fromCurrencyAtoms,
+      toCurrencyAtoms: trade.toCurrencyAtoms,
+      fromItems: trade.fromItems?.length,
+      toItems: trade.toItems?.length,
+      source: externalTradeData ? 'socket' : 'local'
+    });
     
     trade.completedAt = new Date().toISOString();
     
@@ -314,13 +333,38 @@ export class TradeManager {
     }
     
     try {
-      // Используем оптимизированный ItemManager для массового переноса!
+      const adapter = this.mainManager.systemAdapter;
+
+      // Перенос предметов
       if (trade.fromItems && trade.fromItems.length > 0) {
         await this.mainManager.itemManager.transferItems(fromActor, toActor, trade.fromItems);
       }
       
       if (trade.toItems && trade.toItems.length > 0) {
         await this.mainManager.itemManager.transferItems(toActor, fromActor, trade.toItems);
+      }
+
+      // Перенос валюты
+      if (trade.fromCurrencyAtoms > 0) {
+        console.log(`THM Trade | Transferring ${trade.fromCurrencyAtoms} atoms from ${fromActor.name} to ${toActor.name}`);
+        const spent = await adapter.spendWealth(fromActor, trade.fromCurrencyAtoms);
+        if (spent) {
+          const currentCurrency = adapter.getActorCurrency(toActor);
+          const currentAtoms = adapter.convertCurrencyToAtoms(currentCurrency);
+          const newCurrency = adapter.convertAtomsToCurrency(currentAtoms + trade.fromCurrencyAtoms);
+          await adapter.updateActorCurrency(toActor, newCurrency);
+        }
+      }
+
+      if (trade.toCurrencyAtoms > 0) {
+        console.log(`THM Trade | Transferring ${trade.toCurrencyAtoms} atoms from ${toActor.name} to ${fromActor.name}`);
+        const spent = await adapter.spendWealth(toActor, trade.toCurrencyAtoms);
+        if (spent) {
+          const currentCurrency = adapter.getActorCurrency(fromActor);
+          const currentAtoms = adapter.convertCurrencyToAtoms(currentCurrency);
+          const newCurrency = adapter.convertAtomsToCurrency(currentAtoms + trade.toCurrencyAtoms);
+          await adapter.updateActorCurrency(fromActor, newCurrency);
+        }
       }
       
       // Отправка завершения всем, чтобы закрыть окна
@@ -343,8 +387,23 @@ export class TradeManager {
    * Отправка сообщения о завершении торговли
    */
   async sendTradeCompletionMessage(trade) {
+    const adapter = this.mainManager.systemAdapter;
+    const currencyLabel = adapter.getCurrencyLabel?.() || 'зм';
+
     const fromItemsList = trade.fromItems.map(item => `<li>${item.name} (${item.quantity || 1})</li>`).join('');
     const toItemsList = trade.toItems.map(item => `<li>${item.name} (${item.quantity || 1})</li>`).join('');
+
+    // Форматируем валюту для чата
+    let fromCurrencyText = '';
+    if (trade.fromCurrencyAtoms > 0) {
+      const displayAmount = adapter.formatAtoms?.(trade.fromCurrencyAtoms) || `${trade.fromCurrencyAtoms} ${currencyLabel}`;
+      fromCurrencyText = `<li>💰 ${displayAmount}</li>`;
+    }
+    let toCurrencyText = '';
+    if (trade.toCurrencyAtoms > 0) {
+      const displayAmount = adapter.formatAtoms?.(trade.toCurrencyAtoms) || `${trade.toCurrencyAtoms} ${currencyLabel}`;
+      toCurrencyText = `<li>💰 ${displayAmount}</li>`;
+    }
     
     const message = `
       <div class="thm-trade-complete">
@@ -353,12 +412,12 @@ export class TradeManager {
           <div class="participant">
             <h4>${trade.fromUserName}</h4>
             <p>Отдал:</p>
-            <ul>${fromItemsList || '<li>Ничего</li>'}</ul>
+            <ul>${fromItemsList}${fromCurrencyText || ''}${!fromItemsList && !fromCurrencyText ? '<li>Ничего</li>' : ''}</ul>
           </div>
           <div class="participant">
             <h4>${trade.toUserName}</h4>
-            <p>Получил:</p>
-            <ul>${toItemsList || '<li>Ничего</li>'}</ul>
+            <p>Отдал:</p>
+            <ul>${toItemsList}${toCurrencyText || ''}${!toItemsList && !toCurrencyText ? '<li>Ничего</li>' : ''}</ul>
           </div>
         </div>
       </div>
@@ -482,6 +541,46 @@ export class TradeManager {
 
     } catch (error) {
       console.error('THM Trade Manager | Error adding item to trade:', error);
+    }
+  }
+
+  /**
+   * Установка валюты в торговле
+   */
+  async setCurrencyInTrade(tradeId, playerSide, amountAtoms) {
+    try {
+      const trade = this.activeTrades.get(tradeId);
+      if (!trade) {
+        console.warn(`THM Trade Manager | Trade ${tradeId} not found for setCurrency`);
+        return;
+      }
+
+      if (playerSide === 'from') {
+        trade.fromCurrencyAtoms = amountAtoms;
+      } else if (playerSide === 'to') {
+        trade.toCurrencyAtoms = amountAtoms;
+      }
+
+      // Сбрасываем подтверждения при изменении
+      trade.fromConfirmed = false;
+      trade.toConfirmed = false;
+      trade.updatedAt = new Date().toISOString();
+
+      console.log(`THM Trade Manager | Currency set in trade ${tradeId}: ${amountAtoms} atoms (${playerSide})`);
+
+      // Обновляем открытые интерфейсы
+      await this.mainManager.socketManager.executeForUsers(
+        CONSTANTS.SOCKET_HOOKS.TRADE_UPDATE,
+        [trade.fromUser, trade.toUser],
+        {
+          action: 'update',
+          tradeId: tradeId,
+          trade: trade
+        }
+      );
+
+    } catch (error) {
+      console.error('THM Trade Manager | Error setting currency in trade:', error);
     }
   }
 

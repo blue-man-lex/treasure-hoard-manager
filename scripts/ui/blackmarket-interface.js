@@ -7,7 +7,6 @@ export class BlackMarketInterface extends FormApplication {
     this.actor = actor;
     this.timerInterval = null;
     this.tooltips = new ShopTooltipsNew(this);
-    this._loadCSS();
 
     // Слушаем обновления через сокеты для реактивного обновления интерфейса
     Hooks.on("treasure-hoard-manager.updateHoard", (data) => {
@@ -35,18 +34,6 @@ export class BlackMarketInterface extends FormApplication {
       });
     }
     return buttons;
-  }
-
-  _loadCSS() {
-    const cssId = 'thm-blackmarket-interface-css';
-    if (!document.getElementById(cssId)) {
-      const link = document.createElement('link');
-      link.id = cssId;
-      link.rel = 'stylesheet';
-      link.type = 'text/css';
-      link.href = `modules/${CONSTANTS.MODULE_NAME}/styles/blackmarket-interface.css`;
-      document.head.appendChild(link);
-    }
   }
 
   static get defaultOptions() {
@@ -78,19 +65,22 @@ export class BlackMarketInterface extends FormApplication {
       { id: 'serviceCustom', config: srvConfig.srv4, name: "Особый заказ", icon: "fas fa-scroll" }
     ];
 
+    // Определяем папку ассетов в зависимости от активной темы
+    const activeTheme = game.modules.get('treasure-hoard-manager')?.activeTheme || 'fantasy';
+    const assetsFolder = activeTheme === 'cyberpunk' ? 'blackmarket-CPR' : 'blackmarket';
+
     for (const s of serviceMap) {
       if (s.config?.enabled) {
-        // Получаем изображение из настроек или используем дефолтное
+        // Получаем изображение из настроек или используем дефолтное (с учётом темы)
         let serviceImg = s.config.img;
         if (!serviceImg) {
-          // Используем те же дефолтные пути, что и в config-app.js
           const defaultImages = {
-            serviceShadowHelp: "modules/treasure-hoard-manager/assets/blackmarket/1.png",
-            serviceAssassination: "modules/treasure-hoard-manager/assets/blackmarket/2.png",
-            serviceInformation: "modules/treasure-hoard-manager/assets/blackmarket/3.png",
-            serviceCustom: "modules/treasure-hoard-manager/assets/blackmarket/4.png"
+            serviceShadowHelp: `modules/treasure-hoard-manager/assets/${assetsFolder}/1.png`,
+            serviceAssassination: `modules/treasure-hoard-manager/assets/${assetsFolder}/2.png`,
+            serviceInformation: `modules/treasure-hoard-manager/assets/${assetsFolder}/3.png`,
+            serviceCustom: `modules/treasure-hoard-manager/assets/${assetsFolder}/4.png`
           };
-          serviceImg = defaultImages[s.id] || `modules/${CONSTANTS.MODULE_NAME}/assets/blackmarket/${s.id}.png`;
+          serviceImg = defaultImages[s.id] || `modules/${CONSTANTS.MODULE_NAME}/assets/${assetsFolder}/${s.id}.png`;
         }
 
         servicesList.push({

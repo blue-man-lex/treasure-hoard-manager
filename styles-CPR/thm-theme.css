@@ -1,0 +1,339 @@
+/**
+ * Treasure Hoard Manager - Global Theme & Design System (Cyberpunk Red Edition)
+ * Полная трансформация: Темная техно-тема, терминальная сетка, строгие углы.
+ * Названия переменных сохранены для совместимости с HTML, но их суть изменена.
+ */
+
+:root {
+  /* --- Цветовая палитра (Cyberpunk Dark) --- */
+  --thm-bg-primary: #050505;   /* Глубокий черный терминала */
+  --thm-bg-secondary: #0a0a0c; /* Темно-серый */
+  --thm-bg-tertiary: #101014;  /* Серый для панелей */
+
+  /* "Золото" теперь означает Неоновый Красный */
+  --thm-border-gold: #ff003c;
+  /* "Темное золото" теперь означает Кроваво-бордовый */
+  --thm-border-gold-low: #5a0015;
+  /* "Бронза" теперь полупрозрачный красный */
+  --thm-border-bronze-low: rgba(255, 0, 60, 0.3);
+
+  --thm-text-primary: #ffffff;
+  --thm-text-secondary: #ff809b; /* Бледно-красный для вторичного текста */
+  --thm-text-muted: #666666;
+  --thm-text-bright: #ffffff;
+
+  --thm-accent-red: #ff003c;
+  --thm-accent-green: #00ff41; /* Токсичный зеленый взлома */
+  --thm-accent-gold: #00e5ff;  /* "Золото" в акцентах стало Цифровым Голубым */
+
+  /* --- Редкость (Cyberpunk Rarity Tiers) --- */
+  --thm-rarity-common: #666666;      /* Хлам */
+  --thm-rarity-uncommon: #00ff41;    /* Базовый Тех */
+  --thm-rarity-rare: #00e5ff;        /* Продвинутый Тех */
+  --thm-rarity-veryrare: #b026ff;    /* Черный Рынок */
+  --thm-rarity-legendary: #fce205;   /* Корпо-Тех (Кибер-желтый) */
+  --thm-rarity-artifact: #ff003c;    /* Реликвия */
+
+  --thm-shadow-main: 0 0 30px rgba(255, 0, 60, 0.15), inset 0 0 20px rgba(255, 0, 60, 0.05);
+
+  /* --- Шрифты терминала --- */
+  --thm-font-main: "Rajdhani", "Courier New", monospace;
+  --thm-font-fancy: "Rajdhani", "Courier New", monospace;
+}
+
+/* ==========================================
+   ИСПРАВЛЕНИЕ ОКОН (WINDOW FIXES)
+   ========================================== */
+
+.thm-window-fix.window-app .window-content {
+  background: var(--thm-bg-primary) !important;
+  /* Добавляем эффект терминальной сетки на все окна мода */
+  background-image:
+    linear-gradient(rgba(255, 0, 60, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 60, 0.03) 1px, transparent 1px) !important;
+  background-size: 20px 20px !important;
+  color: var(--thm-text-primary) !important;
+  padding: 0 !important;
+  font-family: var(--thm-font-main) !important;
+  text-transform: uppercase; /* Жесткий регистр системы */
+}
+
+.thm-window-fix.window-app {
+  background: var(--thm-bg-primary) !important;
+  border: 1px solid var(--thm-border-gold) !important; /* Здесь будет неоново-красный */
+  box-shadow: var(--thm-shadow-main) !important;
+  border-radius: 0 !important; /* Убираем скругления */
+}
+
+.thm-window-fix.window-app .window-header {
+  background: var(--thm-bg-secondary) !important;
+  border-bottom: 2px solid var(--thm-border-gold) !important;
+  color: var(--thm-accent-red) !important;
+  font-family: var(--thm-font-main) !important;
+  text-shadow: 0 0 5px rgba(255, 0, 60, 0.5) !important;
+}
+
+/* ==========================================
+   ГЛАВНЫЙ КОНТЕЙНЕР (PREMIUM WINDOW)
+   ========================================== */
+
+.thm-premium-window {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.thm-premium-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  background: rgba(10, 10, 12, 0.9);
+  border-bottom: 1px dashed var(--thm-border-gold-low);
+  gap: 15px;
+  position: relative;
+}
+
+/* Декоративный уголок в заголовке */
+.thm-premium-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; right: 0;
+  width: 30px; height: 3px;
+  background: var(--thm-border-gold);
+  box-shadow: 0 0 10px var(--thm-border-gold);
+}
+
+.thm-window-title {
+  margin: 0;
+  font-size: 22px;
+  color: var(--thm-text-bright);
+  font-family: var(--thm-font-fancy);
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(255, 0, 60, 0.6);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Мигающий системный курсор */
+.thm-window-title::before {
+  content: 'SYS>';
+  color: var(--thm-border-gold);
+  animation: cyb-blink 1s infinite;
+  font-size: 0.8em;
+}
+
+@keyframes cyb-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* ==========================================
+   ЯЧЕЙКИ ПРЕДМЕТОВ (SQUARE SLOTS CYBERPUNK)
+   ========================================== */
+
+.thm-item-slot,
+.item-row.thm-item-slot {
+  position: relative !important;
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  background: rgba(5, 5, 5, 0.9) !important;
+  border: 1px solid var(--thm-rarity-common) !important;
+  border-radius: 0 !important; /* Острые углы */
+  padding: 0 !important;
+  margin: 1px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+  overflow: hidden !important;
+}
+
+/* Эффект сканирования при наведении на ячейку */
+.thm-item-slot:hover {
+  transform: scale(1.05) !important;
+  z-index: 10 !important;
+  border-color: var(--thm-accent-green) !important;
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.3), inset 0 0 10px rgba(0, 255, 65, 0.2) !important;
+}
+
+.thm-item-icon {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border: none !important;
+  display: block !important;
+  filter: contrast(1.2) grayscale(0.2);
+}
+
+.thm-item-qty {
+  position: absolute !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  background: var(--thm-border-gold) !important;
+  color: #000 !important;
+  font-size: 11px !important;
+  padding: 1px 5px !important;
+  border-radius: 0 !important;
+  border: none !important;
+  border-left: 1px solid #000 !important;
+  border-top: 1px solid #000 !important;
+  z-index: 10 !important;
+  font-weight: bold !important;
+  font-family: monospace !important;
+}
+
+/* Редкость через рамку (Single Border System) */
+.rarity-uncommon.thm-item-slot { border-color: var(--thm-rarity-uncommon) !important; box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.1) !important;}
+.rarity-rare.thm-item-slot { border-color: var(--thm-rarity-rare) !important; box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1) !important;}
+.rarity-veryrare.thm-item-slot { border-color: var(--thm-rarity-veryrare) !important; box-shadow: inset 0 0 10px rgba(176, 38, 255, 0.1) !important;}
+.rarity-legendary.thm-item-slot { border-color: var(--thm-rarity-legendary) !important; box-shadow: inset 0 0 15px rgba(252, 226, 5, 0.15) !important;}
+.rarity-artifact.thm-item-slot { border-color: var(--thm-rarity-artifact) !important; box-shadow: inset 0 0 15px rgba(255, 0, 60, 0.2) !important;}
+
+/* Совместимость с thm-rarity-bg */
+.thm-rarity-bg {
+  display: none !important;
+}
+
+/* ==========================================
+   ВАЛЮТА (DIGITAL CURRENCY)
+   ========================================== */
+
+.thm-currency-block {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 5px;
+}
+
+.thm-currency-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--thm-border-gold-low);
+  border-radius: 0; /* Острые плашки данных */
+  color: var(--thm-text-primary);
+  font-size: 13px;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+/* Переопределяем цвета валют из старой фэнтези-палитры в кибер-цвета */
+.thm-currency-item.pp { color: #b026ff; border-color: #b026ff; background: rgba(176, 38, 255, 0.1); }
+.thm-currency-item.gp { color: #fce205; border-color: #fce205; background: rgba(252, 226, 5, 0.1); }
+.thm-currency-item.ep { color: #00e5ff; border-color: #00e5ff; background: rgba(0, 229, 255, 0.1); }
+.thm-currency-item.sp { color: #cccccc; border-color: #cccccc; background: rgba(200, 200, 200, 0.1); }
+.thm-currency-item.cp { color: #ff5050; border-color: #ff5050; background: rgba(255, 80, 80, 0.1); }
+
+/* ==========================================
+   КНОПКИ (TERMINAL BUTTONS)
+   ========================================== */
+
+.thm-btn {
+  background: transparent !important;
+  border: 1px solid var(--thm-border-gold) !important; /* Красная рамка */
+  color: var(--thm-border-gold) !important;
+  border-radius: 0 !important;
+  padding: 8px 15px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  font-weight: bold !important;
+  font-size: 13px !important;
+  font-family: var(--thm-font-main) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: inset 0 0 10px rgba(255, 0, 60, 0.1) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.thm-btn:hover:not(:disabled) {
+  background: var(--thm-border-gold) !important;
+  color: #000 !important;
+  box-shadow: 0 0 15px rgba(255, 0, 60, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+.thm-btn:disabled {
+  border-color: var(--thm-text-muted) !important;
+  color: var(--thm-text-muted) !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ==========================================
+   ПОРТРЕТЫ (AVATARS)
+   ========================================== */
+
+.thm-portrait-frame {
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--thm-border-gold);
+  border-radius: 0;
+  overflow: hidden;
+  background: #000;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Стилизация под сканер биометрии */
+.thm-portrait-frame::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(rgba(255,0,60,0.2) 1px, transparent 1px);
+  background-size: 100% 4px;
+  pointer-events: none;
+}
+
+.thm-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.2) grayscale(0.5); /* Суровый киберпанк-фильтр для лиц */
+}
+
+/* ==========================================
+   ФОРМЫ И СЕЛЕКТЫ (INPUTS & SELECTS)
+   ========================================== */
+
+.thm-window-fix select,
+.thm-window-fix input {
+  background: rgba(0, 0, 0, 0.8) !important;
+  color: var(--thm-text-bright) !important;
+  border: 1px solid var(--thm-border-gold-low) !important;
+  border-radius: 0 !important;
+  padding: 4px 8px !important;
+  font-family: var(--thm-font-main) !important;
+  cursor: pointer !important;
+  text-transform: uppercase;
+}
+
+.thm-window-fix select:hover,
+.thm-window-fix select:focus,
+.thm-window-fix input:focus {
+  border-color: var(--thm-border-gold) !important;
+  box-shadow: 0 0 10px rgba(255, 0, 60, 0.4), inset 0 0 5px rgba(255, 0, 60, 0.2) !important;
+  outline: none !important;
+}
+
+/* Стилизация опций внутри списков */
+.thm-window-fix select option {
+  background: var(--thm-bg-primary) !important;
+  color: var(--thm-text-bright) !important;
+  padding: 8px !important;
+  font-family: var(--thm-font-main) !important;
+}

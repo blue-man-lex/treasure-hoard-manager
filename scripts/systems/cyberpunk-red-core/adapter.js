@@ -152,6 +152,29 @@ export class CyberpunkRedAdapter extends SystemAdapter {
   }
 
   /**
+   * Форматирование атомов для отображения в чате
+   */
+  formatAtoms(atoms) {
+    return `${atoms} eb`;
+  }
+
+  /**
+   * Получение валюты актера (переопределение)
+   */
+  getActorCurrency(actor) {
+    const value = foundry.utils.getProperty(actor, this.getCurrencyPath()) || 0;
+    return { eb: value };
+  }
+
+  /**
+   * Обновление валюты актера (переопределение)
+   */
+  async updateActorCurrency(actor, currencyData) {
+    const amount = typeof currencyData === 'number' ? currencyData : (currencyData?.eb || 0);
+    return actor.update({ [this.getCurrencyPath()]: amount });
+  }
+
+  /**
    * Конвертация в атомы (для внутренних расчетов)
    */
   convertCurrencyToAtoms(currencyData) {
@@ -262,8 +285,22 @@ export class CyberpunkRedAdapter extends SystemAdapter {
   }
 
   /**
-   * Конфигурация магазинов Найт-Сити
+   * Категории товаров для Cyberpunk Red
+   * Используют те же ключи настроек (categoryWeapons и т.д.) для совместимости,
+   * но отображаются с нативными для CPR названиями и иконками
    */
+  getItemCategories() {
+    return [
+      { key: 'categoryWeapons', label: 'Оружие / Боеприпасы', icon: 'fas fa-crosshairs' },
+      { key: 'categoryArmor', label: 'Броня / Одежда', icon: 'fas fa-vest' },
+      { key: 'categoryPotions', label: 'Медикаменты', icon: 'fas fa-syringe' },
+      { key: 'categoryScrolls', label: 'Программы', icon: 'fas fa-microchip' },
+      { key: 'categoryFood', label: 'Снаряжение', icon: 'fas fa-toolbox' },
+      { key: 'categoryGems', label: 'Кибервэр', icon: 'fas fa-brain' },
+      { key: 'categoryMaterials', label: 'Электроника / Апгрейды', icon: 'fas fa-plug' }
+    ];
+  }
+
   getShopConfiguration() {
     return {
       shopTypes: {

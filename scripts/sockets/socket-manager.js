@@ -605,6 +605,9 @@ export class SocketManager {
         if (tradeWindow) {
           await tradeWindow.updateTrade(trade);
         }
+      } else if (action === 'setCurrency') {
+        // Устанавливаем валюту в торговле
+        await this.mainManager.tradeManager.setCurrencyInTrade(tradeId, data.playerSide, data.amountAtoms);
       }
 
       logger.info(`THM Socket | Trade update received: ${tradeId} - ${action}`);

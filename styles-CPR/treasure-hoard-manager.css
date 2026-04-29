@@ -1,0 +1,610 @@
+/* ==========================================
+   Стиль окна настроек THM (Cyberpunk Red Edition)
+   Интерфейс Администратора (Root Access)
+   ========================================== */
+
+/* 1. Переопределение базового фона Foundry VTT ТОЛЬКО для нашего окна */
+.app.window-app.thm-config-window .window-content {
+    background-color: #050505;
+    background-image:
+      linear-gradient(rgba(255, 0, 60, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 0, 60, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: #ffffff;
+    padding: 15px;
+    font-family: "Rajdhani", "Courier New", monospace;
+    overflow-y: auto;
+    text-transform: uppercase;
+}
+
+/* 2. Предупреждения (Системные алерты) */
+.thm-config-window .notification.warning {
+    background: rgba(252, 226, 5, 0.1);
+    border: 1px dashed #fce205; /* Кибер-желтый для варнингов */
+    border-left: 4px solid #fce205;
+    color: #fce205;
+    padding: 10px;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    text-shadow: 0 0 5px rgba(252, 226, 5, 0.5);
+    letter-spacing: 1px;
+}
+
+/* 3. Шапка (Header) */
+.thm-config-window .sheet-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #5a0015;
+    position: relative;
+}
+
+/* Декоративная линия загрузки в шапке */
+.thm-config-window .sheet-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0;
+    width: 25%; height: 2px;
+    background: #ff003c;
+    box-shadow: 0 0 10px #ff003c;
+}
+
+.thm-config-window .profile-img {
+    border: 2px solid #ff003c;
+    border-radius: 0; /* Строгий квадрат */
+    background: #000;
+    object-fit: cover;
+    filter: contrast(1.2) grayscale(0.2);
+    box-shadow: 0 0 15px rgba(255, 0, 60, 0.2);
+}
+
+.thm-config-window .header-content {
+    flex: 1;
+}
+
+.thm-config-window .charname {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+    color: #ff003c;
+    border-bottom: none;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(255, 0, 60, 0.6);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Мигающий курсор админа */
+.thm-config-window .charname::before {
+    content: 'ROOT>';
+    color: #ffffff;
+    font-size: 0.7em;
+    animation: cyb-blink 1s infinite;
+}
+
+@keyframes cyb-blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+/* Главный переключатель в шапке */
+.thm-config-window .highlight-box {
+    background: rgba(255, 0, 60, 0.05);
+    border: 1px solid #5a0015;
+    padding: 10px 15px;
+    border-radius: 0;
+    margin: 0;
+    box-shadow: inset 0 0 10px rgba(255, 0, 60, 0.1);
+}
+
+.thm-config-window .highlight-box .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #ff003c;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.thm-config-window .highlight-box input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: #ff003c;
+}
+
+/* 4. Вкладки (Tabs) */
+.thm-config-window .sheet-tabs {
+    display: flex;
+    gap: 5px;
+    border-bottom: 2px solid #5a0015;
+    margin-bottom: 15px;
+}
+
+.thm-config-window .sheet-tabs .item {
+    padding: 8px 15px;
+    color: #666;
+    background: rgba(10, 10, 12, 0.8);
+    border-radius: 0; /* Острые вкладки */
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    border-bottom: none;
+    letter-spacing: 1px;
+}
+
+.thm-config-window .sheet-tabs .item:hover {
+    color: #ffffff;
+    background: rgba(255, 0, 60, 0.1);
+}
+
+.thm-config-window .sheet-tabs .item.active {
+    color: #ff003c;
+    background: rgba(255, 0, 60, 0.15);
+    border: 1px solid #5a0015;
+    border-top: 3px solid #ff003c;
+    border-bottom: none;
+    position: relative;
+    top: 2px; /* Перекрывает нижнюю линию */
+    text-shadow: 0 0 5px rgba(255, 0, 60, 0.5);
+}
+
+/* 5. Базовые элементы форм (Терминальные блоки ввода) */
+.thm-config-window .form-group {
+    background: rgba(10, 10, 12, 0.8);
+    border: 1px solid #5a0015;
+    border-left: 3px solid #ff003c;
+    border-radius: 0;
+    padding: 10px 15px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    position: relative;
+}
+
+/* Декоративный уголок для формы */
+.thm-config-window .form-group::before {
+    content: '';
+    position: absolute;
+    top: -1px; right: -1px;
+    width: 8px; height: 8px;
+    border-top: 2px solid #ff003c;
+    border-right: 2px solid #ff003c;
+}
+
+.thm-config-window .form-group > label {
+    flex: 1 0 35%;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.thm-config-window .form-group .form-fields {
+    flex: 1 0 60%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* Фикс чекбоксов и инпутов */
+.thm-config-window .form-group input[type="text"],
+.thm-config-window .form-group input[type="number"],
+.thm-config-window .form-group select {
+    background: #000;
+    border: 1px solid #5a0015;
+    color: #00ff41; /* Хакерский зеленый для вводимых данных */
+    padding: 4px 8px;
+    border-radius: 0;
+    height: 28px;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.thm-config-window .form-group input[type="text"]:focus,
+.thm-config-window .form-group input[type="number"]:focus,
+.thm-config-window .form-group select:focus {
+    border-color: #ff003c;
+    outline: none;
+    box-shadow: 0 0 10px rgba(255, 0, 60, 0.4), inset 0 0 5px rgba(255, 0, 60, 0.2);
+}
+
+.thm-config-window .form-group input[type="checkbox"],
+.thm-config-window .form-group input[type="radio"] {
+    margin: 0;
+    cursor: pointer;
+    accent-color: #ff003c;
+}
+
+.thm-config-window .notes {
+    flex: 1 0 100%;
+    margin: 5px 0 0 0;
+    font-size: 11px;
+    color: #ff809b; /* Приглушенный красный */
+    line-height: 1.3;
+    text-transform: none; /* Оставляем нормальный регистр для читаемости */
+}
+
+.thm-config-window .divider {
+    color: #ff003c;
+    border-bottom: 1px dashed #5a0015;
+    padding-bottom: 5px;
+    margin: 20px 0 15px 0;
+    font-family: "Rajdhani", "Courier New", monospace;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px rgba(255, 0, 60, 0.5);
+}
+
+/* 6. Кастомные группы (Гриды и Списки чекбоксов) */
+.thm-config-window .radio-group,
+.thm-config-window .checkbox-group {
+    flex: 1 0 60%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: center;
+}
+
+.thm-config-window .radio-option,
+.thm-config-window .checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.thm-config-window .radio-option label,
+.thm-config-window .checkbox-option label {
+    margin: 0;
+    cursor: pointer;
+    font-weight: normal;
+    color: #cccccc;
+}
+
+/* 7. Магазин: Сетка Категорий */
+.thm-config-window .category-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.thm-config-window .category-item label {
+    display: flex;
+    align-items: center;
+    background: rgba(10, 10, 12, 0.8);
+    border: 1px solid #5a0015;
+    padding: 8px;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all 0.2s;
+    gap: 10px;
+}
+
+.thm-config-window .category-item label:hover {
+    border-color: #ff003c;
+    background: rgba(255, 0, 60, 0.1);
+    box-shadow: 0 0 8px rgba(255, 0, 60, 0.3);
+}
+
+.thm-config-window .category-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ffffff;
+}
+
+/* 8. Магазин: Типы торговцев */
+.thm-config-window .shop-type-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.thm-config-window .shop-type-option input[type="radio"] {
+    display: none;
+}
+
+.thm-config-window .shop-type-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(10, 10, 12, 0.8);
+    border: 1px solid #5a0015;
+    padding: 10px;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.thm-config-window .shop-type-option input[type="radio"]:checked + .shop-type-label {
+    border-color: #ff003c;
+    background: rgba(255, 0, 60, 0.15);
+    box-shadow: inset 0 0 15px rgba(255, 0, 60, 0.2);
+}
+
+.thm-config-window .shop-type-icon img {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #ff003c;
+    border-radius: 0;
+    filter: contrast(1.2) grayscale(0.2);
+}
+
+.thm-config-window .shop-type-info h4 {
+    margin: 0 0 2px 0;
+    color: #ff003c;
+    font-size: 14px;
+    border: none;
+    letter-spacing: 1px;
+}
+
+.thm-config-window .shop-type-info p {
+    margin: 0;
+    font-size: 11px;
+    color: #aaaaaa;
+    line-height: 1.2;
+    text-transform: none;
+}
+
+/* 9. Ползунки Редкости и Лимиты */
+.thm-config-window .rarity-settings,
+.thm-config-window .inventory-limits,
+.thm-config-window .pricing-settings,
+.thm-config-window .base-rarity {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.thm-config-window .rarity-row,
+.thm-config-window .limit-row,
+.thm-config-window .pricing-row,
+.thm-config-window .rarity-base {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 0, 60, 0.05);
+    border: 1px solid #5a0015;
+    padding: 6px 10px;
+    border-radius: 0;
+}
+
+.thm-config-window .rarity-row label,
+.thm-config-window .limit-row label,
+.thm-config-window .pricing-row label,
+.thm-config-window .rarity-base label {
+    flex: 1;
+    margin: 0;
+    font-size: 13px;
+    font-weight: normal;
+}
+
+.thm-config-window .rarity-row input[type="range"] {
+    flex: 2;
+    accent-color: #ff003c; /* Красный ползунок */
+}
+
+.thm-config-window .rarity-value {
+    width: 40px;
+    text-align: right;
+    font-weight: bold;
+    color: #00ff41; /* Цифры значения зеленые */
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.thm-config-window .price-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 2;
+}
+
+.thm-config-window .price-info {
+    font-size: 11px;
+    color: #888;
+}
+
+/* 10. Компендиумы (Поиск и Теги) */
+.thm-config-window .compendium-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 10px 0;
+    width: 100%;
+}
+
+.thm-config-window .compendium-tag {
+    background: rgba(255, 0, 60, 0.1);
+    border: 1px solid #5a0015;
+    color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 0;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: monospace;
+}
+
+.thm-config-window .compendium-tag i.remove-tag {
+    color: #ff003c;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.thm-config-window .compendium-tag i.remove-tag:hover {
+    transform: scale(1.2);
+    text-shadow: 0 0 5px #ff003c;
+}
+
+.thm-config-window .thm-compendium-search-row {
+    display: flex;
+    gap: 5px;
+    width: 100%;
+}
+
+.thm-config-window .thm-compendium-search-row input {
+    flex: 1;
+}
+
+.thm-config-window .thm-compendium-search-row button {
+    width: 30px;
+    height: 28px;
+    padding: 0;
+    background: #000;
+    border: 1px solid #5a0015;
+    color: #ff003c;
+    border-radius: 0;
+    transition: all 0.2s;
+}
+
+.thm-config-window .thm-compendium-search-row button:hover {
+    border-color: #ff003c;
+    box-shadow: 0 0 8px rgba(255, 0, 60, 0.5);
+}
+
+.thm-config-window .compendium-search-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(10, 10, 12, 0.8);
+    padding: 6px 10px;
+    margin-bottom: 4px;
+    border-radius: 0;
+    border-left: 3px solid #ff003c;
+}
+
+.thm-config-window .compendium-search-item button {
+    width: auto;
+    padding: 2px 8px;
+    font-size: 12px;
+}
+
+/* 11. Подвал (Footer) */
+.thm-config-window .sheet-footer {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #5a0015;
+}
+
+.thm-config-window .sheet-footer button {
+    background: transparent;
+    border: 1px solid #ff003c;
+    color: #ff003c;
+    font-weight: bold;
+    border-radius: 0;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: inset 0 0 10px rgba(255, 0, 60, 0.1);
+}
+
+.thm-config-window .sheet-footer button:hover {
+    background: #ff003c;
+    color: #000;
+    box-shadow: 0 0 15px rgba(255, 0, 60, 0.5);
+}
+
+/* ==========================================================================
+   ИСПРАВЛЕНИЕ КНОПОК И ИХ СОДЕРЖИМОГО (FilePicker, Поиск, Добавить)
+   СТРОГО ИЗОЛИРОВАНО ОТ ОСТАЛЬНОГО FOUNDRY
+   ========================================================================== */
+
+/* Красим иконки и текст внутри кнопок в неоновый цвет */
+.thm-config-window button {
+    color: #ff003c !important;
+}
+
+.thm-config-window button i,
+.thm-config-window button.file-picker i {
+    color: #ff003c !important;
+}
+
+/* Стилизация кнопок "Добавить" в списке компендиумов */
+.thm-config-window .compendium-list button,
+.thm-config-window button.add-source,
+.thm-config-window .add-btn,
+.thm-config-window .btn-add-compendium {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border: 1px solid #5a0015 !important;
+    color: #ffffff !important;
+    border-radius: 0 !important; /* Острые углы */
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    padding: 4px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    font-family: "Rajdhani", monospace !important;
+    text-transform: uppercase;
+}
+
+/* Эффект при наведении на кнопки "Добавить" */
+.thm-config-window .compendium-list button:hover,
+.thm-config-window button.add-source:hover,
+.thm-config-window .add-btn:hover,
+.thm-config-window .btn-add-compendium:hover {
+    background: rgba(255, 0, 60, 0.15) !important;
+    border-color: #ff003c !important;
+    color: #fff !important;
+    box-shadow: 0 0 10px rgba(255, 0, 60, 0.4) !important;
+}
+
+/* Эффект при клике */
+.thm-config-window .compendium-list button:active,
+.thm-config-window button.add-source:active,
+.thm-config-window .add-btn:active,
+.thm-config-window .btn-add-compendium:active {
+    transform: translateY(2px) !important;
+    box-shadow: inset 0 0 5px rgba(255, 0, 60, 0.3) !important;
+}
+
+.thm-config-window .compendium-results {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 5px;
+    padding-right: 5px;
+}
+
+/* ==========================================================================
+   Стилизация ползунка (Киберпанк Скроллбар для настроек)
+   ========================================================================== */
+.thm-config-window::-webkit-scrollbar,
+.thm-config-window .compendium-results::-webkit-scrollbar {
+    width: 6px;
+}
+.thm-config-window::-webkit-scrollbar-track,
+.thm-config-window .compendium-results::-webkit-scrollbar-track {
+    background: #050505;
+    border-left: 1px solid #5a0015;
+}
+.thm-config-window::-webkit-scrollbar-thumb,
+.thm-config-window .compendium-results::-webkit-scrollbar-thumb {
+    background: #5a0015;
+    border-radius: 0;
+}
+.thm-config-window::-webkit-scrollbar-thumb:hover,
+.thm-config-window .compendium-results::-webkit-scrollbar-thumb:hover {
+    background: #ff003c;
+}

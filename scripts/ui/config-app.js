@@ -105,6 +105,8 @@ export class TreasureHoardConfig extends FormApplication {
     // Добавляем данные о типах торговцев из адаптера
     const shopConfiguration = game.THM?.manager?.systemAdapter?.getShopConfiguration() || { shopTypes: {}, categoryConfig: {} };
     const shopTypes = shopConfiguration.shopTypes;
+    const isCyberpunk = game.system.id === 'cyberpunk-red-core';
+    const categories = game.THM?.manager?.systemAdapter?.getItemCategories?.() || this._getDefaultCategories();
 
     // Проверяем что typeSpecific имеет значение по умолчанию для shopType
     if (!typeSpecific.shopType) {
@@ -118,18 +120,35 @@ export class TreasureHoardConfig extends FormApplication {
       hoardType: hoardType,
       isContainer: hoardType === 'container',
       isShop: hoardType === 'shop',
-      isBlackMarket: hoardType === 'blackmarket', // <-- НОВОЕ
+      isBlackMarket: hoardType === 'blackmarket',
       hasTypeSpecific: !!hoardType,
       typeSpecific: typeSpecific,
       shopTypes: shopTypes,
+      isCyberpunk: isCyberpunk,
+      categories: categories,
       pricingConfig: game.THM?.manager?.systemAdapter?.getPricingConfig() || { methods: ['default'] },
       settings: savedSettings.general || CONSTANTS.DEFAULTS,
       types: {
         container: "Контейнер / Сундук",
         shop: "Магазин / Торговец",
-        blackmarket: "Чёрный рынок" // <-- Новинка
+        blackmarket: "Чёрный рынок"
       }
     };
+  }
+
+  /**
+   * Категории по умолчанию (фэнтези)
+   */
+  _getDefaultCategories() {
+    return [
+      { key: 'categoryWeapons', label: 'Оружие', icon: 'fas fa-sword' },
+      { key: 'categoryArmor', label: 'Броня', icon: 'fas fa-shield' },
+      { key: 'categoryPotions', label: 'Зелья', icon: 'fas fa-flask' },
+      { key: 'categoryScrolls', label: 'Свитки', icon: 'fas fa-scroll' },
+      { key: 'categoryFood', label: 'Еда', icon: 'fas fa-drumstick-bite' },
+      { key: 'categoryGems', label: 'Камни', icon: 'fas fa-gem' },
+      { key: 'categoryMaterials', label: 'Материалы', icon: 'fas fa-hammer' }
+    ];
   }
 
   activateListeners(html) {

@@ -195,9 +195,11 @@
               <input type="radio" name="shopType" value="{{@key}}" id="shop-{{@key}}" {{checked (eq
                 ../typeSpecific.shopType @key)}}>
               <label for="shop-{{@key}}" class="shop-type-label">
+                {{#unless ../isCyberpunk}}
                 <div class="shop-type-icon">
                   <img src="{{icon}}" alt="{{name}}">
                 </div>
+                {{/unless}}
                 <div class="shop-type-info">
                   <h4>{{name}}</h4>
                   <p>{{description}}</p>
@@ -214,62 +216,16 @@
           <p class="notes" style="margin-top: 0;">Автоматически настраивается на основе типа торговца.</p>
 
           <div class="category-grid">
+            {{#each categories}}
             <div class="category-item">
               <label>
-                <input type="checkbox" name="categoryWeapons" {{checked typeSpecific.categoryWeapons}}>
+                <input type="checkbox" name="{{key}}" {{checked (lookup ../typeSpecific key)}}>
                 <div class="category-content">
-                  <i class="fas fa-sword"></i> <span>Оружие</span>
+                  <i class="{{icon}}"></i> <span>{{label}}</span>
                 </div>
               </label>
             </div>
-            <div class="category-item">
-              <label>
-                <input type="checkbox" name="categoryArmor" {{checked typeSpecific.categoryArmor}}>
-                <div class="category-content">
-                  <i class="fas fa-shield"></i> <span>Броня</span>
-                </div>
-              </label>
-            </div>
-            <div class="category-item">
-              <label>
-                <input type="checkbox" name="categoryPotions" {{checked typeSpecific.categoryPotions}}>
-                <div class="category-content">
-                  <i class="fas fa-flask"></i> <span>Зелья</span>
-                </div>
-              </label>
-            </div>
-            <div class="category-item">
-              <label>
-                <input type="checkbox" name="categoryScrolls" {{checked typeSpecific.categoryScrolls}}>
-                <div class="category-content">
-                  <i class="fas fa-scroll"></i> <span>Свитки</span>
-                </div>
-              </label>
-            </div>
-            <div class="category-item">
-              <label>
-                <input type="checkbox" name="categoryFood" {{checked typeSpecific.categoryFood}}>
-                <div class="category-content">
-                  <i class="fas fa-drumstick-bite"></i> <span>Еда</span>
-                </div>
-              </label>
-            </div>
-            <div class="category-item">
-              <label>
-                <input type="checkbox" name="categoryGems" {{checked typeSpecific.categoryGems}}>
-                <div class="category-content">
-                  <i class="fas fa-gem"></i> <span>Камни</span>
-                </div>
-              </label>
-            </div>
-            <div class="category-item">
-              <label>
-                <input type="checkbox" name="categoryMaterials" {{checked typeSpecific.categoryMaterials}}>
-                <div class="category-content">
-                  <i class="fas fa-hammer"></i> <span>Материалы</span>
-                </div>
-              </label>
-            </div>
+            {{/each}}
           </div>
         </div>
 
