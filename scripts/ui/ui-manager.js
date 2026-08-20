@@ -629,6 +629,11 @@ export class UIManager {
           this.refreshTokenHUD(actor);
         }
       }
+      
+      // Обработка изменений токенов для corpse-manager
+      if (this.mainManager?.corpseManager) {
+        this.mainManager.corpseManager.handleTokenUpdate(token, updateData);
+      }
     });
     
     // Обработчик для закрытия окон при смене сцены

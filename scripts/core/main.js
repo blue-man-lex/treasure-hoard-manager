@@ -6,6 +6,7 @@ import { ShopManager } from '../shops/shop-manager.js';
 import { BlackMarketManager } from '../managers/blackmarket-manager.js';
 import { UIManager } from '../ui/ui-manager.js';
 import { SocketManager } from '../sockets/socket-manager.js';
+import { CorpseManager } from '../item-management/corpse-manager.js';
 
 export class TreasureHoardManager {
   constructor(systemAdapter) {
@@ -17,6 +18,7 @@ export class TreasureHoardManager {
     this.blackMarketManager = new BlackMarketManager(this);
     this.uiManager = new UIManager(this);
     this.socketManager = new SocketManager(this);
+    this.corpseManager = new CorpseManager(this);
     
     // Кэш для проверок
     this._validationCache = new Map();
@@ -432,14 +434,7 @@ export class TreasureHoardManager {
     }
     
     // Открываем интерфейс по типу
-    if (this.isContainer(target)) {
-      await this.uiManager.showContainerInterface(actor, { bypassPermission: true });
-    } else if (this.isHoard(target)) {
-      console.log(`THM | Opening hoard interface for: ${actor.name}`);
-      // await this.uiManager.showHoardInterface(actor); // ВРЕМЕННО ЗАГЛУШЕНО
-      console.log(`THM | Hoard interface not implemented yet - using container as fallback`);
-      await this.uiManager.showContainerInterface(actor, { bypassPermission: true });
-    } else if (this.isShop(target)) {
+    if (this.isShop(target)) {
       await this.uiManager.showShopInterface(actor, { bypassPermission: true });
     } else if (this.isBlackMarket(target)) {
       await this.uiManager.showBlackMarketInterface(actor, { bypassPermission: true });

@@ -17,6 +17,26 @@
       "DebugMode": {
         "Name": "Debug Mode",
         "Hint": "Enables detailed logging for pricing system debugging"
+      },
+      "EnableCorpseLooting": {
+        "Name": "🪦 Corpse Looting (D&D 5e)",
+        "Hint": "Automatically converts dead NPCs into lootable containers. Works only in D&D 5e."
+      },
+      "AutoOpenCorpseOnDeath": {
+        "Name": "Auto-notify about corpses",
+        "Hint": "Send a chat message to players when an NPC dies and becomes available for looting"
+      },
+      "DeleteEmptyCorpse": {
+        "Name": "Delete empty corpses",
+        "Hint": "Automatically delete corpse token when all items and currency are looted"
+      },
+      "CorpseVisualEffects": {
+        "Name": "Corpse visual effects",
+        "Hint": "Apply visual changes to corpse tokens (gray tint, transparency)"
+      },
+      "CorpseDecayTime": {
+        "Name": "Corpse decay time (hours)",
+        "Hint": "After how many game hours the corpse will automatically disappear. 0 = corpses never decay."
       }
     },
     "Settings": {

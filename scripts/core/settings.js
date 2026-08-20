@@ -44,6 +44,66 @@ export class THMSettings {
       },
       requiresReload: true
     });
+
+    // ========== CORPSE LOOTING SETTINGS (D&D 5e only) ==========
+
+    // Включение функции обыска трупов
+    game.settings.register(THMSettings.MODULE_NAME, 'enableCorpseLooting', {
+      name: 'THM.SETTINGS.EnableCorpseLooting.Name',
+      hint: 'THM.SETTINGS.EnableCorpseLooting.Hint',
+      scope: 'world',
+      config: true,
+      default: false,
+      type: Boolean,
+      onChange: value => {
+        console.log(`THM Settings | Corpse Looting ${value ? 'enabled' : 'disabled'}`);
+      }
+    });
+
+    // Автоматическое открытие интерфейса при смерти
+    game.settings.register(THMSettings.MODULE_NAME, 'autoOpenCorpseOnDeath', {
+      name: 'THM.SETTINGS.AutoOpenCorpseOnDeath.Name',
+      hint: 'THM.SETTINGS.AutoOpenCorpseOnDeath.Hint',
+      scope: 'world',
+      config: true,
+      default: false,
+      type: Boolean
+    });
+
+    // Удаление пустых трупов
+    game.settings.register(THMSettings.MODULE_NAME, 'deleteEmptyCorpse', {
+      name: 'THM.SETTINGS.DeleteEmptyCorpse.Name',
+      hint: 'THM.SETTINGS.DeleteEmptyCorpse.Hint',
+      scope: 'world',
+      config: true,
+      default: true,
+      type: Boolean
+    });
+
+    // Визуальные эффекты для трупов
+    game.settings.register(THMSettings.MODULE_NAME, 'corpseVisualEffects', {
+      name: 'THM.SETTINGS.CorpseVisualEffects.Name',
+      hint: 'THM.SETTINGS.CorpseVisualEffects.Hint',
+      scope: 'world',
+      config: true,
+      default: true,
+      type: Boolean
+    });
+
+    // Время разложения трупа (в часах)
+    game.settings.register(THMSettings.MODULE_NAME, 'corpseDecayTime', {
+      name: 'THM.SETTINGS.CorpseDecayTime.Name',
+      hint: 'THM.SETTINGS.CorpseDecayTime.Hint',
+      scope: 'world',
+      config: true,
+      default: 0,
+      type: Number,
+      range: {
+        min: 0,
+        max: 168,
+        step: 1
+      }
+    });
   }
   
   /**
@@ -55,6 +115,27 @@ export class THMSettings {
   
   static get debugMode() {
     return game.settings.get(THMSettings.MODULE_NAME, 'debugMode');
+  }
+
+  // Corpse Looting settings
+  static get enableCorpseLooting() {
+    return game.settings.get(THMSettings.MODULE_NAME, 'enableCorpseLooting');
+  }
+
+  static get autoOpenCorpseOnDeath() {
+    return game.settings.get(THMSettings.MODULE_NAME, 'autoOpenCorpseOnDeath');
+  }
+
+  static get deleteEmptyCorpse() {
+    return game.settings.get(THMSettings.MODULE_NAME, 'deleteEmptyCorpse');
+  }
+
+  static get corpseVisualEffects() {
+    return game.settings.get(THMSettings.MODULE_NAME, 'corpseVisualEffects');
+  }
+
+  static get corpseDecayTime() {
+    return game.settings.get(THMSettings.MODULE_NAME, 'corpseDecayTime');
   }
 
   /**

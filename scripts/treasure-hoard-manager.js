@@ -284,6 +284,14 @@ class TreasureHoardModule {
 
     // Запуск основной логики
     if (this.manager) await this.manager.postInit();
+    
+    // Инициализация Corpse Manager (только для D&D 5e)
+    if (game.system.id === 'dnd5e' && this.manager.corpseManager) {
+      this.manager.corpseManager.init();
+      console.log('THM | Corpse Manager initialized for D&D 5e');
+      console.log('THM | Corpse looting hooks registered');
+    }
+    
     logger.info('Модуль THM полностью готов!');
   }
 }
@@ -299,4 +307,61 @@ Hooks.on('init', () => {
 Hooks.on('ready', () => {
   console.log('THM MAIN | Хук ready вызван!');
   thmModule.onReady();
+});
+
+// ============================================================================
+// ХУКИ ДЛЯ СИСТЕМЫ ТРУПОВ (Corpse Manager)
+// ============================================================================
+
+// Хук 1: Отслеживание изменения HP (только для GM и только NPC)
+Hooks.on('updateActor', async (actor, changes, options, userId) => {
+  if (!game.user.isGM) return;
+  if (!game.THM?.manager?.corpseManager) return;
+  if (!actor || actor.type !== 'npc') return; // ТОЛЬКО NPC!
+  
+  // Проверяем изменение HP
+  if (changes.system?.attributes?.hp !== undefined) {
+    console.log(`THM Corpse | updateActor hook - HP changed for NPC ${actor.name}`);
+    await game.THM.manager.corpseManager.handleActorUpdate(actor);
+  }
+});
+
+// Хук 2: Отслеживание добавления статуса "dead" (только для GM и только NPC)
+Hooks.on('createActiveEffect', async (effect, options, userId) => {
+  if (!game.user.isGM) return;
+  if (!game.THM?.manager?.corpseManager) return;
+  
+  const actor = effect.parent;
+  if (!(actor instanceof Actor)) return;
+  if (actor.type !== 'npc') return; // ТОЛЬКО NPC!
+  
+  // Проверяем статус "dead"
+  const isDead = effect.statuses?.has('dead') || 
+                 effect.flags?.core?.statusId === 'dead' ||
+                 effect.name?.toLowerCase().includes('dead') ||
+                 effect.name?.toLowerCase().includes('мертв');
+  
+  if (isDead) {
+    console.log(`THM Corpse | createActiveEffect hook - Dead status added to NPC ${actor.name}`);
+    await game.THM.manager.corpseManager.handleActorUpdate(actor);
+  }
+});
+
+// Хук 3: Отслеживание удаления статуса "dead" для воскрешения (только для GM и только NPC)
+Hooks.on('deleteActiveEffect', async (effect, options, userId) => {
+  if (!game.user.isGM) return;
+  if (!game.THM?.manager?.corpseManager) return;
+  
+  const actor = effect.parent;
+  if (!(actor instanceof Actor)) return;
+  if (actor.type !== 'npc') return; // ТОЛЬКО NPC!
+  
+  // Проверяем удаление статуса "dead" (воскрешение)
+  const wasDead = effect.statuses?.has('dead') || 
+                  effect.flags?.core?.statusId === 'dead';
+  
+  if (wasDead) {
+    console.log(`THM Corpse | deleteActiveEffect hook - Dead status removed from NPC ${actor.name}`);
+    await game.THM.manager.corpseManager.handleActorUpdate(actor);
+  }
 });
