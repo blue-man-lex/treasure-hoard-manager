@@ -22,8 +22,11 @@ export class SocketManager {
     logger.info('Инициализация Socket Manager...');
 
     if (!game.modules.get('socketlib')?.active) {
-      logger.error('Treasure Hoard Manager требует модуль socketlib');
-      throw new Error('Treasure Hoard Manager требует модуль socketlib');
+      logger.warn('THM | socketlib не активен. Мультиплеерные функции будут ограничены.');
+      if (game.user.isGM && typeof ui !== 'undefined') {
+        ui.notifications?.warn('THM: Для работы торговли и передачи предметов между игроками требуется включить модуль socketlib.');
+      }
+      return;
     }
 
     logger.debug('THM Socket Manager | Initializing socketlib...');
@@ -113,7 +116,9 @@ export class SocketManager {
    */
   registerHandler(name, handler) {
     this.handlers.set(name, handler);
-    this.socket.register(name, handler);
+    if (this.socket) {
+      this.socket.register(name, handler);
+    }
     logger.debug(`THM Socket Manager | Registered handler: ${name}`);
   }
 
@@ -126,8 +131,10 @@ export class SocketManager {
 
       if (!game.user.isGM) return;
 
-      const container = await fromUuid(containerUuid);
-      const looter = await fromUuid(looterUuid);
+      const rawContainer = await fromUuid(containerUuid);
+      const container = rawContainer?.actor || rawContainer;
+      const rawLooter = await fromUuid(looterUuid);
+      const looter = rawLooter?.actor || rawLooter;
 
       if (!container || !looter) {
         console.warn('THM Socket | Invalid actors in loot item:', { containerUuid, looterUuid });
@@ -168,8 +175,10 @@ export class SocketManager {
       const { containerUuid, looterUuid, userId } = data;
 
       // Получаем актеров
-      const container = await fromUuid(containerUuid);
-      const looter = await fromUuid(looterUuid);
+      const rawContainer = await fromUuid(containerUuid);
+      const container = rawContainer?.actor || rawContainer;
+      const rawLooter = await fromUuid(looterUuid);
+      const looter = rawLooter?.actor || rawLooter;
 
       if (!container || !looter) {
         throw new Error('Контейнер или игрок не найден');
@@ -181,12 +190,13 @@ export class SocketManager {
       }
 
       // 1. ЗАБИРАЕМ ПРЕДМЕТЫ
-      const items = container.items.map(item => item.toObject());
+      const itemCollection = container.items?.contents || (container.items?.values ? Array.from(container.items.values()) : (container.items || []));
+      const items = itemCollection.map(item => item.toObject ? item.toObject() : item);
 
       if (items.length > 0) {
         // Перемещаем все предметы игроку
         await looter.createEmbeddedDocuments('Item', items);
-        await container.deleteEmbeddedDocuments('Item', container.items.map(i => i.id));
+        await container.deleteEmbeddedDocuments('Item', itemCollection.map(i => i.id));
       }
 
       // 2. ЗАБИРАЕМ ВАЛЮТУ (с учетом настроек деления)
@@ -216,8 +226,10 @@ export class SocketManager {
       const { containerUuid, looterUuid, userId } = data;
 
       // Получаем актеров
-      const container = await fromUuid(containerUuid);
-      const looter = await fromUuid(looterUuid);
+      const rawContainer = await fromUuid(containerUuid);
+      const container = rawContainer?.actor || rawContainer;
+      const rawLooter = await fromUuid(looterUuid);
+      const looter = rawLooter?.actor || rawLooter;
 
       if (!container || !looter) {
         throw new Error('Контейнер или игрок не найден');
@@ -454,13 +466,12 @@ export class SocketManager {
    * Выполнение от имени GM (одного)
    */
   async executeAsGM(handlerName, data) {
-    if (!this.ready) {
-      logger.error('THM Socket | Socket manager not ready');
-      return;
-    }
-
-    if (!this.socket) {
-      logger.error('THM Socket | Socket not initialized');
+    if (!this.ready || !this.socket) {
+      if (game.user.isGM && this.handlers.has(handlerName)) {
+        logger.debug(`THM Socket | Executing ${handlerName} directly for local GM`);
+        return await this.handlers.get(handlerName)(data);
+      }
+      logger.error('THM Socket | Socket manager not ready or socket not initialized');
       return;
     }
 

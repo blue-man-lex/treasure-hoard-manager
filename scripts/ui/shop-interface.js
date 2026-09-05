@@ -8,12 +8,12 @@ export class ShopInterface extends FormApplication {
     this.actor = actor;
 
     // Проверяем доступность shopManager
-    const module = game.modules.get('treasure-hoard-manager');
-    if (!module || !module.manager || !module.manager.shopManager) {
+    const manager = game.THM?.manager || game.modules.get('treasure-hoard-manager')?.manager;
+    if (!manager || !manager.shopManager) {
       console.error('THM Shop Interface | ShopManager not available');
       this.shopManager = null;
     } else {
-      this.shopManager = module.manager.shopManager;
+      this.shopManager = manager.shopManager;
     }
 
     this.rarityFilter = '';
@@ -584,7 +584,8 @@ export class ShopInterface extends FormApplication {
    */
   openShopSettings() {
     // Открываем конфигурацию магазина
-    const configApp = game.modules.get('treasure-hoard-manager').manager.uiManager.configApp;
+    const manager = game.THM?.manager || game.modules.get('treasure-hoard-manager')?.manager;
+    const configApp = manager?.uiManager?.configApp;
     if (configApp) {
       configApp.render(true, { actor: this.actor });
     } else {
@@ -1503,7 +1504,7 @@ export class ShopInterface extends FormApplication {
   async executeTrade(playerValueAtoms, merchantValueAtoms, balancedMode = false) {
     const player = this.getPlayerActor();
     const merchant = this.actor;
-    const itemManager = game.modules.get(CONSTANTS.MODULE_NAME).manager.itemManager;
+    const itemManager = this.shopManager?.mainManager?.itemManager || game.THM?.manager?.itemManager || game.modules.get(CONSTANTS.MODULE_NAME)?.manager?.itemManager;
     const adapter = this.shopManager.mainManager.systemAdapter;
 
     const useNpcCurrency = this.getShopSettings().useNpcCurrency ?? true;
@@ -1570,9 +1571,9 @@ export class ShopInterface extends FormApplication {
       this.render(true);
 
       // 4. Оповещение через сокеты
-      const module = game.modules.get(CONSTANTS.MODULE_NAME);
-      if (module.manager?.socketManager) {
-        module.manager.socketManager.broadcast('updateHoard', {
+      const socketManager = this.shopManager?.mainManager?.socketManager || game.THM?.manager?.socketManager || game.modules.get(CONSTANTS.MODULE_NAME)?.manager?.socketManager;
+      if (socketManager) {
+        socketManager.broadcast('updateHoard', {
           actorUuid: merchant.uuid,
           action: "inventory_refreshed"
         }).catch(err => console.warn("THM | Broadcast omitted:", err));

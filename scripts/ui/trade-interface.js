@@ -12,8 +12,8 @@ export class TradeInterface extends Application {
     super(options);
 
     this.tradeId = tradeId;
-    this.tradeManager = game.modules.get('treasure-hoard-manager')?.manager?.tradeManager;
-    this.mainManager = game.modules.get('treasure-hoard-manager')?.manager;
+    this.tradeManager = game.THM?.manager?.tradeManager || game.modules.get('treasure-hoard-manager')?.manager?.tradeManager;
+    this.mainManager = game.THM?.manager || game.modules.get('treasure-hoard-manager')?.manager;
 
     if (!this.tradeManager) {
       throw new Error('Trade Manager не найден!');

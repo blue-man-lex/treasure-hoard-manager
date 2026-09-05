@@ -180,19 +180,20 @@ export class HoardManager {
    * @returns {number} Расстояние в клетках
    */
   _getTokenDistance(tokenA, tokenB) {
+    const gridSize = canvas.dimensions?.size || canvas.grid?.sizeX || canvas.grid?.size || 100;
     // Получаем прямоугольные области токенов с поддержкой разных типов
     const rectA = {
       x: tokenA.x,
       y: tokenA.y,
-      w: (tokenA.document?.width || tokenA.width) * canvas.grid.size,
-      h: (tokenA.document?.height || tokenA.height) * canvas.grid.size
+      w: (tokenA.document?.width || tokenA.width) * gridSize,
+      h: (tokenA.document?.height || tokenA.height) * gridSize
     };
     
     const rectB = {
       x: tokenB.x,
       y: tokenB.y,
-      w: (tokenB.document?.width || tokenB.width) * canvas.grid.size,
-      h: (tokenB.document?.height || tokenB.height) * canvas.grid.size
+      w: (tokenB.document?.width || tokenB.width) * gridSize,
+      h: (tokenB.document?.height || tokenB.height) * gridSize
     };
     
     console.log(`THM | Token A rect:`, rectA);
@@ -202,7 +203,7 @@ export class HoardManager {
     const distance = this._distanceBetweenRects(rectA, rectB);
     
     // Конвертируем в клетки и добавляем 1 (как в Item Piles)
-    return Math.floor(distance / canvas.grid.size) + 1;
+    return Math.floor(distance / gridSize) + 1;
   }
 
   /**
@@ -265,25 +266,16 @@ export class HoardManager {
       return { allowed: false, reason: 'Не является кучей добычи THM' };
     }
     
-    // Получаем настройки - сначала из токена, потом из актера
-    let settings = null;
-    
-    // Если это TokenDocument, получаем флаги напрямую из него
-    if (actor instanceof TokenDocument) {
-      settings = actor.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.SETTINGS);
-      console.log(`THM | Settings from TokenDocument:`, settings);
-    } 
-    // Если это Actor, пробуем получить из токена на сцене
-    else if (actor instanceof Actor && actor.token) {
-      settings = actor.token.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.SETTINGS);
-      console.log(`THM | Settings from actor.token:`, settings);
+    // Если пользователь - GM, всегда разрешаем доступ
+    if (user.isGM) {
+      return { allowed: true };
     }
     
-    // Fallback на актера
-    if (!settings) {
-      settings = actor.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.SETTINGS);
-      console.log(`THM | Settings from actor fallback:`, settings);
-    }
+    // Получаем настройки - проверяем и документ токена, и актера
+    const targetDoc = actor instanceof TokenDocument ? actor : (actor.token || actor);
+    const targetActor = actor instanceof TokenDocument ? actor.actor : (actor.actor || actor);
+    const settings = targetDoc?.getFlag?.(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.SETTINGS) ||
+                     targetActor?.getFlag?.(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.SETTINGS) || {};
     
     const generalSettings = settings?.general || {};
     console.log(`THM | General settings:`, generalSettings);

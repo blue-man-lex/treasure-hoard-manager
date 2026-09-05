@@ -117,7 +117,7 @@ export class Dnd5eAdapter extends SystemAdapter {
    * Получение данных о редкости предмета
    */
   getItemRarityData(item) {
-    const rarityValue = item.system.rarity?.toLowerCase?.() || item.system.rarity?.value?.toLowerCase?.() || 'common';
+    const rarityValue = item?.system?.rarity?.toLowerCase?.() || item?.system?.rarity?.value?.toLowerCase?.() || 'common';
 
     // Формируем чистый класс для CSS (very rare -> veryrare)
     const rarityClass = rarityValue.replace(/\s+/g, '').replace(/-/g, '');
@@ -724,7 +724,7 @@ export class Dnd5eAdapter extends SystemAdapter {
     if (method === 'xge' && typeof priceData === 'string') {
       try {
         const roll = new Roll(priceData);
-        basePrice = (await roll.evaluate({ async: true })).total;
+        basePrice = (await roll.evaluate()).total;
       } catch (error) {
         console.warn(`THM Adapter | XGE roll failed for ${item.name}:`, error);
         basePrice = 100;

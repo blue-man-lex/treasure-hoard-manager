@@ -50,17 +50,26 @@ class TreasureHoardModule {
     THMPricingHook.init();
     console.log('THM INIT | Хук автоматического назначения цен инициализирован');
 
-    // 4. Сохраняем в объект модуля для доступа
-    game.modules.get('treasure-hoard-manager').manager = this.manager;
-
-    // 5. Создаем API для внешних модулей (например SLS)
-    game.modules.get('treasure-hoard-manager').api = {
-      hoardManager: this.manager.hoardManager,
-      shopManager: this.manager.shopManager,
-      itemManager: this.manager.itemManager,
-      systemAdapter: this.systemAdapter,
-      CONSTANTS: CONSTANTS
+    // 4. Инициализация глобального объекта
+    game.THM = {
+      manager: this.manager,
+      api: {
+        hoardManager: this.manager.hoardManager,
+        shopManager: this.manager.shopManager,
+        itemManager: this.manager.itemManager,
+        systemAdapter: this.systemAdapter,
+        CONSTANTS: CONSTANTS
+      },
+      activeTheme: THMSettings.getActiveTheme(),
+      systemAdapter: this.systemAdapter
     };
+
+    // 5. Сохраняем в объект модуля для доступа
+    const thmModuleDoc = game.modules.get('treasure-hoard-manager');
+    if (thmModuleDoc && Object.isExtensible(thmModuleDoc)) {
+      thmModuleDoc.manager = this.manager;
+      thmModuleDoc.api = game.THM.api;
+    }
 
     console.log('THM INIT | API создан и доступен для внешних модулей');
     console.log('THM INIT | Модуль успешно инициализирован');
@@ -74,7 +83,10 @@ class TreasureHoardModule {
     this.activeTheme = theme;
 
     // Сохраняем тему на модуле для доступа из других компонентов
-    game.modules.get('treasure-hoard-manager').activeTheme = theme;
+    const thmModuleDoc = game.modules.get('treasure-hoard-manager');
+    if (thmModuleDoc && Object.isExtensible(thmModuleDoc)) {
+      thmModuleDoc.activeTheme = theme;
+    }
 
     const basePath = theme === 'cyberpunk'
       ? 'modules/treasure-hoard-manager/styles-CPR'
@@ -145,7 +157,8 @@ class TreasureHoardModule {
     }
 
     // 5. ✅ ДОБАВЛЯЕМ КОМАНДЫ ДЛЯ ОТЛАДКИ В КОНСОЛЬ
-    game.THM = {
+    game.THM = game.THM || {};
+    Object.assign(game.THM, {
       manager: this.manager,
       uiManager: this.manager.uiManager,
       logger: logger,
@@ -263,7 +276,7 @@ class TreasureHoardModule {
         logger.debug(`  - Prototype Token: ${JSON.stringify(actor.prototypeToken)}`);
         logger.info('=== END ACTOR CHECK ===');
       }
-    };
+    });
 
     logger.info('Команды THM доступны в консоли: game.THM');
 

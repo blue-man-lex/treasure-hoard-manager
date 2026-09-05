@@ -125,9 +125,10 @@ export class TreasureHoardManager {
     
     // ЕСЛИ ВАЛИДЕН - ЧИТАЕМ КОНКРЕТНЫЙ ТИП
     const actor = target.actor || target;
-    const flagTarget = actor.token || actor;
-    const flags = foundry.utils.getProperty(flagTarget, 'flags.treasure-hoard-manager');
-    const flagType = flags?.data?.type || flags?.type;
+    const tokenDoc = actor.token || (target.document ? target.document : null);
+    const tokenFlags = tokenDoc ? foundry.utils.getProperty(tokenDoc, 'flags.treasure-hoard-manager') : null;
+    const actorFlags = foundry.utils.getProperty(actor, 'flags.treasure-hoard-manager');
+    const flagType = tokenFlags?.data?.type || tokenFlags?.type || actorFlags?.data?.type || actorFlags?.type;
     return flagType === type;
   }
 
@@ -169,7 +170,8 @@ export class TreasureHoardManager {
   getTokensAtLocation(position) {
     const tokens = [...canvas.tokens.placeables].filter((token) => token?.mesh?.visible);
     return tokens.filter((token) => {
-      return position.x >= token.x && position.x < token.x + token.document.width * canvas.grid.size && position.y >= token.y && position.y < token.y + token.document.height * canvas.grid.size;
+      const gridSize = canvas.dimensions?.size || canvas.grid?.sizeX || canvas.grid?.size || 100;
+      return position.x >= token.x && position.x < token.x + token.document.width * gridSize && position.y >= token.y && position.y < token.y + token.document.height * gridSize;
     });
   }
 
@@ -213,16 +215,21 @@ export class TreasureHoardManager {
     });
 
     // ПЕРЕОПРЕДЕЛЯЕМ render ДЛЯ ВСЕХ ЛИСТОВ АКТЕРОВ
-    const sheetOverrides = Object.keys(CONFIG.Actor.sheetClasses).reduce((acc, str) => {
-      const sheets = Object.keys(CONFIG.Actor.sheetClasses[str]);
-      return acc.concat(
-        sheets.filter((sheet) => {
-          return !acc.some((override) => override.includes(`["${sheet}"]`));
-        }).map((sheet) => {
-          return `CONFIG.Actor.sheetClasses.${str}.["${sheet}"].cls.prototype.render`;
-        })
-      );
-    }, []).flat();
+    let sheetOverrides = [];
+    if (CONFIG.Actor?.sheetClasses) {
+      sheetOverrides = Object.keys(CONFIG.Actor.sheetClasses).reduce((acc, str) => {
+        const classStr = CONFIG.Actor.sheetClasses[str];
+        if (!classStr) return acc;
+        const sheets = Object.keys(classStr);
+        return acc.concat(
+          sheets.filter((sheet) => {
+            return !acc.some((override) => override.includes(`["${sheet}"]`));
+          }).map((sheet) => {
+            return `CONFIG.Actor.sheetClasses.${str}.["${sheet}"].cls.prototype.render`;
+          })
+        );
+      }, []).flat();
+    }
 
     // Метод override для рендера
     const sheetOverrideMethod = function(wrapped, forced, options, ...args) {
@@ -345,11 +352,14 @@ export class TreasureHoardManager {
       }
       
       // Блокируем стандартный лист актера
-      event.preventDefault();
-      event.stopPropagation();
+      const event = args[0] || (typeof window !== 'undefined' ? window.event : null);
+      if (event) {
+        event.preventDefault?.();
+        event.stopPropagation?.();
+      }
       
       // Открываем наш интерфейс
-      self.renderTHMInterface(this.document);
+      self.renderTHMInterface(this.document, { bypassPermission: true });
       
       return false;
     }, "MIXED");
@@ -371,10 +381,10 @@ export class TreasureHoardManager {
     if (options.bypassPermission) {
       hasPermission = true;
     } else {
-      // Если это токен, проверяем права токена через testUserPermission
+      const TokenCls = foundry?.canvas?.placeables?.Token || (typeof Token !== 'undefined' ? Token : null);
       if (target instanceof TokenDocument) {
         hasPermission = hasPermission || target.testUserPermission(game.user, CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER);
-      } else if (typeof Token !== 'undefined' && target instanceof Token) {
+      } else if (TokenCls && target instanceof TokenCls) {
         hasPermission = hasPermission || target.document.testUserPermission(game.user, CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER);
       } else {
         hasPermission = hasPermission || target.testUserPermission(game.user, CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER);
@@ -469,7 +479,17 @@ export class TreasureHoardManager {
       }
       
       // Проверяем, есть ли под курсором токены
-      const { x, y } = canvas.grid.getTopLeftPoint(dropData);
+      let pos = { x: dropData.x, y: dropData.y };
+      if (typeof canvas?.grid?.getTopLeftPoint === 'function') {
+        pos = canvas.grid.getTopLeftPoint(dropData);
+      } else if (typeof canvas?.grid?.getSnappedPoint === 'function') {
+        const mode = CONST.GRID_SNAPPING_MODES?.TOP_LEFT_VERTEX ?? 1;
+        pos = canvas.grid.getSnappedPoint(dropData, { mode });
+      } else if (typeof canvas?.grid?.getTopLeft === 'function') {
+        const [gx, gy] = canvas.grid.getTopLeft(dropData.x, dropData.y);
+        pos = { x: gx, y: gy };
+      }
+      const { x, y } = pos;
       const tokensAtLocation = this.getTokensAtLocation({ x, y });
       
       if (tokensAtLocation.length) {
@@ -756,7 +776,7 @@ export class TreasureHoardManager {
     if (!game.user.isGM) return;
     
     // ПРАВИЛЬНОЕ получение актера 
-    const actor = actorSheet?.actor;
+    const actor = actorSheet?.actor || actorSheet?.document;
     if (!actor || !(actor instanceof Actor)) {
       console.warn('THM | No valid actor found for header controls');
       return;
@@ -770,6 +790,7 @@ export class TreasureHoardManager {
     };
     
     buttons.unshift({
+      action: "thm",
       label: "THM",
       icon: "fa-solid fa-coins",
       class: "thm-config-button",

@@ -33,7 +33,7 @@ export class THMPricingHook {
     }
     
     // Генерируем цену через системный адаптер
-    const adapter = game.modules.get(CONSTANTS.MODULE_NAME).api.systemAdapter;
+    const adapter = game.THM?.systemAdapter || game.modules.get(CONSTANTS.MODULE_NAME)?.api?.systemAdapter;
     if (!adapter) return;
 
     const priceMethod = 'dmg'; // Глобально всегда используем метод Диапазонов (DMG)

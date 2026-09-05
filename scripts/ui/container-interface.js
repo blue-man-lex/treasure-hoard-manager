@@ -161,7 +161,7 @@ export class ContainerInterface extends FormApplication {
     }
 
     // Для ГМа или незапертого контейнера - показываем всё как обычно
-    const mainManager = game.modules.get('treasure-hoard-manager').manager;
+    const mainManager = game.THM?.manager || game.modules.get('treasure-hoard-manager')?.manager;
     const adapter = mainManager.systemAdapter;
 
     // Получаем валюту через адаптер и формируем HTML
@@ -256,7 +256,7 @@ export class ContainerInterface extends FormApplication {
 
     // Используем наш кастомный менеджер сокетов
     try {
-      const mainManager = game.modules.get('treasure-hoard-manager').manager;
+      const mainManager = game.THM?.manager || game.modules.get('treasure-hoard-manager')?.manager;
       await mainManager.socketManager.executeAsGM(CONSTANTS.SOCKET_HOOKS.LOOT_ALL, {
         containerUuid: this.actor.uuid,
         looterUuid: game.user.character?.uuid || canvas.tokens.controlled[0]?.actor?.uuid,
@@ -287,7 +287,7 @@ export class ContainerInterface extends FormApplication {
 
     // Используем наш кастомный менеджер сокетов
     try {
-      const mainManager = game.modules.get('treasure-hoard-manager').manager;
+      const mainManager = game.THM?.manager || game.modules.get('treasure-hoard-manager')?.manager;
       await mainManager.socketManager.executeAsGM(CONSTANTS.SOCKET_HOOKS.LOOT_CURRENCY, {
         containerUuid: this.actor.uuid,
         looterUuid: game.user.character?.uuid || canvas.tokens.controlled[0]?.actor?.uuid,
@@ -323,7 +323,7 @@ export class ContainerInterface extends FormApplication {
 
     // Используем наш кастомный менеджер сокетов
     try {
-      const mainManager = game.modules.get('treasure-hoard-manager').manager;
+      const mainManager = game.THM?.manager || game.modules.get('treasure-hoard-manager')?.manager;
       await mainManager.socketManager.executeAsGM(CONSTANTS.SOCKET_HOOKS.LOOT_ITEM, {
         containerUuid: this.actor.uuid,
         itemId: id,

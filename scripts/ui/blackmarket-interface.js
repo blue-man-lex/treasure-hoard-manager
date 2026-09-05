@@ -66,7 +66,7 @@ export class BlackMarketInterface extends FormApplication {
     ];
 
     // Определяем папку ассетов в зависимости от активной темы
-    const activeTheme = game.modules.get('treasure-hoard-manager')?.activeTheme || 'fantasy';
+    const activeTheme = game.THM?.activeTheme || game.modules.get('treasure-hoard-manager')?.activeTheme || 'fantasy';
     const assetsFolder = activeTheme === 'cyberpunk' ? 'blackmarket-CPR' : 'blackmarket';
 
     for (const s of serviceMap) {
