@@ -37,6 +37,17 @@
       "CorpseDecayTime": {
         "Name": "Corpse decay time (hours)",
         "Hint": "After how many game hours the corpse will automatically disappear. 0 = corpses never decay."
+      },
+      "CorpseLootReview": {
+        "Name": "Defeated Creature Loot Moderation",
+        "Hint": "How to curate loot after a creature dies",
+        "Prompt": "Prompt GM with Loot Setup Dialog",
+        "Auto": "Automatic Smart Filter (No Dialog)",
+        "Never": "Disabled (All creature items)"
+      },
+      "FilterNaturalWeapons": {
+        "Name": "Exclude Natural Weapons & Anatomy",
+        "Hint": "Automatically exclude tentacles, bite, claws, natural armor, and creature organs from player loot"
       }
     },
     "Settings": {

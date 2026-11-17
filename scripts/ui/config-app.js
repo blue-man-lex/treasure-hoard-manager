@@ -60,9 +60,15 @@ export class TreasureHoardConfig extends FormApplication {
       shopType: 'general',
       priceMarkup: 100,
       priceBuyback: 50,
+      priceMethod: 'dmg',
+      useThmPricing: true,
+      prioritizeCompendiumPrice: false,
+      detailedPrices: false,
       overwriteName: false,
       shopGender: 'any',
       useNpcCurrency: true,
+      allowPlatinum: false,
+      allowElectrum: false,
       merchantLevel: 1,
       // Дефолтная редкость (сумма 100% для баланса)
       rarityCommon: 70,
@@ -101,6 +107,8 @@ export class TreasureHoardConfig extends FormApplication {
     // 2. Умное слияние: берем сохраненные данные и накладываем их на дефолты
     // Это заполнит пустые поля, но не затрет то, что мастер уже ввел
     const typeSpecific = foundry.utils.mergeObject(shopDefaults, savedSettings.specific || {});
+    // Синхронизация deleteWhenEmpty для вкладки Настройки Типа у контейнера
+    typeSpecific.deleteWhenEmpty = savedSettings.specific?.deleteWhenEmpty ?? savedSettings.general?.deleteWhenEmpty ?? false;
 
     // Добавляем данные о типах торговцев из адаптера
     const shopConfiguration = game.THM?.manager?.systemAdapter?.getShopConfiguration() || { shopTypes: {}, categoryConfig: {} };
@@ -111,6 +119,18 @@ export class TreasureHoardConfig extends FormApplication {
     // Проверяем что typeSpecific имеет значение по умолчанию для shopType
     if (!typeSpecific.shopType) {
       typeSpecific.shopType = 'general';
+    }
+
+    // Если категории еще не были сохранены (новый магазин), настраиваем их по типу торговца
+    const hasAnyCategorySaved = Object.keys(savedSettings.specific || {}).some(k => k.startsWith('category'));
+    if (!hasAnyCategorySaved) {
+      const activeShopType = typeSpecific.shopType || 'general';
+      const catConfig = shopConfiguration.categoryConfig?.[activeShopType];
+      if (catConfig) {
+        for (const [k, v] of Object.entries(catConfig)) {
+          typeSpecific[k] = Boolean(v);
+        }
+      }
     }
 
     return {
@@ -219,10 +239,18 @@ export class TreasureHoardConfig extends FormApplication {
       setTimeout(() => this.setPosition({ height: "auto" }), 50);
     });
 
-    html.find('input[name="shopType"]').change(ev => {
+    html.find('input[name="shopType"]').on('change', ev => {
       this.autoConfigureCategories(html, ev.target.value);
-      // Фикс пересчета высоты окна
       setTimeout(() => this.setPosition({ height: "auto" }), 50);
+    });
+
+    html.find('.shop-type-option').on('click', ev => {
+      if (ev.target.tagName !== 'INPUT') {
+        const radio = $(ev.currentTarget).find('input[name="shopType"]');
+        if (!radio.prop('checked')) {
+          radio.prop('checked', true).trigger('change');
+        }
+      }
     });
 
     // ФИКС БАГА ПОЛЗУНКОВ: Обновление значений при движении
@@ -454,26 +482,39 @@ export class TreasureHoardConfig extends FormApplication {
       },
       specific: {
         moneySplit: formData.moneySplit,
+        deleteWhenEmpty: formData.deleteWhenEmpty === true,
         access: { online: formData.accessOnline, scene: formData.accessScene },
         // Магазин настройки
         inventorySources: formData.inventorySources,
         shopType: formData.shopType,
         priceMarkup: Number(formData.priceMarkup) || 100,
         priceBuyback: Number(formData.priceBuyback) || 50,
+        priceMethod: formData.priceMethod || 'dmg',
+        useThmPricing: formData.useThmPricing === true,
+        prioritizeCompendiumPrice: formData.prioritizeCompendiumPrice === true,
+        detailedPrices: formData.detailedPrices === true,
         alwaysOpen: formData.alwaysOpen,
         useReputation: formData.useReputation,
         useNpcCurrency: formData.useNpcCurrency,
+        allowPlatinum: formData.allowPlatinum || false,
+        allowElectrum: formData.allowElectrum || false,
         merchantLevel: Number(formData.merchantLevel) || 1,
         overwriteName: formData.overwriteName || false,
         shopGender: formData.shopGender || 'any',
-        // Категории
-        categoryWeapons: formData.categoryWeapons,
-        categoryArmor: formData.categoryArmor,
-        categoryPotions: formData.categoryPotions,
-        categoryScrolls: formData.categoryScrolls,
-        categoryFood: formData.categoryFood,
-        categoryGems: formData.categoryGems,
-        categoryMaterials: formData.categoryMaterials,
+        // Редкость товаров из ползунков
+        rarityCommon: Number(formData.rarityCommon) || 70,
+        rarityUncommon: Number(formData.rarityUncommon) || 20,
+        rarityRare: Number(formData.rarityRare) || 7,
+        rarityVeryRare: Number(formData.rarityVeryRare) || 2,
+        rarityLegendary: Number(formData.rarityLegendary) || 1,
+        // Категории (строгий булевый тип)
+        categoryWeapons: formData.categoryWeapons === true,
+        categoryArmor: formData.categoryArmor === true,
+        categoryPotions: formData.categoryPotions === true,
+        categoryScrolls: formData.categoryScrolls === true,
+        categoryFood: formData.categoryFood === true,
+        categoryGems: formData.categoryGems === true,
+        categoryMaterials: formData.categoryMaterials === true,
         // Умная адаптивность
         smartAdaptive: formData.smartAdaptive,
         levelMultiplier: formData.levelMultiplier,
@@ -781,27 +822,45 @@ export class TreasureHoardConfig extends FormApplication {
   }
 
   /**
-   * Автоматическая настройка категорий на основе типа торговца
+   * Автоматическая настройка категорий и редкости на основе типа торговца
    */
   autoConfigureCategories(html, shopType) {
-    const shopConfiguration = game.THM?.manager?.systemAdapter?.getShopConfiguration() || { categoryConfig: {} };
-    const categoryConfig = shopConfiguration.categoryConfig;
+    const adapter = game.THM?.manager?.systemAdapter || game.modules.get(CONSTANTS.MODULE_NAME)?.api?.systemAdapter;
+    const shopConfiguration = adapter?.getShopConfiguration?.() || { categoryConfig: {}, shopTypes: {} };
+    const categoryConfig = shopConfiguration.categoryConfig || {};
+    const config = categoryConfig[shopType] || {};
 
-    const config = categoryConfig[shopType];
-    if (config) {
-      Object.keys(config).forEach(category => {
-        const checkbox = html.find(`input[name="${category}"]`);
-        if (checkbox.length > 0) {
-          checkbox.prop('checked', config[category]);
-        }
-      });
+    const allCategories = adapter?.getItemCategories?.() || this._getDefaultCategories();
 
-      // ❌ НЕ меняем иконку для магазинов - иконки теперь только для контейнеров!
-      // Магазины используют свою систему портретов из папок shop-portraits
-      console.log(`THM Config | Categories auto-configured for shop type: ${shopType} (icon change disabled)`);
-
-      // Показываем уведомление
-      ui.notifications.info(`Категории автоматически настроены для типа: ${shopType}`);
+    // Сбрасываем/выставляем ВСЕ категории строго в соответствии с конфигурацией выбранного типа торговца
+    for (const cat of allCategories) {
+      const checkbox = html.find(`input[name="${cat.key}"]`);
+      if (checkbox.length > 0) {
+        checkbox.prop('checked', Boolean(config[cat.key]));
+      }
     }
+
+    // Также обновляем ползунки редкости под профиль торговца
+    const shopTypeInfo = shopConfiguration.shopTypes?.[shopType];
+    if (shopTypeInfo?.defaultRarity) {
+      const dr = shopTypeInfo.defaultRarity;
+      const rarityMap = {
+        rarityCommon: dr.common ?? 70,
+        rarityUncommon: dr.uncommon ?? 20,
+        rarityRare: dr.rare ?? 7,
+        rarityVeryRare: dr.veryrare ?? 2,
+        rarityLegendary: dr.legendary ?? 1
+      };
+      for (const [rKey, rVal] of Object.entries(rarityMap)) {
+        const range = html.find(`input[name="${rKey}"]`);
+        if (range.length > 0) {
+          range.val(rVal);
+          range.siblings('.rarity-value').text(`${rVal}%`);
+        }
+      }
+    }
+
+    console.log(`THM Config | Categories auto-configured for shop type: ${shopType}`);
+    ui.notifications.info(`Категории и редкость настроены для типа: ${shopTypeInfo?.name || shopType}`);
   }
 }

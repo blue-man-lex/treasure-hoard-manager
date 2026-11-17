@@ -2,7 +2,7 @@
   "id": "treasure-hoard-manager",
   "title": "Treasure Hoard Manager",
   "description": "<p>Advanced loot, trade and black market system with reputation-based pricing and dynamic merchant management. Now with corpse looting for D&D 5e!</p>",
-  "version": "1.14.1",
+  "version": "1.14.2",
   "compatibility": {
     "minimum": "12",
     "verified": "14",

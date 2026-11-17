@@ -90,6 +90,31 @@ export class THMSettings {
       type: Boolean
     });
 
+    // Режим модерации лута трупов (окно для мастера vs автофильтр)
+    game.settings.register(THMSettings.MODULE_NAME, 'corpseLootReview', {
+      name: 'THM.SETTINGS.CorpseLootReview.Name',
+      hint: 'THM.SETTINGS.CorpseLootReview.Hint',
+      scope: 'world',
+      config: true,
+      default: 'prompt',
+      type: String,
+      choices: {
+        'prompt': 'THM.SETTINGS.CorpseLootReview.Prompt',
+        'auto': 'THM.SETTINGS.CorpseLootReview.Auto',
+        'never': 'THM.SETTINGS.CorpseLootReview.Never'
+      }
+    });
+
+    // Автоматическая фильтрация природных атак и органов монстров
+    game.settings.register(THMSettings.MODULE_NAME, 'filterNaturalWeapons', {
+      name: 'THM.SETTINGS.FilterNaturalWeapons.Name',
+      hint: 'THM.SETTINGS.FilterNaturalWeapons.Hint',
+      scope: 'world',
+      config: true,
+      default: true,
+      type: Boolean
+    });
+
     // Время разложения трупа (в часах)
     game.settings.register(THMSettings.MODULE_NAME, 'corpseDecayTime', {
       name: 'THM.SETTINGS.CorpseDecayTime.Name',
@@ -136,6 +161,22 @@ export class THMSettings {
 
   static get corpseDecayTime() {
     return game.settings.get(THMSettings.MODULE_NAME, 'corpseDecayTime');
+  }
+
+  static get corpseLootReview() {
+    try {
+      return game.settings.get(THMSettings.MODULE_NAME, 'corpseLootReview');
+    } catch {
+      return 'prompt';
+    }
+  }
+
+  static get filterNaturalWeapons() {
+    try {
+      return game.settings.get(THMSettings.MODULE_NAME, 'filterNaturalWeapons');
+    } catch {
+      return true;
+    }
   }
 
   /**

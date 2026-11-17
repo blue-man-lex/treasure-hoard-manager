@@ -247,7 +247,8 @@
    ФОРМЫ И СЕЛЕКТЫ (FORMS & SELECTS)
    ========================================== */
 
-.thm-window-fix select {
+.thm-window-fix select,
+.thm-config-window select {
   background: var(--thm-bg-tertiary) !important;
   color: var(--thm-text-primary) !important;
   border: 1px solid var(--thm-border-gold-low) !important;
@@ -258,14 +259,17 @@
 }
 
 .thm-window-fix select:hover,
-.thm-window-fix select:focus {
+.thm-window-fix select:focus,
+.thm-config-window select:hover,
+.thm-config-window select:focus {
   border-color: var(--thm-border-gold) !important;
   box-shadow: 0 0 5px rgba(159, 130, 78, 0.3) !important;
   outline: none !important;
 }
 
 /* Стилизация опций внутри списков */
-.thm-window-fix select option {
+.thm-window-fix select option,
+.thm-config-window select option {
   background: var(--thm-bg-secondary) !important;
   color: var(--thm-text-primary) !important;
   padding: 5px !important;

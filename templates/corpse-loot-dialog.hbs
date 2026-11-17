@@ -1,0 +1,103 @@
+<form class="thm-premium-window thm-corpse-dialog" autocomplete="off">
+
+  <!-- ШАПКА ДИАЛОГА -->
+  <div class="thm-premium-header">
+    <div class="thm-portrait-frame">
+      <img class="thm-portrait-img" src="{{portraitImg}}" alt="{{actor.name}}">
+    </div>
+    <div class="header-info">
+      <h1 class="thm-window-title">Добыча: {{actor.name}}</h1>
+      <p class="thm-window-subtitle">Настройте, какие предметы и валюта будут доступны игрокам для обыска</p>
+    </div>
+  </div>
+
+  <!-- БЫСТРЫЕ ДЕЙСТВИЯ -->
+  <div class="corpse-dialog-toolbar">
+    <button type="button" class="toolbar-btn smart-select-btn" title="Отметить обычные вещи и снять галочки с природных атак/органов">
+      <i class="fas fa-magic"></i> Умный выбор
+    </button>
+    <button type="button" class="toolbar-btn select-all-btn" title="Выбрать все предметы">
+      <i class="fas fa-check-double"></i> Выбрать все
+    </button>
+    <button type="button" class="toolbar-btn deselect-all-btn" title="Снять выбор со всех предметов">
+      <i class="fas fa-ban"></i> Снять все
+    </button>
+    <div class="selection-counter">
+      Выбрано: <span class="selected-count">{{selectedCount}}</span> / <span class="total-count">{{totalCount}}</span>
+    </div>
+  </div>
+
+  <!-- СПИСОК ПРЕДМЕТОВ -->
+  <div class="corpse-items-container">
+    {{#if items.length}}
+      <div class="corpse-items-list">
+        {{#each items}}
+          <div class="corpse-item-row {{#if this.isNatural}}natural-item{{/if}} {{#unless this.included}}excluded-item{{/unless}}" data-item-id="{{this.id}}">
+            <label class="item-checkbox-label">
+              <input type="checkbox" class="item-loot-checkbox" name="item_{{this.id}}" {{#if this.included}}checked{{/if}} data-item-id="{{this.id}}" data-is-natural="{{this.isNatural}}">
+              <span class="custom-checkbox"><i class="fas fa-check"></i></span>
+            </label>
+
+            <img class="item-img" src="{{this.img}}" alt="{{this.name}}">
+
+            <div class="item-details">
+              <div class="item-name-line">
+                <span class="item-name">{{this.name}}</span>
+                {{#if this.isNatural}}
+                  <span class="badge-natural" title="Природное оружие, атака или орган монстра (не является обычным снаряжением)">
+                    <i class="fas fa-paw"></i> Природное
+                  </span>
+                {{/if}}
+              </div>
+              <div class="item-meta-line">
+                <span class="badge-type rarity-{{this.rarity}}">{{this.typeName}}</span>
+                {{#if (gt this.quantity 1)}}
+                  <span class="item-qty">Кол-во: {{this.quantity}}</span>
+                {{/if}}
+                <span class="item-price">{{this.formattedPrice}}</span>
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="empty-state">
+        <i class="fas fa-box-open"></i>
+        <p>У существа нет предметов в инвентаре</p>
+      </div>
+    {{/if}}
+  </div>
+
+  <!-- РЕДАКТИРОВАНИЕ ВАЛЮТЫ -->
+  {{#if currencyList.length}}
+    <div class="corpse-currency-section">
+      <div class="currency-header">
+        <i class="fas fa-coins"></i>
+        <span>Валюта в добыче:</span>
+      </div>
+      <div class="currency-inputs-grid">
+        {{#each currencyList}}
+          <div class="currency-input-group">
+            <label>
+              {{#if this.img}}<img src="{{this.img}}" alt="{{this.label}}" class="currency-coin-icon" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px; object-fit: contain;">{{/if}}
+              {{this.label}}:
+            </label>
+            <input type="number" name="currency_{{this.key}}" value="{{this.value}}" min="0" step="1">
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  {{/if}}
+
+  <!-- ФУТЕР КНОПОК -->
+  <div class="corpse-dialog-footer">
+    <button type="submit" class="thm-btn confirm-btn">
+      <i class="fas fa-check"></i> Сформировать добычу
+    </button>
+    <button type="button" class="thm-btn cancel-btn">
+      <i class="fas fa-times"></i> Закрыть
+    </button>
+  </div>
+
+</form>
+

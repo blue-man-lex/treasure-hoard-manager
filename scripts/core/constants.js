@@ -5,7 +5,7 @@
 
 export const CONSTANTS = {
   MODULE_NAME: "treasure-hoard-manager",
-  VERSION: "1.0.0",
+  VERSION: "1.14.2",
   
   // Названия флагов
   FLAGS: {
@@ -13,7 +13,8 @@ export const CONSTANTS = {
     ENABLED: "enabled",  // Включено ли хранилище
     VERSION: "version",   // Версия флагов
     DATA: "data",        // Основной флаг для всех настроек
-    SETTINGS: "settings" // Настройки хранилища
+    SETTINGS: "settings", // Настройки хранилища
+    EXCLUDED_ITEMS: "excludedItemIds" // Список ID предметов, исключенных из лута
   },
   
   // Типы хранилищ

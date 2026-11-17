@@ -97,12 +97,37 @@ export class GenericSystemAdapter extends SystemAdapter {
   }
 
   /**
+   * Проверка является ли предмет природной частью существа
+   */
+  isNaturalItem(item) {
+    if (!item) return false;
+    const typeValue = item.system?.type?.value;
+    const weaponType = item.system?.weaponType;
+    if (typeValue === 'natural' || weaponType === 'natural') return true;
+
+    if (item.type === "weapon" || item.type === "equipment") {
+      const name = item.name?.trim().toLowerCase() || "";
+      const naturalNamePattern = /^(?:щупальц[еаы]|укус|когт[ией]|хвост|удар\s+хвостом|жало|рог[аио]?|клюв|таран|сжатие|дыхание|панцирь|чешуя|природный\s+доспех|лап[аы]|tentacle[s]?|bite|claw[s]?|tail|slam|sting(er)?|gore|horn[s]?|beak|talon[s]?|constrict|breath\s+weapon|natural\s+armor)/i;
+      if (naturalNamePattern.test(name)) {
+        const price = item.system?.price?.value || item.system?.price || item.system?.cost || 0;
+        if (price === 0 || typeValue === "natural" || !typeValue) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
    * Проверка может ли предмет быть в хранилище
    */
   canItemBeInHoard(item) {
+    if (!item) return false;
     // Исключаем системные типы предметов
     const excludedTypes = ["spell", "feat", "class", "subclass", "background", "race"];
-    return !excludedTypes.includes(item.type);
+    if (excludedTypes.includes(item.type)) return false;
+    if (this.isNaturalItem(item)) return false;
+    return true;
   }
 
   /**

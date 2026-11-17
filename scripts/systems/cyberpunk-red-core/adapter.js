@@ -84,6 +84,16 @@ export class CyberpunkRedAdapter extends SystemAdapter {
   }
 
   /**
+   * Проверка является ли предмет неотъемлемой/встроенной частью киборга/существа
+   */
+  isNaturalItem(item) {
+    if (!item) return false;
+    if (item.system?.core || item.system?.isFoundational) return true;
+    if (item.type === "cyberware" && item.system?.isFoundational) return true;
+    return false;
+  }
+
+  /**
    * Проверка может ли предмет быть в хранилище
    */
   canItemBeInHoard(item) {
@@ -91,7 +101,7 @@ export class CyberpunkRedAdapter extends SystemAdapter {
     if (excludedTypes.includes(item.type)) return false;
     
     // В CPR некоторые предметы "встроены" и не могут быть переданы
-    if (item.system?.core || item.system?.isFoundational) return false;
+    if (this.isNaturalItem(item)) return false;
     
     return true;
   }

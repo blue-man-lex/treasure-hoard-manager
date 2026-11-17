@@ -23,31 +23,45 @@ export class THMPricingHook {
     if (!THMSettings.autoPriceItems || userId !== game.userId) {
       return;
     }
-    
-    // Сначала проверяем есть ли у предмета цена
-    const currentPrice = typeof item.system?.price === 'number' ? item.system.price :
-                       (item.system?.price?.value || 0);
-    
-    if (currentPrice > 0) {
-      return; // ✅ Цена уже есть - ничего не делаем
+
+    // Проверяем тип предмета: оцениваем только физические предметы
+    const physicalTypes = ['weapon', 'equipment', 'consumable', 'loot', 'tool', 'backpack', 'container'];
+    if (!physicalTypes.includes(item.type)) {
+      return;
     }
-    
-    // Генерируем цену через системный адаптер
+
+    // Если предмет уже был оценен THM (например, при передаче между актерами), не пересчитываем заново
+    if (item.getFlag?.(CONSTANTS.MODULE_NAME, 'priced')) {
+      return;
+    }
+
     const adapter = game.THM?.systemAdapter || game.modules.get(CONSTANTS.MODULE_NAME)?.api?.systemAdapter;
     if (!adapter) return;
 
-    const priceMethod = 'dmg'; // Глобально всегда используем метод Диапазонов (DMG)
+    // Исключаем природные атаки монстров
+    if (typeof adapter.isNaturalItem === 'function' && adapter.isNaturalItem(item)) {
+      return;
+    }
+
+    const priceMethod = 'dmg'; // Глобально используем метод Диапазонов (DMG)
     const price = await adapter.generateItemPrice(item, priceMethod);
-    
+
     if (price > 0) {
-      // Обновляем предмет с ценой
-      await item.update({
-        'system.price.value': price
-      });
-      
+      const pricePath = typeof adapter.getPricePath === 'function' ? adapter.getPricePath() : 'system.price.value';
+      const updateData = {
+        [pricePath]: price,
+        [`flags.${CONSTANTS.MODULE_NAME}.priced`]: true
+      };
+
+      if (item.system?.price && typeof item.system.price === 'object') {
+        updateData['system.price.denomination'] = 'gp';
+      }
+
+      await item.update(updateData);
+
       if (THMSettings.debugMode) {
         const source = item._stats?.compendiumSource ? `from compendium` : `created`;
-        console.log(`THM Auto Pricing | Set price for ${item.name}: ${price} gp (${priceMethod}) [${source}]`);
+        console.log(`THM Auto Pricing | Overwrote price for ${item.name}: ${price} gp (${priceMethod}) [${source}]`);
       }
     }
   }

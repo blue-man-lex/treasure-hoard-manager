@@ -4,10 +4,13 @@
 
 /* Специфичные настройки сетки контейнера */
 .thm-loot-window .items-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
   gap: 8px;
-  margin: 25px 30px;
+  padding: 16px 20px;
+  margin: 0;
+  min-height: 120px;
 }
 
 /* Настройки Body */
@@ -15,7 +18,7 @@
   padding: 0;
   flex: 1;
   overflow-y: auto;
-  min-height: 200px;
+  min-height: 180px;
 }
 
 /* Область валюты */
@@ -23,8 +26,8 @@
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--thm-border-gold-low);
   border-radius: 10px;
-  padding: 15px 20px;
-  margin: 0 30px 20px 30px;
+  padding: 12px 16px;
+  margin: 0 20px 16px 20px;
   backdrop-filter: blur(5px);
 }
 
@@ -33,39 +36,171 @@
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
-/* Специфичные контроли замка */
+/* Шапка контейнера и контролы */
+.thm-loot-window .thm-premium-header {
+  display: flex !important;
+  align-items: center !important;
+  padding: 8px 16px !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: 56px !important;
+  flex: 0 0 auto !important;
+  border-bottom: 1px solid var(--thm-border-gold-low) !important;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), transparent) !important;
+}
+
+.thm-loot-window .thm-portrait-frame {
+  flex: 0 0 44px !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  border: 1px solid var(--thm-border-gold-low) !important;
+  border-radius: 4px !important;
+  overflow: hidden !important;
+  background: #000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+
+.thm-loot-window .thm-portrait-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  border: none !important;
+}
+
+.thm-loot-window .header-info {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.thm-loot-window .header-info .thm-window-title {
+  margin: 0 !important;
+  font-size: 18px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  color: var(--thm-text-bright) !important;
+  font-family: var(--thm-font-fancy) !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+}
+
 .thm-loot-window .header-controls {
-  margin-left: auto;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  margin-left: auto !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  box-sizing: border-box !important;
+}
+
+.thm-loot-window .configure-loot-btn,
+.thm-loot-window button.configure-loot-btn {
+  background: linear-gradient(135deg, rgba(90, 55, 20, 0.85) 0%, rgba(50, 30, 10, 0.95) 100%) !important;
+  border: 1px solid var(--thm-border-gold) !important;
+  color: var(--thm-text-gold, #f4e4c1) !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: auto !important;
+  max-width: max-content !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+  box-sizing: border-box !important;
+}
+
+.thm-loot-window .configure-loot-btn:hover,
+.thm-loot-window button.configure-loot-btn:hover {
+  background: linear-gradient(135deg, rgba(130, 80, 30, 0.95) 0%, rgba(70, 40, 15, 1) 100%) !important;
+  border-color: #ffd700 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(200, 160, 80, 0.5) !important;
+}
+
+.thm-loot-window .lock-controls {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
 }
 
 .thm-loot-window .lock-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 8px 15px;
-  border: 1px solid var(--thm-border-gold-low);
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.4);
-  transition: all 0.3s ease;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  padding: 4px 10px !important;
+  border: 1px solid var(--thm-border-gold-low) !important;
+  border-radius: 6px !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  white-space: nowrap !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  width: auto !important;
+  min-width: auto !important;
+  max-width: max-content !important;
+  flex: 0 0 auto !important;
+  transition: all 0.2s ease !important;
+  user-select: none !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .thm-loot-window .lock-toggle:hover {
-  background: rgba(0, 0, 0, 0.6);
-  border-color: var(--thm-border-gold);
+  background: rgba(0, 0, 0, 0.75) !important;
+  border-color: var(--thm-border-gold) !important;
 }
 
-.thm-loot-window .lock-checkbox { display: none; }
+.thm-loot-window .lock-checkbox { display: none !important; }
+
+.thm-loot-window .lock-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+}
 
 .thm-loot-window .lock-label i {
-  transition: color 0.3s ease;
+  transition: color 0.3s ease !important;
 }
 
-.thm-loot-window .lock-checkbox:checked ~ .lock-label i { color: var(--thm-accent-red); }
-.thm-loot-window .lock-checkbox:not(:checked) ~ .lock-label i { color: var(--thm-accent-green); }
+.thm-loot-window .lock-checkbox:checked ~ .lock-label i { color: var(--thm-accent-red) !important; }
+.thm-loot-window .lock-checkbox:not(:checked) ~ .lock-label i { color: var(--thm-accent-green) !important; }
 
 /* Сообщения */
 .thm-loot-window .locked-message, 
@@ -74,8 +209,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px;
+  padding: 40px;
   color: var(--thm-text-muted);
+  width: 100%;
 }
 
 .thm-loot-window .locked-message i {
@@ -88,8 +224,335 @@
 .thm-loot-window .loot-footer {
   background: rgba(0, 0, 0, 0.5);
   border-top: 1px solid var(--thm-border-gold-low);
-  padding: 20px 30px;
+  padding: 14px 20px;
   display: flex;
   justify-content: center;
-  gap: 15px;
+  gap: 12px;
+}
+
+/* Стили исключенных из лута предметов (для GM) */
+.thm-loot-window .thm-item-slot.thm-item-excluded {
+  opacity: 0.45;
+  filter: grayscale(80%);
+  border-style: dashed;
+  position: relative;
+}
+
+.thm-loot-window .thm-item-slot.thm-item-excluded:hover {
+  opacity: 0.8;
+  filter: grayscale(20%);
+}
+
+.thm-loot-window .thm-badge-hidden {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(180, 40, 40, 0.85);
+  color: #fff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+
+/* ========================================================================== */
+/* ОКНО НАСТРОЙКИ ДОБЫЧИ ТРУПА (Corpse Loot Review Dialog)                    */
+/* ========================================================================== */
+
+.thm-corpse-dialog-window.window-app,
+.thm-corpse-loot-dialog-window.window-app {
+  z-index: 105 !important;
+}
+
+.thm-corpse-dialog-window .window-content,
+.thm-corpse-loot-dialog-window .window-content {
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.thm-corpse-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  color: #f0ebe0;
+}
+
+.thm-corpse-dialog .header-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.thm-corpse-dialog .header-info .thm-window-title {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.thm-corpse-dialog .thm-window-subtitle {
+  font-size: 11px;
+  color: #a89f91;
+  margin: 3px 0 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.thm-corpse-dialog .corpse-dialog-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(201, 170, 113, 0.2);
+  flex-shrink: 0;
+}
+
+.thm-corpse-dialog .toolbar-btn {
+  background: rgba(40, 30, 20, 0.8);
+  border: 1px solid #7d6337;
+  color: #dfd2be;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.thm-corpse-dialog .toolbar-btn:hover {
+  background: rgba(70, 50, 30, 0.9);
+  border-color: #c9aa71;
+  color: #ffffff;
+}
+
+.thm-corpse-dialog .toolbar-btn.smart-select-btn {
+  background: linear-gradient(135deg, rgba(80, 45, 15, 0.8) 0%, rgba(50, 30, 10, 0.9) 100%);
+  border-color: #c9aa71;
+  color: #f4e4c1;
+  font-weight: 600;
+}
+
+.thm-corpse-dialog .toolbar-btn.smart-select-btn:hover {
+  box-shadow: 0 0 8px rgba(201, 170, 113, 0.5);
+}
+
+.thm-corpse-dialog .selection-counter {
+  margin-left: auto;
+  font-size: 12px;
+  color: #c9aa71;
+  font-weight: bold;
+}
+
+.thm-corpse-dialog .corpse-items-container {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 200px;
+  padding: 10px 20px;
+}
+
+.thm-corpse-dialog .corpse-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  background: rgba(25, 23, 20, 0.7);
+  border: 1px solid rgba(201, 170, 113, 0.15);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.thm-corpse-dialog .corpse-item-row:hover {
+  background: rgba(45, 38, 30, 0.8);
+  border-color: rgba(201, 170, 113, 0.4);
+}
+
+.thm-corpse-dialog .corpse-item-row.excluded-item {
+  opacity: 0.45;
+  filter: grayscale(70%);
+  border-style: dashed;
+}
+
+.thm-corpse-dialog .corpse-item-row.natural-item {
+  border-left: 3px solid #d9534f;
+}
+
+.thm-corpse-dialog .item-checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin: 0;
+}
+
+.thm-corpse-dialog .item-loot-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #c9aa71;
+}
+
+.thm-corpse-dialog .custom-checkbox {
+  display: none;
+}
+
+.thm-corpse-dialog .item-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  border: 1px solid rgba(201, 170, 113, 0.3);
+  object-fit: cover;
+}
+
+.thm-corpse-dialog .item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.thm-corpse-dialog .item-name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.thm-corpse-dialog .item-name {
+  font-weight: 600;
+  color: #f0ebe0;
+  font-size: 13px;
+}
+
+.thm-corpse-dialog .badge-natural {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: rgba(180, 40, 40, 0.75);
+  color: #fff;
+  border-radius: 4px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.thm-corpse-dialog .item-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: #a89f91;
+}
+
+.thm-corpse-dialog .badge-type {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.thm-corpse-dialog .item-price {
+  color: #f1c40f;
+  margin-left: auto;
+}
+
+.thm-corpse-dialog .corpse-currency-section {
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.35);
+  border-top: 1px solid rgba(201, 170, 113, 0.2);
+  flex-shrink: 0;
+}
+
+.thm-corpse-dialog .currency-header {
+  font-size: 12px;
+  color: #c9aa71;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.thm-corpse-dialog .currency-inputs-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.thm-corpse-dialog .currency-input-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.thm-corpse-dialog .currency-input-group label {
+  font-size: 11px;
+  color: #dfd2be;
+  margin: 0;
+}
+
+.thm-corpse-dialog .currency-input-group input {
+  width: 60px;
+  height: 26px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid #7d6337;
+  color: #fff;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.thm-corpse-dialog .corpse-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 15px 20px;
+  background: rgba(15, 12, 10, 0.95);
+  border-top: 1px solid rgba(201, 170, 113, 0.3);
+  flex-shrink: 0;
+}
+
+.thm-corpse-dialog .corpse-dialog-footer .thm-btn {
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.thm-corpse-dialog .confirm-btn {
+  background: linear-gradient(135deg, #7b5825 0%, #4a3312 100%);
+  border: 1px solid #c9aa71;
+  color: #fff;
+  font-weight: bold;
+}
+
+.thm-corpse-dialog .confirm-btn:hover {
+  background: linear-gradient(135deg, #a67732 0%, #634519 100%);
+  box-shadow: 0 0 10px rgba(201, 170, 113, 0.6);
+}
+
+.thm-corpse-dialog .cancel-btn {
+  background: rgba(40, 40, 40, 0.8);
+  border: 1px solid #555;
+  color: #ccc;
+}
+
+.thm-corpse-dialog .cancel-btn:hover {
+  background: rgba(60, 60, 60, 0.9);
+  color: #fff;
 }

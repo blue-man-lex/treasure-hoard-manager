@@ -179,31 +179,59 @@ export class HoardManager {
    * @param {Token} tokenB - Второй токен
    * @returns {number} Расстояние в клетках
    */
+  /**
+   * Вычисление минимального расстояния между двумя токенами в клетках сетки.
+   * Корректно учитывает габариты обоих токенов (1x1, 2x2, 3x3 и т.д.),
+   * измеряя расстояние от границы одного токена до границы другого.
+   * @param {Token} tokenA
+   * @param {Token} tokenB
+   * @returns {number} Расстояние в клетках (0 - перекрываются, 1 - в соседней клетке)
+   */
   _getTokenDistance(tokenA, tokenB) {
+    if (!tokenA || !tokenB) return Infinity;
+
     const gridSize = canvas.dimensions?.size || canvas.grid?.sizeX || canvas.grid?.size || 100;
-    // Получаем прямоугольные области токенов с поддержкой разных типов
-    const rectA = {
-      x: tokenA.x,
-      y: tokenA.y,
-      w: (tokenA.document?.width || tokenA.width) * gridSize,
-      h: (tokenA.document?.height || tokenA.height) * gridSize
-    };
-    
-    const rectB = {
-      x: tokenB.x,
-      y: tokenB.y,
-      w: (tokenB.document?.width || tokenB.width) * gridSize,
-      h: (tokenB.document?.height || tokenB.height) * gridSize
-    };
-    
-    console.log(`THM | Token A rect:`, rectA);
-    console.log(`THM | Token B rect:`, rectB);
-    
-    // Вычисляем минимальное расстояние между прямоугольниками
-    const distance = this._distanceBetweenRects(rectA, rectB);
-    
-    // Конвертируем в клетки и добавляем 1 (как в Item Piles)
-    return Math.floor(distance / gridSize) + 1;
+    const isGridless = canvas.grid?.type === CONST.GRID_TYPES?.GRIDLESS || canvas.grid?.type === 0;
+
+    const docA = tokenA.document || tokenA;
+    const docB = tokenB.document || tokenB;
+
+    // Ширина и высота токенов в клетках (сетка)
+    const wA = Math.max(1, Math.round(docA.width ?? 1));
+    const hA = Math.max(1, Math.round(docA.height ?? 1));
+    const wB = Math.max(1, Math.round(docB.width ?? 1));
+    const hB = Math.max(1, Math.round(docB.height ?? 1));
+
+    // Координаты токенов в клетках (сетка)
+    const xA = Math.round((tokenA.x ?? docA.x ?? 0) / gridSize);
+    const yA = Math.round((tokenA.y ?? docA.y ?? 0) / gridSize);
+    const xB = Math.round((tokenB.x ?? docB.x ?? 0) / gridSize);
+    const yB = Math.round((tokenB.y ?? docB.y ?? 0) / gridSize);
+
+    // Диапазоны клеток, занимаемых токенами
+    const minAx = xA, maxAx = xA + wA - 1;
+    const minAy = yA, maxAy = yA + hA - 1;
+    const minBx = xB, maxBx = xB + wB - 1;
+    const minBy = yB, maxBy = yB + hB - 1;
+
+    // Расстояние между границами по осям X и Y в клетках
+    const dx = Math.max(0, minAx - maxBx, minBx - maxAx);
+    const dy = Math.max(0, minAy - maxBy, minBy - maxAy);
+
+    // Дистанция по физическим границам пикселей с небольшим допуском 2px
+    const rectA = { x: tokenA.x ?? docA.x ?? 0, y: tokenA.y ?? docA.y ?? 0, w: wA * gridSize, h: hA * gridSize };
+    const rectB = { x: tokenB.x ?? docB.x ?? 0, y: tokenB.y ?? docB.y ?? 0, w: wB * gridSize, h: hB * gridSize };
+    const distPx = this._distanceBetweenRects(rectA, rectB);
+    const distInCellsByPixels = Math.max(0, Math.ceil((distPx - 2) / gridSize));
+
+    // В сетке (D&D 5e / квадратная сетка) берем минимум между расчетом по сетке и физическим расстоянием,
+    // что исключает ложные срабатывания при смещениях и для больших существ (2x2, 3x3)
+    if (!isGridless) {
+      return Math.min(Math.max(dx, dy), distInCellsByPixels);
+    }
+
+    // Для бессеточной карты (gridless) считаем расстояние между прямоугольниками в пикселях
+    return distInCellsByPixels;
   }
 
   /**
@@ -395,7 +423,16 @@ export class HoardManager {
       // Проверка на удаление пустой кучи
       const settings = actor.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.SETTINGS);
       if (settings?.general?.deleteWhenEmpty && items.length === 0) {
-        await actor.delete();
+        if (actor.isToken && actor.token) {
+          await actor.token.delete();
+        } else {
+          const token = canvas.tokens?.placeables.find(t => t.actor?.id === actor.id);
+          if (token?.document) {
+            await token.document.delete();
+          } else {
+            await actor.delete();
+          }
+        }
         ui.notifications.info(`Куча "${actor.name}" удалена (пустая)`);
       }
       

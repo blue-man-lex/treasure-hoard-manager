@@ -7,7 +7,6 @@ console.log('THM MAIN | Файл загружен, начинаем инициа
 
 import { TreasureHoardManager } from './core/main.js';
 import { CONSTANTS } from './core/constants.js';
-import { TreasureHoardConfig } from './ui/config-app.js';
 import { logger } from './core/simple-logger.js';
 import { GenericSystemAdapter } from './systems/generic/adapter.js';
 import { Dnd5eAdapter } from './systems/dnd5e/adapter.js';
@@ -103,16 +102,19 @@ class TreasureHoardModule {
       'blackmarket-interface.css'
     ];
 
+    const version = thmModuleDoc?.version || '1.14.2';
+
     for (const file of cssFiles) {
       const linkId = `thm-style-${file.replace('.css', '')}`;
-      if (document.getElementById(linkId)) continue;
-
-      const link = document.createElement('link');
-      link.id = linkId;
-      link.rel = 'stylesheet';
-      link.type = 'text/css';
-      link.href = `${basePath}/${file}`;
-      document.head.appendChild(link);
+      let link = document.getElementById(linkId);
+      if (!link) {
+        link = document.createElement('link');
+        link.id = linkId;
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        document.head.appendChild(link);
+      }
+      link.href = `${basePath}/${file}?v=${version}`;
     }
 
     // Устанавливаем класс-маркер на body для доп. стилизации
@@ -180,6 +182,21 @@ class TreasureHoardModule {
           logger.info(`Тестовый интерфейс контейнера открыт для: ${actor.name}`);
         } catch (error) {
           logger.error('Ошибка при открытии тестового интерфейса', error);
+        }
+      },
+
+      // Команда для настройки добычи трупа (GM Loot Review)
+      reviewCorpseLoot: async (actorId) => {
+        const actor = actorId ? (game.actors.get(actorId) || game.actors.getName(actorId)) : canvas.tokens?.controlled[0]?.actor;
+        if (!actor) {
+          ui.notifications.error('Выберите токен или передайте ID актера');
+          return;
+        }
+        try {
+          const { CorpseLootDialog } = await import('./ui/corpse-loot-dialog.js');
+          new CorpseLootDialog(actor).render(true);
+        } catch (error) {
+          logger.error('Ошибка при открытии CorpseLootDialog', error);
         }
       },
 
@@ -286,13 +303,6 @@ class TreasureHoardModule {
     logger.debug(`Найдено CSS ссылок: ${cssLinks.length}`);
     cssLinks.forEach((link, index) => {
       logger.debug(`CSS ${index}: ${link.href}`);
-    });
-
-    // Регистрация меню настроек в конфиге Foundry
-    game.settings.registerMenu('treasure-hoard-manager', 'configMenu', {
-      label: 'Настройки THM',
-      type: TreasureHoardConfig,
-      restricted: true
     });
 
     // Запуск основной логики

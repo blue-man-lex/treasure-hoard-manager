@@ -107,6 +107,14 @@ export class SocketManager {
     // Обновление денег актера
     this.registerHandler('updateActorCurrency', this.handleUpdateActorCurrency.bind(this));
     this.registerHandler('spendWealthAsGM', this.handleSpendWealthAsGM.bind(this));
+    this.registerHandler('addWealthAsGM', this.handleAddWealthAsGM.bind(this));
+
+    // Управление видимостью предметов в луте
+    this.registerHandler('toggleItemExclude', this.handleToggleItemExclude.bind(this));
+
+    // Анимация плавного растворения токена и закрытие окон опустошенного контейнера
+    this.registerHandler('tokenFadeAnimation', this.handleTokenFadeAnimation.bind(this));
+    this.registerHandler('closeContainerWindow', this.handleCloseContainerWindow.bind(this));
 
     logger.info('THM Socket Manager | All handlers registered via socketlib');
   }
@@ -147,6 +155,37 @@ export class SocketManager {
         return;
       }
 
+      // Проверка доступности предмета для игрока (исключения и природные атаки)
+      const adapter = this.mainManager?.systemAdapter;
+      const excludedIds = new Set(
+        container.getFlag?.(CONSTANTS.MODULE_NAME, 'data.excludedItemIds') ||
+        container.getFlag?.(CONSTANTS.MODULE_NAME, 'excludedItemIds') || []
+      );
+      const isCorpse = container.getFlag?.(CONSTANTS.MODULE_NAME, 'isCorpse')
+        || rawContainer.getFlag?.(CONSTANTS.MODULE_NAME, 'isCorpse') || false;
+      const hasExcludedFlags = container.getFlag?.(CONSTANTS.MODULE_NAME, 'excludedItemIds') !== undefined
+        || rawContainer.getFlag?.(CONSTANTS.MODULE_NAME, 'excludedItemIds') !== undefined;
+
+      // Технические типы никогда нельзя лутать
+      const technicalTypes = ["spell", "feat", "class", "subclass", "background", "race"];
+      if (technicalTypes.includes(item.type)) {
+        console.warn('THM Socket | Attempted to loot technical item:', item.name);
+        return;
+      }
+
+      // Для трупа или контейнера с курацией: список excludedIds — решающий закон мастера
+      let isExcluded = false;
+      if (isCorpse || hasExcludedFlags) {
+        isExcluded = excludedIds.has(itemId);
+      } else if (adapter && typeof adapter.canItemBeInHoard === 'function') {
+        isExcluded = !adapter.canItemBeInHoard(item) || excludedIds.has(itemId);
+      }
+
+      if (isExcluded) {
+        console.warn('THM Socket | Attempted to loot excluded item:', item.name);
+        return;
+      }
+
       // Перемещаем предмет
       await container.deleteEmbeddedDocuments('Item', [item.id]);
       await looter.createEmbeddedDocuments('Item', [item.toObject()]);
@@ -159,9 +198,50 @@ export class SocketManager {
 
       console.log(`THM Socket | Item looted: ${item.name} by ${looter.name}`);
 
+      // Проверка на опустошение контейнера/трупа и плавное удаление токена
+      await this._checkAndHandleEmptyContainer(container, rawContainer);
+
     } catch (error) {
       console.error('THM Socket | Error in loot item handler:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Обработчик переключения скрытия предмета от игроков (только GM)
+   */
+  async handleToggleItemExclude(data) {
+    try {
+      const { containerUuid, itemId } = data;
+      if (!game.user.isGM) return;
+
+      const rawContainer = await fromUuid(containerUuid);
+      const container = rawContainer?.actor || rawContainer;
+      if (!container) return;
+
+      const currentExcluded = new Set(
+        container.getFlag(CONSTANTS.MODULE_NAME, 'data.excludedItemIds') ||
+        container.getFlag(CONSTANTS.MODULE_NAME, 'excludedItemIds') || []
+      );
+
+      if (currentExcluded.has(itemId)) {
+        currentExcluded.delete(itemId);
+      } else {
+        currentExcluded.add(itemId);
+      }
+
+      const updated = Array.from(currentExcluded);
+      await container.setFlag(CONSTANTS.MODULE_NAME, 'data.excludedItemIds', updated);
+      await container.setFlag(CONSTANTS.MODULE_NAME, 'excludedItemIds', updated);
+
+      // Обновляем открытые интерфейсы
+      Object.values(ui.windows).forEach(w => {
+        if (w.actor?.id === container.id || w.actor?.uuid === container.uuid) {
+          w.render(false);
+        }
+      });
+    } catch (error) {
+      logger.error('THM Socket | Error in handleToggleItemExclude:', error);
     }
   }
 
@@ -189,14 +269,44 @@ export class SocketManager {
         throw new Error('Только GM может обрабатывать запросы на лут');
       }
 
-      // 1. ЗАБИРАЕМ ПРЕДМЕТЫ
+      // 1. ЗАБИРАЕМ ПРЕДМЕТЫ С УЧЕТОМ ФИЛЬТРОВ И ИСКЛЮЧЕНИЙ
+      const adapter = this.mainManager?.systemAdapter;
+      const excludedIds = new Set(
+        container.getFlag?.(CONSTANTS.MODULE_NAME, 'data.excludedItemIds') ||
+        container.getFlag?.(CONSTANTS.MODULE_NAME, 'excludedItemIds') || []
+      );
+
       const itemCollection = container.items?.contents || (container.items?.values ? Array.from(container.items.values()) : (container.items || []));
-      const items = itemCollection.map(item => item.toObject ? item.toObject() : item);
+      
+      // Фильтруем предметы: только те, что разрешены адаптером и не исключены мастером
+      const isCorpse = container.getFlag?.(CONSTANTS.MODULE_NAME, 'isCorpse')
+        || rawContainer.getFlag?.(CONSTANTS.MODULE_NAME, 'isCorpse') || false;
+      const hasExcludedFlags = container.getFlag?.(CONSTANTS.MODULE_NAME, 'excludedItemIds') !== undefined
+        || rawContainer.getFlag?.(CONSTANTS.MODULE_NAME, 'excludedItemIds') !== undefined;
+
+      const lootableItemDocs = itemCollection.filter(item => {
+        const technicalTypes = ["spell", "feat", "class", "subclass", "background", "race"];
+        if (technicalTypes.includes(item.type)) return false;
+
+        if (isCorpse || hasExcludedFlags) {
+          return !excludedIds.has(item.id);
+        }
+        if (excludedIds.has(item.id)) return false;
+        if (adapter && typeof adapter.isItemLootable === 'function') {
+          return adapter.isItemLootable(item, container);
+        }
+        if (adapter && typeof adapter.canItemBeInHoard === 'function') {
+          return adapter.canItemBeInHoard(item);
+        }
+        return true;
+      });
+
+      const items = lootableItemDocs.map(item => item.toObject ? item.toObject() : item);
 
       if (items.length > 0) {
-        // Перемещаем все предметы игроку
+        // Перемещаем только лутаемые предметы игроку
         await looter.createEmbeddedDocuments('Item', items);
-        await container.deleteEmbeddedDocuments('Item', itemCollection.map(i => i.id));
+        await container.deleteEmbeddedDocuments('Item', lootableItemDocs.map(i => i.id));
       }
 
       // 2. ЗАБИРАЕМ ВАЛЮТУ (с учетом настроек деления)
@@ -208,7 +318,10 @@ export class SocketManager {
         data: { userId }
       });
 
-      logger.info(`THM Socket | Loot all completed for ${looter.name}`);
+      logger.info(`THM Socket | Loot all completed for ${looter.name} (${items.length} items looted)`);
+
+      // Проверка на опустошение контейнера/трупа и плавное удаление токена
+      await this._checkAndHandleEmptyContainer(container, rawContainer);
 
     } catch (error) {
       logger.error('THM Socket | Error in loot all handler:', error);
@@ -250,6 +363,9 @@ export class SocketManager {
       });
 
       logger.info(`THM Socket | Currency loot processed by ${looter.name}`);
+
+      // Проверка на опустошение контейнера/трупа и плавное удаление токена
+      await this._checkAndHandleEmptyContainer(container, rawContainer);
 
     } catch (error) {
       logger.error('THM Socket | Error in loot currency handler:', error);
@@ -419,6 +535,176 @@ export class SocketManager {
 
     } catch (error) {
       logger.error('THM Socket | Error in update hoard handler:', error);
+    }
+  }
+
+  /**
+   * Обработчик плавной анимации растворения токена (выполняется на всех клиентах)
+   */
+  async handleTokenFadeAnimation(data) {
+    try {
+      const { tokenId, sceneId, duration = 1200 } = data;
+      if (!canvas.ready || !canvas.tokens) return;
+      if (sceneId && canvas.scene?.id !== sceneId) return;
+
+      const token = canvas.tokens.get(tokenId) || canvas.tokens.placeables.find(t => t.id === tokenId);
+      if (!token) return;
+
+      const AnimationCls = foundry?.canvas?.animation?.CanvasAnimation || globalThis.CanvasAnimation;
+      if (AnimationCls?.animate) {
+        try {
+          await AnimationCls.animate([
+            { parent: token, attribute: 'alpha', to: 0 }
+          ], {
+            name: `thm.token.fade.${tokenId}`,
+            duration: duration
+          });
+        } catch (e) {
+          if (token) token.alpha = 0;
+        }
+      } else {
+        if (token) token.alpha = 0;
+      }
+    } catch (err) {
+      console.warn('THM Socket | Error in handleTokenFadeAnimation:', err);
+    }
+  }
+
+  /**
+   * Закрытие открытых окон интерфейса для опустошенного контейнера/трупа
+   */
+  handleCloseContainerWindow(data) {
+    try {
+      const { actorId, tokenDocId } = data;
+      Object.values(ui.windows).forEach(w => {
+        const isTarget = w.actor && (
+          w.actor.id === actorId ||
+          w.actor.uuid === actorId ||
+          w.actor.token?.id === tokenDocId ||
+          w.actor.token?.document?.id === tokenDocId
+        );
+        if (isTarget && typeof w.close === 'function') {
+          w.close();
+        }
+      });
+    } catch (err) {
+      console.warn('THM Socket | Error in handleCloseContainerWindow:', err);
+    }
+  }
+
+  /**
+   * Проверка опустошения контейнера/трупа и плавное удаление токена со сцены
+   * @param {Actor} container
+   * @param {TokenDocument|Actor} rawContainer
+   */
+  async _checkAndHandleEmptyContainer(container, rawContainer) {
+    if (!game.user.isGM || !container) return;
+
+    try {
+      const isCorpse = container.getFlag(CONSTANTS.MODULE_NAME, 'isCorpse') || false;
+      const deleteEmptyCorpse = game.settings.get(CONSTANTS.MODULE_NAME, 'deleteEmptyCorpse');
+      const containerSettings = container.getFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.SETTINGS);
+      const shouldDelete = isCorpse ? deleteEmptyCorpse : (containerSettings?.general?.deleteWhenEmpty ?? false);
+
+      if (!shouldDelete) return;
+
+      // 1. Проверяем валюту
+      const adapter = this.mainManager?.systemAdapter;
+      const currencyData = (adapter && typeof adapter.getActorCurrency === 'function')
+        ? adapter.getActorCurrency(container)
+        : (container.system?.currency || {});
+      const hasCurrency = Object.values(currencyData).some(v => Number(v) > 0);
+      if (hasCurrency) return; // Деньги еще есть
+
+      // 2. Проверяем видимые (лутаемые) предметы
+      const technicalExcludedTypes = ["spell", "feat", "class", "subclass", "background", "race"];
+      const candidateItems = container.items.contents.filter(i => !technicalExcludedTypes.includes(i.type));
+
+      const excludedIds = new Set(
+        container.getFlag(CONSTANTS.MODULE_NAME, 'excludedItemIds') ||
+        container.getFlag(CONSTANTS.MODULE_NAME, 'data.excludedItemIds') || []
+      );
+      const hasConfiguredFlags = container.getFlag(CONSTANTS.MODULE_NAME, 'excludedItemIds') !== undefined;
+
+      const visibleItems = candidateItems.filter(i => {
+        if (isCorpse || hasConfiguredFlags) {
+          return !excludedIds.has(i.id);
+        }
+        return adapter ? (adapter.canItemBeInHoard(i) && !excludedIds.has(i.id)) : !excludedIds.has(i.id);
+      });
+
+      if (visibleItems.length > 0) return; // Предметы для лута еще есть
+
+      // 3. КОНТЕЙНЕР / ТРУП ПОЛНОСТЬЮ ПУСТ! Начинаем плавное удаление токена
+      logger.info(`THM Socket | Container/Corpse "${container.name}" is completely empty. Starting fade & removal...`);
+
+      // Находим соответствующий TokenDocument
+      let tokenDoc = null;
+      if (rawContainer instanceof TokenDocument) {
+        tokenDoc = rawContainer;
+      } else if (container.token instanceof TokenDocument) {
+        tokenDoc = container.token;
+      } else if (container.isToken && container.token) {
+        tokenDoc = container.token;
+      } else {
+        const scene = canvas.scene || game.scenes.active;
+        tokenDoc = scene?.tokens.find(t => t.actorId === container.id || t.id === container.token?.id || t.actor?.id === container.id) || null;
+      }
+
+      if (!tokenDoc) {
+        logger.warn(`THM Socket | Could not find token document on scene for empty container "${container.name}"`);
+        return;
+      }
+
+      const scene = tokenDoc.parent || canvas.scene;
+
+      // Закрываем окно ContainerInterface у всех клиентов
+      if (this.socket && typeof this.socket.executeForEveryone === 'function') {
+        try {
+          await this.socket.executeForEveryone('closeContainerWindow', {
+            actorId: container.id,
+            tokenDocId: tokenDoc.id
+          });
+        } catch (e) {
+          this.handleCloseContainerWindow({ actorId: container.id, tokenDocId: tokenDoc.id });
+        }
+      } else {
+        this.handleCloseContainerWindow({ actorId: container.id, tokenDocId: tokenDoc.id });
+      }
+
+      // Запускаем плавную анимацию растворения на всех клиентах
+      const fadeDuration = 1200;
+      if (this.socket && typeof this.socket.executeForEveryone === 'function') {
+        try {
+          await this.socket.executeForEveryone('tokenFadeAnimation', {
+            tokenId: tokenDoc.id,
+            sceneId: scene?.id,
+            duration: fadeDuration
+          });
+        } catch (animErr) {
+          logger.warn('THM Socket | Could not broadcast tokenFadeAnimation:', animErr);
+        }
+      } else {
+        await this.handleTokenFadeAnimation({ tokenId: tokenDoc.id, sceneId: scene?.id, duration: fadeDuration });
+      }
+
+      // Ждем завершения анимации на GM-клиенте перед окончательным удалением
+      await new Promise(resolve => setTimeout(resolve, fadeDuration));
+
+      // Удаляем TokenDocument со сцены
+      try {
+        await tokenDoc.delete();
+        const msg = isCorpse
+          ? `Труп "${container.name}" полностью обыскан и истаял.`
+          : `Контейнер "${container.name}" опустошен и удален со сцены.`;
+        ui.notifications.info(msg);
+        logger.info(`THM Socket | Token ${tokenDoc.id} for "${container.name}" successfully deleted from scene.`);
+      } catch (delErr) {
+        logger.error(`THM Socket | Error deleting token document ${tokenDoc.id}:`, delErr);
+      }
+
+    } catch (err) {
+      logger.error('THM Socket | Error in _checkAndHandleEmptyContainer:', err);
     }
   }
 
@@ -692,6 +978,32 @@ export class SocketManager {
       logger.info(`THM Socket | Wealth spent for ${actor.name}: ${amount}`);
     } else {
       logger.error('THM Socket | Failed to find valid actor for spendWealth:', actorUuid);
+    }
+  }
+
+  /**
+   * Умное пополнение денег актера (через сокет от лица GM)
+   */
+  async handleAddWealthAsGM(data) {
+    if (!game.user.isGM) return;
+
+    const { actorUuid, amount, options } = data;
+    const document = await fromUuid(actorUuid);
+    const actor = document.actor || document;
+
+    if (actor && actor.update) {
+      const adapter = this.mainManager.systemAdapter;
+      if (typeof adapter.addWealth === 'function') {
+        await adapter.addWealth(actor, amount, options);
+      } else {
+        const currentCurrency = adapter.getActorCurrency(actor);
+        const currentAtoms = adapter.convertCurrencyToAtoms(currentCurrency);
+        const newCurrency = adapter.convertAtomsToCurrency(currentAtoms + amount);
+        await adapter.updateActorCurrency(actor, newCurrency);
+      }
+      logger.info(`THM Socket | Wealth added for ${actor.name}: ${amount}`);
+    } else {
+      logger.error('THM Socket | Failed to find valid actor for addWealth:', actorUuid);
     }
   }
 

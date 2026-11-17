@@ -399,6 +399,22 @@
                 <span class="price-info">50 = выкуп за 50%</span>
               </div>
             </div>
+
+            <div class="checkbox-option" style="margin-top: 8px;">
+              <input type="checkbox" id="use-thm-pricing" name="useThmPricing" {{checked typeSpecific.useThmPricing}}>
+              <label for="use-thm-pricing">Назначать цены правилами THM (DMG / XGE)</label>
+            </div>
+            <span class="price-info" style="display:block; margin-left: 24px; color: #aaa; font-size: 11px;">
+              Если галочка снята, берутся готовые цены из библиотек компендиумов.
+            </span>
+
+            <div class="checkbox-option" style="margin-top: 6px;">
+              <input type="checkbox" id="detailed-prices" name="detailedPrices" {{checked typeSpecific.detailedPrices}}>
+              <label for="detailed-prices">Живые (разменные) цены (золото, серебро, медь)</label>
+            </div>
+            <span class="price-info" style="display:block; margin-left: 24px; color: #aaa; font-size: 11px;">
+              Генерирует разменную монету (серебро и медь) вместо круглых сумм.
+            </span>
           </div>
         </div>
 
@@ -418,6 +434,14 @@
               <input type="checkbox" id="use-npc-currency" name="useNpcCurrency" {{checked
                 typeSpecific.useNpcCurrency}}>
               <label for="use-npc-currency">Учитывать кошелек торговца (лимит денег)</label>
+            </div>
+            <div class="checkbox-option">
+              <input type="checkbox" id="allow-platinum" name="allowPlatinum" {{checked typeSpecific.allowPlatinum}}>
+              <label for="allow-platinum">Использовать платину (PP) в кассе</label>
+            </div>
+            <div class="checkbox-option">
+              <input type="checkbox" id="allow-electrum" name="allowElectrum" {{checked typeSpecific.allowElectrum}}>
+              <label for="allow-electrum">Использовать электрум (EP) в кассе</label>
             </div>
           </div>
         </div>

@@ -72,6 +72,17 @@ export class SystemAdapter {
   }
 
   /**
+   * Пополнение валюты актера
+   */
+  async addWealth(actor, amountAtoms, options = {}) {
+    const currentCurrency = this.getActorCurrency(actor);
+    const currentAtoms = this.convertCurrencyToAtoms(currentCurrency);
+    const newCurrency = this.convertAtomsToCurrency(currentAtoms + amountAtoms);
+    await this.updateActorCurrency(actor, newCurrency);
+    return true;
+  }
+
+  /**
    * Получение пути к данным валюты в системе
    */
   getCurrencyPath() {
@@ -106,9 +117,44 @@ export class SystemAdapter {
   }
 
   /**
+   * Проверка является ли предмет природной частью существа (атака, броня, орган)
+   * Переопределяется в системных адаптерах
+   */
+  isNaturalItem(item) {
+    if (!item) return false;
+    const typeValue = item.system?.type?.value;
+    const weaponType = item.system?.weaponType;
+    if (typeValue === 'natural' || weaponType === 'natural') return true;
+    return false;
+  }
+
+  /**
    * Проверка может ли предмет быть в хранилище
    */
   canItemBeInHoard(item) {
+    if (!item) return false;
+    if (this.isNaturalItem(item)) return false;
+    return true;
+  }
+
+  /**
+   * Проверка доступен ли предмет для обыска/лута с учетом исключений контейнера
+   */
+  isItemLootable(item, container = null) {
+    if (!item || !this.canItemBeInHoard(item)) return false;
+
+    // Проверка персонального флага на предмете
+    if (item.getFlag?.('treasure-hoard-manager', 'excludedFromLoot')) return false;
+
+    // Проверка списка исключений на контейнере
+    if (container) {
+      const excludedIds = container.getFlag?.('treasure-hoard-manager', 'data.excludedItemIds')
+        || container.getFlag?.('treasure-hoard-manager', 'excludedItemIds');
+      if (Array.isArray(excludedIds) && excludedIds.includes(item.id)) {
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -296,7 +342,7 @@ export class SystemAdapter {
   /**
    * Генерация цены предмета на основе настроек системы
    */
-  async generateItemPrice(item, method = 'default') {
+  async generateItemPrice(item, method = 'default', specificSettings = {}) {
     return 10;
   }
 }

@@ -41,7 +41,13 @@ export class ShopManager {
       transactionHistory: [],
       adaptiveRarity: settings?.specific?.smartAdaptive || false,
       levelMultiplier: settings?.specific?.levelMultiplier || 2,
-      raritySettings: this.calculateRaritySettings(settings?.specific, category.defaultRarity)
+      raritySettings: this.calculateRaritySettings(settings?.specific, (settings?.specific?.rarityCommon !== undefined) ? {
+        common: Number(settings.specific.rarityCommon) || 70,
+        uncommon: Number(settings.specific.rarityUncommon) || 20,
+        rare: Number(settings.specific.rarityRare) || 7,
+        veryrare: Number(settings.specific.rarityVeryRare) || 2,
+        legendary: Number(settings.specific.rarityLegendary) || 1
+      } : category.defaultRarity)
     };
 
     const finalSettings = mergeObject(defaultSettings, options);
@@ -253,7 +259,7 @@ export class ShopManager {
       
       for (const item of actor.items) {
         if ((item.system?.price?.value || 0) === 0) {
-          const generatedPrice = await this.mainManager.systemAdapter.generateItemPrice(item, priceMethod);
+          const generatedPrice = await this.mainManager.systemAdapter.generateItemPrice(item, priceMethod, settings?.specific);
           itemUpdates.push({
             _id: item.id,
             "system.price.value": generatedPrice
@@ -274,7 +280,14 @@ export class ShopManager {
 
     // Оригинальная логика для компендиумов
     const category = this.shopCategories[settings?.specific?.shopType] || this.shopCategories.general || Object.values(this.shopCategories)[0] || { defaultRarity: { common: 50, uncommon: 30, rare: 15, veryrare: 5, legendary: 0 } };
-    const raritySettings = settings?.raritySettings || this.calculateRaritySettings(settings?.specific, category.defaultRarity);
+    const baseRarity = (settings?.specific?.rarityCommon !== undefined) ? {
+      common: Number(settings.specific.rarityCommon) || 70,
+      uncommon: Number(settings.specific.rarityUncommon) || 20,
+      rare: Number(settings.specific.rarityRare) || 7,
+      veryrare: Number(settings.specific.rarityVeryRare) || 2,
+      legendary: Number(settings.specific.rarityLegendary) || 1
+    } : category.defaultRarity;
+    const raritySettings = settings?.raritySettings || this.calculateRaritySettings(settings?.specific, baseRarity);
 
     const inventory = await this.loadItemsFromCompendiums(settings?.specific?.inventorySources);
     if (!inventory || inventory.length === 0) {
@@ -327,13 +340,27 @@ export class ShopManager {
       if (!newItem.system) newItem.system = {};
       if (!newItem.system.price) newItem.system.price = {};
 
-      // Используем новую систему генерации цен через адаптер
-      const priceMethod = settings?.specific?.priceMethod || 'dmg'; // DMG по умолчанию
-      const finalPrice = await this.mainManager.systemAdapter.generateItemPrice(newItem, priceMethod);
+      // Определяем, кто назначает цену:
+      // По умолчанию (useThmPricing: true): THM рассчитывает цены (DMG / XGE / категории)
+      // Если галочка снята (useThmPricing === false) или включен prioritizeCompendiumPrice: сохраняем цену из компендиума, если она > 0
+      const useThm = settings?.specific?.useThmPricing !== false && !settings?.specific?.prioritizeCompendiumPrice;
+      let finalPrice = 0;
+
+      if (!useThm) {
+        finalPrice = (typeof adapter.getItemPrice === 'function') ? adapter.getItemPrice(newItem) : (newItem.system?.price?.value || 0);
+      }
+
+      if (!finalPrice || finalPrice <= 0) {
+        const priceMethod = settings?.specific?.priceMethod || 'dmg';
+        finalPrice = await this.mainManager.systemAdapter.generateItemPrice(newItem, priceMethod, settings?.specific);
+      }
 
       // Записываем цену в карточку предмета (используя путь из адаптера)
       const pricePath = (typeof adapter.getPricePath === 'function') ? adapter.getPricePath() : "system.price.value";
       foundry.utils.setProperty(newItem, pricePath, finalPrice);
+      if (newItem.system?.price && typeof newItem.system.price === 'object') {
+        newItem.system.price.denomination = 'gp';
+      }
 
       return newItem;
     }));
@@ -627,13 +654,27 @@ export class ShopManager {
       if (!newItem.system) newItem.system = {};
       if (!newItem.system.price) newItem.system.price = {};
 
-      // Используем новую систему генерации цен
-      const priceMethod = settings?.specific?.priceMethod || 'dmg'; // DMG по умолчанию
-      const finalPrice = await this.mainManager.systemAdapter.generateItemPrice(newItem, priceMethod);
+      // Определяем, кто назначает цену:
+      // По умолчанию (useThmPricing: true): THM рассчитывает цены (DMG / XGE / категории)
+      // Если галочка снята (useThmPricing === false) или включен prioritizeCompendiumPrice: сохраняем цену из компендиума, если она > 0
+      const useThm = settings?.specific?.useThmPricing !== false && !settings?.specific?.prioritizeCompendiumPrice;
+      let finalPrice = 0;
+
+      if (!useThm) {
+        finalPrice = (typeof adapter.getItemPrice === 'function') ? adapter.getItemPrice(newItem) : (newItem.system?.price?.value || 0);
+      }
+
+      if (!finalPrice || finalPrice <= 0) {
+        const priceMethod = settings?.specific?.priceMethod || 'dmg';
+        finalPrice = await this.mainManager.systemAdapter.generateItemPrice(newItem, priceMethod, settings?.specific);
+      }
 
       // Записываем цену в карточку предмета (используя путь из адаптера)
       const pricePath = (typeof adapter.getPricePath === 'function') ? adapter.getPricePath() : "system.price.value";
       foundry.utils.setProperty(newItem, pricePath, finalPrice);
+      if (newItem.system?.price && typeof newItem.system.price === 'object') {
+        newItem.system.price.denomination = 'gp';
+      }
 
       return newItem;
     }));

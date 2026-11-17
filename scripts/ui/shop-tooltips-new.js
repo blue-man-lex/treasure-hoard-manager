@@ -291,8 +291,12 @@ class ShopTooltipsNew {
       return adapter.formatCurrencyHtml({ eb: priceValue });
     }
     
-    // Для DnD5e priceValue — это обычно золото (gp). Адаптер ожидает атомы (cp).
-    return adapter.formatCurrencyHtml(priceValue * 100);
+    // Для DnD5e priceValue — это золото (gp). Адаптер ожидает атомы (cp).
+    const shopSettings = this.shopInterface?.getShopSettings?.() || {};
+    return adapter.formatCurrencyHtml(Math.round(priceValue * 100), {
+      allowPlatinum: shopSettings.allowPlatinum === true,
+      allowElectrum: shopSettings.allowElectrum === true
+    });
   }
 
 

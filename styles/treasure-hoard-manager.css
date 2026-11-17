@@ -136,16 +136,30 @@
     justify-content: flex-end; /* Прижимаем поля вправо */
 }
 
-/* Фикс чекбоксов и инпутов */
+/* Фикс чекбоксов, инпутов и выпадающих списков */
 .thm-config-window .form-group input[type="text"],
 .thm-config-window .form-group input[type="number"],
-.thm-config-window .form-group select {
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid #555;
-    color: #fff;
-    padding: 4px 8px;
-    border-radius: 4px;
-    height: 28px;
+.thm-config-window select,
+.thm-config-window .form-group select,
+.thm-config-window .pricing-row select,
+.thm-config-window .price-input-group select {
+    background: #1e1e24 !important;
+    background-color: #1e1e24 !important;
+    border: 1px solid #555 !important;
+    color: #f0f0f0 !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    height: 28px !important;
+}
+
+.thm-config-window select option,
+.thm-config-window .form-group select option,
+.thm-config-window .pricing-row select option,
+.thm-config-window .price-input-group select option {
+    background: #1e1e24 !important;
+    background-color: #1e1e24 !important;
+    color: #f0f0f0 !important;
+    padding: 6px 10px !important;
 }
 
 .thm-config-window .form-group input[type="checkbox"],

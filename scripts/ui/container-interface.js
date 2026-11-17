@@ -25,14 +25,16 @@ export class ContainerInterface extends FormApplication {
 
   _loadCSS() {
     const cssId = 'thm-container-interface-css';
-    if (!document.getElementById(cssId)) {
-      const link = document.createElement('link');
+    let link = document.getElementById(cssId);
+    if (!link) {
+      link = document.createElement('link');
       link.id = cssId;
       link.rel = 'stylesheet';
       link.type = 'text/css';
-      link.href = `modules/${CONSTANTS.MODULE_NAME}/styles/container-interface-premium.css`;
       document.head.appendChild(link);
     }
+    const version = game.modules.get(CONSTANTS.MODULE_NAME)?.version || CONSTANTS.VERSION || '1.14.2';
+    link.href = `modules/${CONSTANTS.MODULE_NAME}/styles/container-interface-premium.css?v=${version}`;
   }
 
   /**
@@ -110,8 +112,8 @@ export class ContainerInterface extends FormApplication {
       id: `thm-container-${foundry.utils.randomID()}`,
       classes: ["sheet", "thm-loot-window", "thm-window-fix"],
       template: `modules/${CONSTANTS.MODULE_NAME}/templates/container-interface.hbs`,
-      width: 480,
-      height: 600,
+      width: 440,
+      height: 520,
       resizable: true,
       title: "Добыча",
       closeOnSubmit: false
@@ -169,9 +171,30 @@ export class ContainerInterface extends FormApplication {
     const currencyHtml = adapter.formatCurrencyHtml(currencyData);
     const hasCurrency = Object.values(currencyData).some(v => v > 0);
 
+    // Получаем список исключенных предметов
+    const excludedIds = new Set(
+      this.actor.getFlag(CONSTANTS.MODULE_NAME, 'data.excludedItemIds') ||
+      this.actor.getFlag(CONSTANTS.MODULE_NAME, 'excludedItemIds') || []
+    );
+    const isCorpse = this.actor.getFlag(CONSTANTS.MODULE_NAME, 'isCorpse') || false;
+    const hasConfiguredFlags = this.actor.getFlag(CONSTANTS.MODULE_NAME, 'excludedItemIds') !== undefined;
+
     // Безопасное получение предметов с использованием фильтров адаптера
     const items = this.actor.items.contents
-      .filter(i => adapter.canItemBeInHoard(i))
+      .filter(i => {
+        // Чисто технические типы (заклинания, умения, классы) не являются лутом
+        const excludedTypes = ["spell", "feat", "class", "subclass", "background", "race"];
+        if (excludedTypes.includes(i.type)) return false;
+
+        if (!game.user.isGM) {
+          // Если труп или настроен список исключений - исключения мастера имеют абсолютный приоритет
+          if (isCorpse || hasConfiguredFlags) {
+            return !excludedIds.has(i.id);
+          }
+          return adapter.canItemBeInHoard(i) && !excludedIds.has(i.id);
+        }
+        return true;
+      })
       .map(i => {
         // Определяем редкость предмета
         let rarity = 'common';
@@ -184,13 +207,22 @@ export class ContainerInterface extends FormApplication {
           }
         }
 
+        const isNatural = adapter && typeof adapter.isNaturalItem === 'function' ? adapter.isNaturalItem(i) : false;
+        
+        // Для трупа или курации: статус "скрыто" зависит строго от excludedIds, а не от дефолтного canItemBeInHoard
+        const isExcluded = (isCorpse || hasConfiguredFlags)
+          ? excludedIds.has(i.id)
+          : (!adapter.canItemBeInHoard(i) || excludedIds.has(i.id));
+
         return {
           id: i.id,
           name: i.name,
           img: i.img,
           quantity: (adapter && typeof adapter.getItemQuantity === 'function') ? adapter.getItemQuantity(i) : (i.system.quantity || 1),
           price: (adapter && typeof adapter.getItemPrice === 'function') ? adapter.getItemPrice(i) : (i.system.price?.value || 0),
-          rarity: rarity
+          rarity: rarity,
+          isExcluded: isExcluded,
+          isNatural: isNatural
         };
       });
 
@@ -202,6 +234,7 @@ export class ContainerInterface extends FormApplication {
       hasCurrency: hasCurrency,
       isGM: game.user.isGM,
       isLocked: isLocked,
+      isCorpse: isCorpse,
       looterName: this.looter ? this.looter.name : "Выберите свой токен"
     };
   }
@@ -231,8 +264,47 @@ export class ContainerInterface extends FormApplication {
       this._onToggleLock(ev.target.checked);
     });
 
+    if (game.user.isGM) {
+      // Кнопка настройки лута (открытие диалога курации)
+      html.find('.configure-loot-btn').click(async (ev) => {
+        ev.preventDefault();
+        try {
+          const { CorpseLootDialog } = await import('./corpse-loot-dialog.js');
+          new CorpseLootDialog(this.actor).render(true);
+        } catch (err) {
+          console.error("THM | Error opening CorpseLootDialog:", err);
+        }
+      });
+
+      // Переключение скрытия предмета по правому клику (ПКМ)
+      html.find('.inventory-item').on('contextmenu', async (ev) => {
+        ev.preventDefault();
+        const itemId = ev.currentTarget.dataset.itemId;
+        if (!itemId) return;
+        await this._onToggleItemExclude(itemId);
+      });
+    }
+
     // Новые чистые подсказки для предметов
     this.tooltips.setupTooltips(html);
+  }
+
+  /**
+   * Быстрое переключение видимости предмета для игроков (только GM)
+   */
+  async _onToggleItemExclude(itemId) {
+    if (!game.user.isGM) return;
+    try {
+      const mainManager = game.THM?.manager || game.modules.get('treasure-hoard-manager')?.manager;
+      if (mainManager?.socketManager) {
+        await mainManager.socketManager.executeAsGM('toggleItemExclude', {
+          containerUuid: this.actor.uuid,
+          itemId: itemId
+        });
+      }
+    } catch (err) {
+      console.error("THM | Error toggling item exclusion:", err);
+    }
   }
 
   _getLooter() {

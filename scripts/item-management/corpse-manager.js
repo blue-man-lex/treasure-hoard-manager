@@ -138,17 +138,55 @@ export class CorpseManager {
       }
     });
 
+    // Применяем автоматический предварительный фильтр природных атак/органов
+    const adapter = this.mainManager.systemAdapter;
+    const shouldFilterNatural = THMSettings.filterNaturalWeapons;
+    const defaultExcludedIds = [];
+
+    if (shouldFilterNatural && adapter) {
+      for (const item of actor.items) {
+        if (typeof adapter.isNaturalItem === 'function' && adapter.isNaturalItem(item)) {
+          defaultExcludedIds.push(item.id);
+        } else if (typeof adapter.canItemBeInHoard === 'function' && !adapter.canItemBeInHoard(item)) {
+          defaultExcludedIds.push(item.id);
+        }
+      }
+    }
+
+    await actor.setFlag(CONSTANTS.MODULE_NAME, 'data.excludedItemIds', defaultExcludedIds);
+    await actor.setFlag(CONSTANTS.MODULE_NAME, 'excludedItemIds', defaultExcludedIds);
+
     // Применяем визуальные эффекты к токену (если есть)
     await this.applyCorpseVisuals(actor);
 
-    // Автоматическое открытие интерфейса (если включено)
+    // Автоматическое оповещение игроков (если включено)
     if (game.settings.get('treasure-hoard-manager', 'autoOpenCorpseOnDeath')) {
       await this.broadcastCorpseAvailable(actor);
     }
 
     ui.notifications.info(`${actor.name} стал доступен для обыска`);
     
-    console.log(`THM Corpse Manager | ${actor.name} successfully converted to corpse`);
+    console.log(`THM Corpse Manager | ${actor.name} successfully converted to corpse (excluded items: ${defaultExcludedIds.length})`);
+
+    // Если включен режим запроса мастера - выводим окно настройки лута
+    const reviewMode = THMSettings.corpseLootReview;
+    if (reviewMode === 'prompt' && game.user.isGM) {
+      await this.openLootReview(actor);
+    }
+  }
+
+  /**
+   * Открытие окна модерации лута поверженного существа (для GM)
+   * @param {Actor} actor
+   */
+  async openLootReview(actor) {
+    if (!game.user.isGM) return;
+    try {
+      const { CorpseLootDialog } = await import('../ui/corpse-loot-dialog.js');
+      new CorpseLootDialog(actor).render(true);
+    } catch (err) {
+      console.error('THM Corpse Manager | Error opening CorpseLootDialog:', err);
+    }
   }
 
   /**
@@ -167,6 +205,7 @@ export class CorpseManager {
     await actor.unsetFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.ENABLED);
     await actor.unsetFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.DATA);
     await actor.unsetFlag(CONSTANTS.MODULE_NAME, CONSTANTS.FLAGS.SETTINGS);
+    await actor.unsetFlag(CONSTANTS.MODULE_NAME, 'excludedItemIds');
 
     // Восстанавливаем визуальные эффекты токена
     await this.removeCorpseVisuals(actor);
@@ -272,15 +311,18 @@ export class CorpseManager {
       return;
     }
 
-    // Проверяем дистанцию (если на сцене)
-    if (canvas.tokens) {
+    // Проверяем дистанцию (если на сцене и пользователь не GM)
+    if (!user.isGM && canvas.tokens) {
       const userToken = canvas.tokens.controlled[0] || 
                        canvas.tokens.placeables.find(t => t.actor?.id === user.character?.id);
-      const corpseToken = canvas.tokens.placeables.find(t => t.actor?.id === actor.id);
+      const corpseToken = (actor.token?.object) ||
+                         (actor.token ? canvas.tokens.get(actor.token.id) : null) ||
+                         canvas.tokens.placeables.find(t => (actor.token && t.id === actor.token.id) || t.actor === actor || t.actor?.id === actor.id);
 
       if (userToken && corpseToken) {
         const distance = this.mainManager.hoardManager._getTokenDistance(userToken, corpseToken);
-        const maxDistance = actor.getFlag(CONSTANTS.MODULE_NAME, 'settings.general.interactionDistance') || 1;
+        const settings = actor.getFlag(CONSTANTS.MODULE_NAME, 'settings') || {};
+        const maxDistance = settings.general?.interactionDistance ?? 1;
         
         if (distance > maxDistance) {
           ui.notifications.warn(`Вы слишком далеко от трупа. Требуемая дистанция: ${maxDistance} клеток`);

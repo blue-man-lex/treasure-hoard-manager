@@ -1185,10 +1185,14 @@ export class ShopInterface extends FormApplication {
           });
         }
       }
-      // 2. Игроку добавляем
-      const currentAtoms = adapter.convertCurrencyToAtoms(adapter.getActorCurrency(player));
-      const newCurrency = adapter.convertAtomsToCurrency(currentAtoms + differenceAtoms);
-      await adapter.updateActorCurrency(player, newCurrency);
+      // 2. Игроку добавляем (умное пополнение без переплавки золота в платину)
+      if (typeof adapter.addWealth === 'function') {
+        await adapter.addWealth(player, differenceAtoms);
+      } else {
+        const currentAtoms = adapter.convertCurrencyToAtoms(adapter.getActorCurrency(player));
+        const newCurrency = adapter.convertAtomsToCurrency(currentAtoms + differenceAtoms);
+        await adapter.updateActorCurrency(player, newCurrency);
+      }
 
     } else if (differenceAtoms < 0) {
       // Игрок платит торговцу
@@ -1200,18 +1204,32 @@ export class ShopInterface extends FormApplication {
         return false;
       }
       
-      // 2. Добавляем торговцу
-      const currentAtoms = adapter.convertCurrencyToAtoms(adapter.getActorCurrency(merchant));
-      const newCurrency = adapter.convertAtomsToCurrency(currentAtoms + amountToPay);
-      
-      // Используем socket для обновления актера НПС
-      if (game.user.isGM) {
-        await adapter.updateActorCurrency(merchant, newCurrency);
-      } else {
-        await this.shopManager.mainManager.socketManager.executeAsGM('updateActorCurrency', {
-          actorUuid: merchant.uuid,
-          currency: newCurrency
-        });
+      // 2. Добавляем торговцу (только если включен учет кошелька торговца, при безлимите касса не пополняется)
+      const useNpcCurrency = this.getShopSettings().useNpcCurrency ?? true;
+      if (useNpcCurrency) {
+        if (typeof adapter.addWealth === 'function') {
+          if (game.user.isGM) {
+            await adapter.addWealth(merchant, amountToPay);
+          } else {
+            await this.shopManager.mainManager.socketManager.executeAsGM('addWealthAsGM', {
+              actorUuid: merchant.uuid,
+              amount: amountToPay
+            });
+          }
+        } else {
+          const currentAtoms = adapter.convertCurrencyToAtoms(adapter.getActorCurrency(merchant));
+          const newCurrency = adapter.convertAtomsToCurrency(currentAtoms + amountToPay);
+          
+          // Используем socket для обновления актера НПС
+          if (game.user.isGM) {
+            await adapter.updateActorCurrency(merchant, newCurrency);
+          } else {
+            await this.shopManager.mainManager.socketManager.executeAsGM('updateActorCurrency', {
+              actorUuid: merchant.uuid,
+              currency: newCurrency
+            });
+          }
+        }
       }
     }
     
@@ -1287,15 +1305,21 @@ export class ShopInterface extends FormApplication {
    * Получение настроек магазина из флагов актера (Бронебойно)
    */
   getShopSettings() {
-    const settings = this.actor.getFlag(CONSTANTS.MODULE_NAME, 'settings') || {};
+    const info = (this.shopManager && this.actor) ? this.shopManager.getShopInfo(this.actor) : null;
+    const settings = this.actor?.getFlag ? (this.actor.getFlag(CONSTANTS.MODULE_NAME, 'settings') || {}) : {};
+    const specific = info?.settings?.specific || settings.specific || {};
     return {
-      priceMarkup: Number(settings.specific?.priceMarkup) || 100,
-      priceBuyback: Number(settings.specific?.priceBuyback) || 50,
-      priceMethod: settings.specific?.priceMethod || 'dmg', // Новая настройка
-      alwaysOpen: settings.specific?.alwaysOpen || false,
-      openingTime: settings.specific?.openingTime || '08:00',
-      closingTime: settings.specific?.closingTime || '20:00',
-      useReputation: settings.specific?.useReputation || false
+      priceMarkup: Number(specific.priceMarkup) || 100,
+      priceBuyback: Number(specific.priceBuyback) || 50,
+      priceMethod: specific.priceMethod || 'dmg',
+      alwaysOpen: specific.alwaysOpen || false,
+      openingTime: specific.openingTime || '08:00',
+      closingTime: specific.closingTime || '20:00',
+      useReputation: specific.useReputation || false,
+      useNpcCurrency: specific.useNpcCurrency ?? true,
+      allowPlatinum: specific.allowPlatinum ?? false,
+      allowElectrum: specific.allowElectrum ?? false,
+      ...specific
     };
   }
 
@@ -1586,14 +1610,6 @@ export class ShopInterface extends FormApplication {
     }
   }
 
-  /**
-   * Получение настроек магазина
-   */
-  getShopSettings() {
-    if (!this.shopManager || !this.actor) return {};
-    const info = this.shopManager.getShopInfo(this.actor);
-    return info?.settings?.specific || {};
-  }
 
   /**
    * Настройка Drag and Drop (Заглушка) Не актуальна. Drag and Drop перенесена в настройки магазина

@@ -6,17 +6,22 @@
       <img class="thm-portrait-img" src="icons/svg/chest.svg" alt="Container">
     </div>
     <div class="header-info">
-      <h1 class="thm-window-title">{{actor.name}}</h1>
+      <h1 class="thm-window-title" title="{{actor.name}}">{{actor.name}}</h1>
     </div>
 
     {{#if isGM}}
     <div class="header-controls">
+      {{#if isCorpse}}
+      <button type="button" class="configure-loot-btn" title="Настроить добычу (выбрать, что оставить в луте)">
+        <i class="fas fa-filter"></i> <span>Настроить лут</span>
+      </button>
+      {{/if}}
       <div class="lock-controls">
-        <label class="lock-toggle">
+        <label class="lock-toggle" title="{{#if isLocked}}Заперто{{else}}Открыто{{/if}}">
           <input type="checkbox" class="lock-checkbox" {{#if isLocked}}checked{{/if}}>
           <span class="lock-label">
             <i class="fas fa-lock{{#unless isLocked}}-open{{/unless}}"></i>
-            {{#if isLocked}}Заперто{{else}}Открыто{{/if}}
+            <span>{{#if isLocked}}Заперто{{else}}Открыто{{/if}}</span>
           </span>
         </label>
       </div>
@@ -36,15 +41,20 @@
         </div>
       {{else}}
         {{#each items}}
-          <div class="thm-item-slot rarity-{{this.rarity}} item-row inventory-item" data-item-id="{{this.id}}" data-actor-id="{{../actor._id}}">
+          <div class="thm-item-slot rarity-{{this.rarity}} item-row inventory-item {{#if this.isExcluded}}thm-item-excluded{{/if}}" data-item-id="{{this.id}}" data-actor-id="{{../actor._id}}" {{#if ../isGM}}{{#if this.isExcluded}}title="Скрыто от игроков (ПКМ чтобы показать)"{{else}}title="Видно игрокам (ПКМ чтобы скрыть)"{{/if}}{{/if}}>
             <div class="thm-rarity-bg"></div>
             <img class="thm-item-icon" src="{{this.img}}" alt="{{this.name}}"/>
             {{#if (gt this.quantity 1)}}
               <span class="thm-item-qty">{{this.quantity}}</span>
             {{/if}}
+            {{#if ../isGM}}
+              {{#if this.isExcluded}}
+                <span class="thm-item-badge thm-badge-hidden" title="Скрыто от игроков"><i class="fas fa-eye-slash"></i></span>
+              {{/if}}
+            {{/if}}
           </div>
         {{else}}
-          <div class="empty-state" style="grid-column: 1 / -1;">
+          <div class="empty-state" style="width: 100%;">
             <h3>Сундук пуст</h3>
           </div>
         {{/each}}

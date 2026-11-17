@@ -10,10 +10,13 @@
 }
 
 .thm-loot-window .items-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
   gap: 8px;
-  margin: 25px 30px;
+  padding: 20px 25px;
+  margin: 0;
+  min-height: 120px;
 }
 
 .thm-loot-window .loot-body {
@@ -73,47 +76,153 @@
   50%, 100% { opacity: 0; }
 }
 
+.thm-loot-window .thm-premium-header {
+  display: flex !important;
+  align-items: center !important;
+  padding: 8px 16px !important;
+  gap: 10px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: 56px !important;
+  flex: 0 0 auto !important;
+}
+
+.thm-loot-window .thm-portrait-frame {
+  flex: 0 0 44px !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+
+.thm-loot-window .header-info {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.thm-loot-window .header-info .thm-window-title {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  margin: 0 !important;
+}
+
 .thm-loot-window .header-controls {
-  margin-left: auto;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  margin-left: auto !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  box-sizing: border-box !important;
+}
+
+.thm-loot-window .configure-loot-btn,
+.thm-loot-window button.configure-loot-btn {
+  background: rgba(40, 10, 15, 0.9) !important;
+  border: 1px solid var(--cyb-red-neon) !important;
+  color: #fff !important;
+  padding: 4px 10px !important;
+  font-family: var(--cyb-font-tech) !important;
+  font-size: 11px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: auto !important;
+  max-width: max-content !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  margin: 0 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
+}
+
+.thm-loot-window .configure-loot-btn:hover,
+.thm-loot-window button.configure-loot-btn:hover {
+  background: rgba(80, 20, 30, 0.95) !important;
+  box-shadow: 0 0 10px rgba(255, 0, 60, 0.4) !important;
+}
+
+.thm-loot-window .lock-controls {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
 }
 
 .thm-loot-window .lock-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 8px 15px;
-  border: 1px solid var(--cyb-red-dark);
-  border-radius: 0;
-  background: rgba(0, 0, 0, 0.8);
-  transition: all 0.2s ease;
-  font-family: var(--cyb-font-tech);
-  color: var(--cyb-text-main);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  padding: 4px 10px !important;
+  border: 1px solid var(--cyb-red-dark) !important;
+  border-radius: 0 !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  transition: all 0.2s ease !important;
+  font-family: var(--cyb-font-tech) !important;
+  color: var(--cyb-text-main) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  white-space: nowrap !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: auto !important;
+  max-width: max-content !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  font-size: 11px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .thm-loot-window .lock-toggle:hover {
-  background: rgba(255, 0, 60, 0.1);
-  border-color: var(--cyb-red-neon);
-  box-shadow: 0 0 10px rgba(255, 0, 60, 0.3);
-  transform: translateX(-2px);
+  background: rgba(255, 0, 60, 0.1) !important;
+  border-color: var(--cyb-red-neon) !important;
+  box-shadow: 0 0 10px rgba(255, 0, 60, 0.3) !important;
+  transform: translateX(-2px) !important;
 }
 
-.thm-loot-window .lock-checkbox { display: none; }
+.thm-loot-window .lock-checkbox { display: none !important; }
+
+.thm-loot-window .lock-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  white-space: nowrap !important;
+}
 
 .thm-loot-window .lock-label i {
-  transition: all 0.3s ease;
+  transition: all 0.3s ease !important;
 }
 
 .thm-loot-window .lock-checkbox:checked ~ .lock-label i {
-  color: var(--cyb-red-neon);
-  text-shadow: 0 0 8px rgba(255, 0, 60, 0.8);
+  color: var(--cyb-red-neon) !important;
+  text-shadow: 0 0 8px rgba(255, 0, 60, 0.8) !important;
 }
 
 .thm-loot-window .lock-checkbox:not(:checked) ~ .lock-label i {
-  color: var(--cyb-green-toxic);
-  text-shadow: 0 0 8px rgba(0, 255, 65, 0.8);
+  color: var(--cyb-green-toxic) !important;
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.8) !important;
 }
 
 .thm-loot-window .locked-message,

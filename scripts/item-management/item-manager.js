@@ -86,9 +86,12 @@ export class ItemManager {
     const itemsToDeleteIds = [];
     const sourceItemsToUpdate = [];
     
-    // Настройки стакания
-    const settings = targetActor.getFlag(CONSTANTS.MODULE_NAME, 'settings');
-    const shouldStackGlobal = settings?.general?.stackItems ?? true;
+    // Настройки стакания (проверяем и цель, и источник, так как у персонажа игрока нет флагов модуля)
+    const targetSettings = targetActor.getFlag(CONSTANTS.MODULE_NAME, 'settings');
+    const sourceSettings = sourceActor.getFlag(CONSTANTS.MODULE_NAME, 'settings');
+    const shouldStackGlobal = (targetSettings?.general?.stackItems !== undefined)
+      ? targetSettings.general.stackItems
+      : ((sourceSettings?.general?.stackItems !== undefined) ? sourceSettings.general.stackItems : true);
 
     // Проходим по предметам без await в цикле
     for (const itemData of items) {
